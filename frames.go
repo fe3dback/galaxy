@@ -83,6 +83,10 @@ func (f *frames) End() {
 	f.deltaTime = time.Since(f.frameStart)
 }
 
+func (f *frames) FPS() int {
+	return f.fps
+}
+
 func (f *frames) DeltaTime() float64 {
 	return f.deltaTime.Seconds()
 }

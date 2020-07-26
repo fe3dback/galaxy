@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/fe3dback/galaxy/utils"
+
 	"github.com/fe3dback/galaxy/game"
 )
 
@@ -26,9 +28,9 @@ func debugSystem() {
 	runtime.ReadMemStats(&m)
 
 	fmt.Printf("-- system:\n")
-	fmt.Printf("      mem: %s\n", formatBytes(m.Alloc))
-	fmt.Printf("total mem: %s\n", formatBytes(m.TotalAlloc))
-	fmt.Printf("  sys mem: %s\n", formatBytes(m.Sys))
+	fmt.Printf("      mem: %s\n", utils.FormatBytes(m.Alloc))
+	fmt.Printf("total mem: %s\n", utils.FormatBytes(m.TotalAlloc))
+	fmt.Printf("  sys mem: %s\n", utils.FormatBytes(m.Sys))
 }
 
 func debugPrintFps(f *frames) {

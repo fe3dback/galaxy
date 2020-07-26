@@ -17,6 +17,7 @@ func gameLoop(params *gameParams) error {
 
 	frames := params.frames
 	world := params.world
+	ui := params.ui
 
 	for frames.Ready() {
 		frames.Begin()
@@ -31,6 +32,11 @@ func gameLoop(params *gameParams) error {
 		err = world.OnDraw()
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
+		}
+
+		err = ui.OnDraw()
+		if err != nil {
+			return fmt.Errorf("can`t draw ui: %v", err)
 		}
 
 		debug(params)

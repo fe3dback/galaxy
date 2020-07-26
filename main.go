@@ -4,22 +4,21 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"runtime"
-
 	_ "net/http/pprof"
+	"runtime"
 )
 
 // -- flags
 var isProfiling = flag.Bool("profile", false, "run in profile mode")
 var profilingPort = flag.Int("profileport", 15600, "http port for profiling")
 
-func init() {
-	runtime.LockOSThread()
-}
-
 func main() {
+	runtime.LockOSThread()
+
 	flag.Parse()
-	run(newGame())
+	factory := newFactory()
+
+	run(factory.provideGameParams())
 }
 
 func run(params *gameParams) {

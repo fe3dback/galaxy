@@ -3,6 +3,10 @@ package render
 import (
 	"fmt"
 
+	"github.com/veandco/go-sdl2/ttf"
+
+	"github.com/fe3dback/galaxy/utils"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -10,18 +14,11 @@ type SDLLib struct {
 	window *sdl.Window
 }
 
-func (s *SDLLib) Close() error {
-	err := s.window.Destroy()
-	sdl.Quit()
-
-	return err
-}
-
 func (s *SDLLib) Window() *sdl.Window {
 	return s.window
 }
 
-func CreateSDL() (lib *SDLLib, sdlError error) {
+func NewSDLLib(closer *utils.Closer) (lib *SDLLib, sdlError error) {
 	defer func() {
 		if err := recover(); err != nil {
 			sdlError = fmt.Errorf("sdl: %v", err)
@@ -33,6 +30,14 @@ func CreateSDL() (lib *SDLLib, sdlError error) {
 	err := sdl.Init(sdl.INIT_EVERYTHING)
 	check(err, "init")
 
+	err = ttf.Init()
+	check(err, "ttf init")
+
+	closer.Enqueue(func() error {
+		sdl.Quit()
+		return nil
+	})
+
 	// window
 	window, err := sdl.CreateWindow(
 		"Galaxy",
@@ -42,6 +47,7 @@ func CreateSDL() (lib *SDLLib, sdlError error) {
 		sdl.WINDOW_SHOWN,
 	)
 	check(err, "create window")
+	closer.Enqueue(window.Destroy)
 
 	surface, err := window.GetSurface()
 	check(err, "window get surface")
