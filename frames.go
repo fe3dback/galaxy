@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -15,6 +18,7 @@ type frames struct {
 	frameDuration time.Duration
 	frameThrottle time.Duration
 	deltaTime     time.Duration
+	isInterrupted bool
 }
 
 func NewFrames(targetFps int64) *frames {
@@ -27,8 +31,16 @@ func NewFrames(targetFps int64) *frames {
 		frameStart:    time.Now(),
 		frameDuration: 0,
 		frameThrottle: 0,
+		isInterrupted: false,
 	}
 
+	f.listenTimer()
+	f.listenOsSignals()
+
+	return f
+}
+
+func (f *frames) listenTimer() {
 	go func() {
 		for range time.Tick(time.Second) {
 			// count fps
@@ -36,8 +48,18 @@ func NewFrames(targetFps int64) *frames {
 			f.count = 0
 		}
 	}()
+}
 
-	return f
+func (f *frames) listenOsSignals() {
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+
+		sig := <-c
+		f.isInterrupted = true
+
+		fmt.Printf("got os signal %v\n", sig)
+	}()
 }
 
 func (f *frames) Begin() {
@@ -67,6 +89,14 @@ func (f *frames) DeltaTime() float64 {
 
 func (f *frames) Seconds() time.Duration {
 	return time.Since(f.gameStart)
+}
+
+func (f *frames) Ready() bool {
+	return !f.isInterrupted
+}
+
+func (f *frames) Interrupt() {
+	f.isInterrupted = true
 }
 
 func (f *frames) throttleGame() {

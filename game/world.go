@@ -6,20 +6,24 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 )
 
-type entityList []*engine.Entity
+type EntityList []*engine.Entity
 
 type World struct {
-	entities entityList
+	entities EntityList
 }
 
 func NewWorld() *World {
 	return &World{
-		entities: make(entityList, 0),
+		entities: make(EntityList, 0),
 	}
 }
 
 func (w *World) AddEntity(e *engine.Entity) {
 	w.entities = append(w.entities, e)
+}
+
+func (w *World) Entities() EntityList {
+	return w.entities
 }
 
 func (w *World) OnUpdate(deltaTime float64) error {
@@ -60,7 +64,7 @@ func (w *World) OnDraw() error {
 }
 
 func (w *World) garbageCollect() {
-	list := make(entityList, 0, len(w.entities))
+	list := make(EntityList, 0, len(w.entities))
 
 	for _, entity := range w.entities {
 		if entity.IsDestroyed() {

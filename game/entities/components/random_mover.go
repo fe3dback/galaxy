@@ -2,6 +2,7 @@ package components
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/fe3dback/galaxy/engine"
 )
@@ -13,9 +14,15 @@ type RandomMover struct {
 }
 
 func NewRandomMover(entity *engine.Entity) *RandomMover {
-	return &RandomMover{
+	mv := &RandomMover{
 		entity: entity,
 	}
+
+	time.AfterFunc(time.Second*3, func() {
+		mv.entity.Destroy()
+	})
+
+	return mv
 }
 
 func (r *RandomMover) OnDraw() error {

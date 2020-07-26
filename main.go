@@ -1,60 +1,45 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"net/http"
+	"runtime"
 
-	"github.com/fe3dback/galaxy/game"
+	_ "net/http/pprof"
 )
 
-const fpsLimit = 60
+// -- flags
+var isProfiling = flag.Bool("profile", false, "run in profile mode")
+var profilingPort = flag.Int("profileport", 15600, "http port for profiling")
+
+func init() {
+	runtime.LockOSThread()
+}
 
 func main() {
-	err := run(options{
-		frames: framesOpt{
-			targetFps: fpsLimit,
-		},
-		debug: debugOpt{
-			frames: true,
-		},
-	})
+	flag.Parse()
+	run(newGame())
+}
+
+func run(params *gameParams) {
+	if params.options.debug.inProfiling {
+		profile()
+	}
+
+	err := gameLoop(params)
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Printf("params loop sucessfully ended\n")
 }
 
-func run(opt options) error {
-	level := game.NewBasicLevel()
-	var err error
-
-	frames := NewFrames(opt.frames.targetFps)
-
-	for {
-		frames.Begin()
-
-		err = level.OnUpdate(frames.DeltaTime())
+func profile() {
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *profilingPort), nil)
 		if err != nil {
-			return fmt.Errorf("can`t update level: %v", err)
+			panic(fmt.Sprintf("can`t start http profiling tools at %d: %v", *profilingPort, err))
 		}
-
-		err = level.OnDraw()
-		if err != nil {
-			return fmt.Errorf("can`t draw level: %v", err)
-		}
-
-		frames.End()
-
-		if opt.debug.frames {
-			debugPrintFps(frames)
-		}
-	}
-}
-
-func debugPrintFps(f *frames) {
-	fmt.Printf("--\n")
-	fmt.Printf("           FPS: %d / %d\n", f.fps, f.limitFps)
-	fmt.Printf("frame duration: %s\n", f.frameDuration)
-	fmt.Printf("frame throttle: %s\n", f.frameThrottle)
-	fmt.Printf("limit duration: %s\n", f.limitDuration)
-	fmt.Printf("    delta time: %f\n", f.DeltaTime())
-	fmt.Printf("       seconds: %s\n", f.Seconds())
+	}()
 }

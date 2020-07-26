@@ -23,7 +23,7 @@ func NewEntity(pos Vector2D, rot Angle) *Entity {
 func (e *Entity) SetPosition(pos Vector2D) {
 	e.position = pos
 
-	fmt.Printf("entity `%T` moved to %v", e, pos)
+	fmt.Printf("entity `%T` moved to %v\n", e, pos)
 }
 
 func (e *Entity) Position() Vector2D {
