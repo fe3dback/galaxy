@@ -16,17 +16,17 @@ func main() {
 	runtime.LockOSThread()
 
 	flag.Parse()
-	factory := newFactory()
+	provider := newProvider()
 
-	run(factory.provideGameParams())
+	run(provider)
 }
 
-func run(params *gameParams) {
-	if params.options.debug.inProfiling {
+func run(provider *provider) {
+	if provider.registry.game.options.debug.inProfiling {
 		profile()
 	}
 
-	err := gameLoop(params)
+	err := gameLoop(provider)
 	if err != nil {
 		panic(err)
 	}

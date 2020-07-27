@@ -4,22 +4,23 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/fe3dback/galaxy/utils"
-
 	"github.com/fe3dback/galaxy/game"
+	"github.com/fe3dback/galaxy/utils"
 )
 
-func debug(params *gameParams) {
-	if params.options.debug.system {
+func debug(provider *provider) {
+	debug := provider.registry.game.options.debug
+
+	if debug.system {
 		debugSystem()
 	}
 
-	if params.options.debug.frames {
-		debugPrintFps(params.frames)
+	if debug.frames {
+		debugPrintFps(provider.registry.game.frames)
 	}
 
-	if params.options.debug.world {
-		debugPrintWorld(params.world)
+	if debug.world {
+		debugPrintWorld(provider.registry.game.world)
 	}
 }
 

@@ -1,8 +1,7 @@
 package ui
 
 import (
-	"math/rand"
-	"strconv"
+	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/render"
@@ -21,12 +20,12 @@ func NewLayerFPS(renderer *render.Renderer, fpsProvider FramesProvider) *LayerFP
 }
 
 func (l *LayerFPS) OnDraw() (err error) {
-	//fps := strconv.Itoa(l.fpsProvider.FPS())
-	fps := strconv.Itoa(60 + rand.Intn(60))
-
-	l.renderer.Clear(engine.ColorBlack)
-	l.renderer.DrawText(engine.ColorGreen, render.FontDefaultMono, fps, 5, 5)
-	l.renderer.Present()
+	l.renderer.DrawText(
+		engine.ColorGreen,
+		render.FontDefaultMono,
+		fmt.Sprintf("fps: %d / %d", l.fpsProvider.FPS(), l.fpsProvider.TotalFPS()),
+		5, 5,
+	)
 
 	return nil
 }

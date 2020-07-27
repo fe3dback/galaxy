@@ -11,5 +11,6 @@ type (
 
 	FramesProvider interface {
 		FPS() int
+		TotalFPS() int
 	}
 )

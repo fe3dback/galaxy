@@ -14,10 +14,10 @@ type Font struct {
 	closer *utils.Closer
 }
 
-func NewFont(path string, closer *utils.Closer) (font *Font, err error) {
+func NewFont(path string, closer *utils.Closer, params FontParams) (font *Font, err error) {
 	utils.Recover(fmt.Sprintf("create font `%s`", path), &err)
 
-	f, err := ttf.OpenFont(path, 12)
+	f, err := ttf.OpenFont(path, params.size)
 	utils.Check("open", err)
 	closer.Enqueue(func() error {
 		f.Close()
@@ -31,7 +31,7 @@ func NewFont(path string, closer *utils.Closer) (font *Font, err error) {
 }
 
 func (f *Font) RenderText(text string, color color.RGBA) *sdl.Surface {
-	surface, err := f.ref.RenderUTF8Solid(text, sdl.Color{
+	surface, err := f.ref.RenderUTF8Blended(text, sdl.Color{
 		R: color.R,
 		G: color.G,
 		B: color.B,

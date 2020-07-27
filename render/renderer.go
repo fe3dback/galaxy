@@ -56,25 +56,25 @@ func (r *Renderer) DrawText(color color.RGBA, fontId FontId, text string, x, y i
 
 	texture, err := r.ref.CreateTextureFromSurface(surface)
 	if err != nil {
-		utils.Check("create texture from surface", err)
+		utils.Check("create font texture from surface", err)
 	}
 	defer func() {
 		err = texture.Destroy()
-		utils.Check("texture destroy", err)
+		utils.Check("font texture destroy", err)
 	}()
 
 	src := sdl.Rect{
 		X: 0,
 		Y: 0,
-		W: 32, // todo: text width?
-		H: 15, // todo: text width?
+		W: surface.W,
+		H: surface.H,
 	}
 
 	dest := sdl.Rect{
 		X: x,
 		Y: y,
-		W: 32, // todo: text width?
-		H: 15, // todo: text width?
+		W: surface.W,
+		H: surface.H,
 	}
 
 	err = r.ref.Copy(texture, &src, &dest)

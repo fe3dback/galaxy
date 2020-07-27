@@ -87,6 +87,26 @@ func (f *frames) FPS() int {
 	return f.fps
 }
 
+func (f *frames) TotalFPS() int {
+	//      max 16ms
+	// throttle 15ms
+	//    frame 1ms
+	// framesSkippedAvg = 15
+	// avgFPS = 60
+	// totalFPS = 60 * 15 ~= 900
+
+	framesSkippedAvg := f.frameThrottle.Seconds() / f.frameDuration.Seconds()
+	if framesSkippedAvg <= 1 {
+		framesSkippedAvg = 0
+	}
+
+	skippedPerSecond := framesSkippedAvg * float64(f.fps)
+	totalFPS := f.FPS() + int(skippedPerSecond)
+
+	// round total fps
+	return totalFPS / 100 * 100
+}
+
 func (f *frames) DeltaTime() float64 {
 	return f.deltaTime.Seconds()
 }

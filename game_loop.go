@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine"
+
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -12,37 +14,43 @@ func (s SdlQuitErr) Error() string {
 	panic("sdl quit")
 }
 
-func gameLoop(params *gameParams) error {
+func gameLoop(provider *provider) error {
 	var err error
 
-	frames := params.frames
-	world := params.world
-	ui := params.ui
+	frames := provider.registry.game.frames
+	world := provider.registry.game.world
+	gameUI := provider.registry.game.ui
+	renderer := provider.registry.engine.renderer
 
 	for frames.Ready() {
+		// start frame
 		frames.Begin()
 
-		// -- game loop
-
+		// update
 		err = world.OnUpdate(frames.DeltaTime())
 		if err != nil {
 			return fmt.Errorf("can`t update world: %v", err)
 		}
+
+		// draw
+		renderer.Clear(engine.ColorBlack)
 
 		err = world.OnDraw()
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}
 
-		err = ui.OnDraw()
+		err = gameUI.OnDraw()
 		if err != nil {
 			return fmt.Errorf("can`t draw ui: %v", err)
 		}
 
-		debug(params)
+		renderer.Present()
 
-		// -- handle events for next frame
+		// debug
+		debug(provider)
 
+		// handle events
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			err := handleSdlEvent(event)
 
@@ -56,6 +64,7 @@ func gameLoop(params *gameParams) error {
 			}
 		}
 
+		// finalize frame
 		frames.End()
 	}
 
