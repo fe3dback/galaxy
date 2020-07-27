@@ -35,8 +35,8 @@ func (r *RandomMover) OnDraw(_ *render.Renderer) error {
 
 func (r *RandomMover) OnUpdate(deltaTime float64) error {
 	pos := r.entity.Position()
-	pos.X = pos.X + (5 * deltaTime)
-	pos.Y = pos.Y - (5 * deltaTime)
+	pos.X = pos.X + (50 * deltaTime)
+	pos.Y = pos.Y - (50 * deltaTime)
 
 	r.entity.SetPosition(pos)
 	r.entity.SetRotation(engine.Anglef(rand.Float64() * 360))
