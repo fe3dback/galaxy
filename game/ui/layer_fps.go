@@ -8,21 +8,19 @@ import (
 )
 
 type LayerFPS struct {
-	renderer    *render.Renderer
 	fpsProvider FramesProvider
 }
 
-func NewLayerFPS(renderer *render.Renderer, fpsProvider FramesProvider) *LayerFPS {
+func NewLayerFPS(fpsProvider FramesProvider) *LayerFPS {
 	return &LayerFPS{
-		renderer:    renderer,
 		fpsProvider: fpsProvider,
 	}
 }
 
-func (l *LayerFPS) OnDraw() (err error) {
-	l.renderer.DrawText(
-		engine.ColorGreen,
+func (l *LayerFPS) OnDraw(r *render.Renderer) (err error) {
+	r.DrawText(
 		render.FontDefaultMono,
+		engine.ColorGreen,
 		fmt.Sprintf("fps: %d / %d", l.fpsProvider.FPS(), l.fpsProvider.TotalFPS()),
 		5, 5,
 	)

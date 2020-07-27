@@ -35,12 +35,12 @@ func gameLoop(provider *provider) error {
 		// draw
 		renderer.Clear(engine.ColorBlack)
 
-		err = world.OnDraw()
+		err = world.OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}
 
-		err = gameUI.OnDraw()
+		err = gameUI.OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw ui: %v", err)
 		}

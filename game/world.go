@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/render"
+
 	"github.com/fe3dback/galaxy/engine"
 )
 
@@ -48,13 +50,13 @@ func (w *World) OnUpdate(deltaTime float64) error {
 	return nil
 }
 
-func (w *World) OnDraw() error {
+func (w *World) OnDraw(r *render.Renderer) error {
 	for _, entity := range w.entities {
 		if entity.IsDestroyed() {
 			continue
 		}
 
-		err := entity.OnDraw()
+		err := entity.OnDraw(r)
 		if err != nil {
 			return fmt.Errorf("can`t draw world entity `%T`: %v", entity, err)
 		}

@@ -1,6 +1,10 @@
 package engine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/fe3dback/galaxy/render"
+)
 
 type components map[ComponentId]Component
 
@@ -57,9 +61,9 @@ func (e *Entity) OnUpdate(deltaTime float64) error {
 	return nil
 }
 
-func (e *Entity) OnDraw() error {
+func (e *Entity) OnDraw(r *render.Renderer) error {
 	for id, component := range e.components {
-		err := component.OnDraw()
+		err := component.OnDraw(r)
 		if err != nil {
 			return fmt.Errorf("can`t draw component `%s` from element `%T`: %v", id, e, err)
 		}

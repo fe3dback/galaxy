@@ -1,13 +1,13 @@
-package components
+package player
 
 import (
 	"math/rand"
 	"time"
 
+	"github.com/fe3dback/galaxy/render"
+
 	"github.com/fe3dback/galaxy/engine"
 )
-
-const id = engine.ComponentId("random_mover")
 
 type RandomMover struct {
 	entity *engine.Entity
@@ -18,15 +18,18 @@ func NewRandomMover(entity *engine.Entity) *RandomMover {
 		entity: entity,
 	}
 
-	time.AfterFunc(time.Second*3, func() {
+	time.AfterFunc(time.Second*15, func() {
 		mv.entity.Destroy()
 	})
 
 	return mv
 }
 
-func (r *RandomMover) OnDraw() error {
-	//fmt.Println("random mover draw called")
+func (r *RandomMover) Id() engine.ComponentId {
+	return "player_random_mover"
+}
+
+func (r *RandomMover) OnDraw(_ *render.Renderer) error {
 	return nil
 }
 
@@ -39,8 +42,4 @@ func (r *RandomMover) OnUpdate(deltaTime float64) error {
 	r.entity.SetRotation(engine.Anglef(rand.Float64() * 360))
 
 	return nil
-}
-
-func (r *RandomMover) Id() engine.ComponentId {
-	return id
 }

@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/fe3dback/galaxy/game/ui"
 
@@ -17,18 +15,18 @@ type (
 	registerFactory struct{}
 	registry        struct {
 		closer *utils.Closer
-		engine *engineRegistry
 		sdl    *sdlRegistry
+		engine *engineRegistry
 		game   *gameRegistry
-	}
-
-	engineRegistry struct {
-		fontCollection *render.FontsCollection
-		renderer       *render.Renderer
 	}
 
 	sdlRegistry struct {
 		window *sdl.Window
+	}
+
+	engineRegistry struct {
+		fontCollection *render.FontManager
+		renderer       *render.Renderer
 	}
 
 	gameRegistry struct {
@@ -46,20 +44,27 @@ func makeRegistry() *registry {
 	closer := reg.registerCloser()
 	sdlLib := reg.registerSDLLib(closer)
 
-	// engine
-	fontsCollection := reg.registerFontsCollection(
-		reg.dirFonts(),
-		closer,
-	)
-
 	// sdl
-	window := reg.registerWindow(
+	sdlWindow := reg.registerSdlWindow(
 		sdlLib,
 	)
-	renderer := reg.registerRenderer(
-		window,
-		fontsCollection,
+	sdlRenderer := reg.registerSdlRenderer(
+		sdlLib,
+	)
+
+	// engine
+	fontManager := reg.registerFontManager(
 		closer,
+	)
+	textureManager := reg.registerTextureManager(
+		sdlRenderer,
+		closer,
+	)
+	renderer := reg.registerRenderer(
+		sdlWindow,
+		sdlRenderer,
+		fontManager,
+		textureManager,
 	)
 
 	// game
@@ -68,18 +73,18 @@ func makeRegistry() *registry {
 	world := reg.registerWorld()
 
 	// ui
-	layerFPS := reg.registerUILayerFPS(renderer, frames)
+	layerFPS := reg.registerUILayerFPS(frames)
 	gameUI := reg.registerUI(layerFPS)
 
 	// build
 	return &registry{
 		closer: closer,
 		engine: &engineRegistry{
-			fontCollection: fontsCollection,
+			fontCollection: fontManager,
 			renderer:       renderer,
 		},
 		sdl: &sdlRegistry{
-			window: window,
+			window: sdlWindow,
 		},
 		game: &gameRegistry{
 			options: options,
@@ -99,17 +104,6 @@ func (r registerFactory) registerCloser() *utils.Closer {
 }
 
 // ----------------------------------------
-// Engine
-// ----------------------------------------
-
-func (r registerFactory) registerFontsCollection(fontsDir string, closer *utils.Closer) *render.FontsCollection {
-	fonts := render.NewFontsCollection(fontsDir, closer)
-	fonts.Load(render.FontDefaultMono)
-
-	return fonts
-}
-
-// ----------------------------------------
 // SDL
 // ----------------------------------------
 
@@ -125,16 +119,36 @@ func (r registerFactory) registerSDLLib(closer *utils.Closer) *render.SDLLib {
 	return sdlLib
 }
 
-func (r registerFactory) registerWindow(sdlLib *render.SDLLib) *sdl.Window {
+func (r registerFactory) registerSdlWindow(sdlLib *render.SDLLib) *sdl.Window {
 	return sdlLib.Window()
 }
 
+func (r registerFactory) registerSdlRenderer(sdlLib *render.SDLLib) *sdl.Renderer {
+	return sdlLib.Renderer()
+}
+
+// ----------------------------------------
+// Engine
+// ----------------------------------------
+
+func (r registerFactory) registerFontManager(closer *utils.Closer) *render.FontManager {
+	fonts := render.NewFontManager(closer)
+	fonts.Load(render.FontDefaultMono)
+
+	return fonts
+}
+
+func (r registerFactory) registerTextureManager(sdlRenderer *sdl.Renderer, closer *utils.Closer) *render.TextureManager {
+	return render.NewTextureManager(sdlRenderer, closer)
+}
+
 func (r registerFactory) registerRenderer(
-	window *sdl.Window,
-	collection *render.FontsCollection,
-	closer *utils.Closer,
+	sdlWindow *sdl.Window,
+	sdlRenderer *sdl.Renderer,
+	fontManager *render.FontManager,
+	textureManager *render.TextureManager,
 ) *render.Renderer {
-	return render.NewRenderer(window, collection, closer)
+	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager)
 }
 
 // ----------------------------------------
@@ -167,30 +181,8 @@ func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {
 	return ui.NewUI(layers...)
 }
 
-func (r registerFactory) registerUILayerFPS(renderer *render.Renderer, frm *frames) *ui.LayerFPS {
+func (r registerFactory) registerUILayerFPS(frm *frames) *ui.LayerFPS {
 	return ui.NewLayerFPS(
-		renderer,
 		frm,
 	)
-}
-
-// ----------------------------------------
-// Path
-// ----------------------------------------
-
-func (r registerFactory) dirRoot() string {
-	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic(fmt.Sprintf("can`t provide root dir: %v", err))
-	}
-
-	return dir
-}
-
-func (r registerFactory) dirResources() string {
-	return fmt.Sprintf("%s/resources", r.dirRoot())
-}
-
-func (r registerFactory) dirFonts() string {
-	return fmt.Sprintf("%s/fonts", r.dirResources())
 }

@@ -1,8 +1,6 @@
 package render
 
 import (
-	"fmt"
-
 	"github.com/veandco/go-sdl2/ttf"
 
 	"github.com/fe3dback/galaxy/utils"
@@ -11,27 +9,27 @@ import (
 )
 
 type SDLLib struct {
-	window *sdl.Window
+	window   *sdl.Window
+	renderer *sdl.Renderer
 }
 
 func (s *SDLLib) Window() *sdl.Window {
 	return s.window
 }
 
+func (s *SDLLib) Renderer() *sdl.Renderer {
+	return s.renderer
+}
+
 func NewSDLLib(closer *utils.Closer) (lib *SDLLib, sdlError error) {
-	defer func() {
-		if err := recover(); err != nil {
-			sdlError = fmt.Errorf("sdl: %v", err)
-			return
-		}
-	}()
+	utils.Recover("sdl lib", &sdlError)
 
 	// lib
 	err := sdl.Init(sdl.INIT_EVERYTHING)
-	check(err, "init")
+	utils.Check("init", err)
 
 	err = ttf.Init()
-	check(err, "ttf init")
+	utils.Check("ttf init", err)
 
 	closer.Enqueue(func() error {
 		sdl.Quit()
@@ -46,27 +44,24 @@ func NewSDLLib(closer *utils.Closer) (lib *SDLLib, sdlError error) {
 		800, 600,
 		sdl.WINDOW_SHOWN,
 	)
-	check(err, "create window")
+	utils.Check("create window", err)
 	closer.Enqueue(window.Destroy)
 
 	surface, err := window.GetSurface()
-	check(err, "window get surface")
+	utils.Check("window get surface", err)
 
 	err = surface.FillRect(nil, 0)
-	check(err, "clear window surface")
+	utils.Check("clear window surface", err)
 
 	err = window.UpdateSurface()
-	check(err, "update window surface")
+	utils.Check("update window surface", err)
+
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	utils.Check("create renderer", err)
+	closer.Enqueue(renderer.Destroy)
 
 	return &SDLLib{
-		window: window,
+		window:   window,
+		renderer: renderer,
 	}, nil
-}
-
-func check(err error, explain string) {
-	if err == nil {
-		return
-	}
-
-	panic(fmt.Sprintf("%s: %v", explain, err))
 }

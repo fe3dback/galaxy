@@ -14,10 +14,10 @@ type Font struct {
 	closer *utils.Closer
 }
 
-func NewFont(path string, closer *utils.Closer, params FontParams) (font *Font, err error) {
-	utils.Recover(fmt.Sprintf("create font `%s`", path), &err)
+func NewFont(params FontParams, closer *utils.Closer) (font *Font, err error) {
+	utils.Recover(fmt.Sprintf("create font `%s`", params.resourcePath), &err)
 
-	f, err := ttf.OpenFont(path, params.size)
+	f, err := ttf.OpenFont(string(params.resourcePath), params.size)
 	utils.Check("open", err)
 	closer.Enqueue(func() error {
 		f.Close()
