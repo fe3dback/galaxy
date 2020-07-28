@@ -25,18 +25,14 @@ func NewRandomMover(entity *engine.Entity) *RandomMover {
 	return mv
 }
 
-func (r *RandomMover) Id() engine.ComponentId {
-	return "player_random_mover"
-}
-
 func (r *RandomMover) OnDraw(_ *render.Renderer) error {
 	return nil
 }
 
 func (r *RandomMover) OnUpdate(deltaTime float64) error {
 	pos := r.entity.Position()
-	pos.X = pos.X + (50 * deltaTime)
-	pos.Y = pos.Y - (50 * deltaTime)
+	pos.X = pos.X + (15 * deltaTime)
+	pos.Y = pos.Y - (15 * deltaTime)
 
 	r.entity.SetPosition(pos)
 	r.entity.SetRotation(engine.Anglef(rand.Float64() * 360))

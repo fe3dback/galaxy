@@ -7,7 +7,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func (r *Renderer) DrawText(fontId FontId, color color.RGBA, text string, x, y int32) {
+func (r *Renderer) DrawText(fontId FontId, color color.RGBA, text string, x, y int) {
 	r.SetDrawColor(color)
 
 	font := r.fontManager.Get(fontId)
@@ -31,8 +31,8 @@ func (r *Renderer) DrawText(fontId FontId, color color.RGBA, text string, x, y i
 	}
 
 	dest := sdl.Rect{
-		X: x,
-		Y: y,
+		X: int32(x),
+		Y: int32(y),
 		W: surface.W,
 		H: surface.H,
 	}

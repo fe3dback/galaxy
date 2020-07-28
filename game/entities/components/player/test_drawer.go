@@ -16,17 +16,13 @@ func NewTestDrawer(entity *engine.Entity) *TestDrawer {
 	}
 }
 
-func (td *TestDrawer) Id() engine.ComponentId {
-	return "player_test_drawer"
-}
-
 func (td *TestDrawer) OnDraw(r *render.Renderer) error {
 	for i := 0; i < 10; i++ {
 		for j := 10; j > 0; j-- {
 			r.DrawSprite(
 				generated.ResourcesImgGfxAnimTestScheet,
-				int32(int(td.entity.Position().X)-i*300),
-				int32(int(td.entity.Position().Y)-j*300),
+				int(td.entity.Position().X)-i*300,
+				int(td.entity.Position().Y)-j*300,
 			)
 		}
 	}

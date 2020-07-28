@@ -2,11 +2,12 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/fe3dback/galaxy/render"
 )
 
-type components map[ComponentId]Component
+type components map[string]Component
 
 type Entity struct {
 	position   Vector2D
@@ -73,14 +74,18 @@ func (e *Entity) OnDraw(r *render.Renderer) error {
 }
 
 func (e *Entity) AddComponent(c Component) {
-	if _, ok := e.components[c.Id()]; ok {
-		panic(fmt.Sprintf("can`t add component `%s` to element, already exist", c.Id()))
+	id := reflect.TypeOf(c).String()
+
+	if _, ok := e.components[id]; ok {
+		panic(fmt.Sprintf("can`t add component `%s` to element, already exist", id))
 	}
 
-	e.components[c.Id()] = c
+	e.components[id] = c
 }
 
-func (e *Entity) GetComponent(id ComponentId) Component {
+func (e *Entity) GetComponent(ref Component) Component {
+	id := reflect.TypeOf(ref).String()
+
 	if c, ok := e.components[id]; ok {
 		return c
 	}

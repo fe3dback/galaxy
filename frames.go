@@ -77,6 +77,7 @@ func (f *frames) End() {
 	}
 
 	// do additional logic
+	// todo: GC can by here forced if frame have some left time to processing
 	f.throttleGame()
 
 	// update state
@@ -88,6 +89,8 @@ func (f *frames) FPS() int {
 }
 
 func (f *frames) TotalFPS() int {
+	// todo: return avg frame time in ms
+
 	//      max 16ms
 	// throttle 15ms
 	//    frame 1ms

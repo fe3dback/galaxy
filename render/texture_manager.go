@@ -32,7 +32,7 @@ func (manager *TextureManager) Get(path generated.ResourcePath) *Texture {
 }
 
 func (manager *TextureManager) Load(path generated.ResourcePath) *Texture {
-	utils.PanicContext(fmt.Sprintf("texture `%s`", path))
+	defer utils.CheckPanic(fmt.Sprintf("texture `%s`", path))
 
 	if _, ok := manager.loadedTextures[path]; ok {
 		panic("texture already loadedTextures")

@@ -17,7 +17,7 @@ func Recover(context string, recoveredErr *error) {
 	}
 }
 
-func PanicContext(context string) {
+func CheckPanic(context string) {
 	if data := recover(); data != nil {
 		err := fmt.Errorf("recovered in %s: %v", context, data)
 		panic(err)

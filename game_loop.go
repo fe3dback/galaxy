@@ -27,6 +27,7 @@ func gameLoop(provider *provider) error {
 		frames.Begin()
 
 		// update
+		// todo: provide all game stats to OnUpdate (deltaTime, framesCount, gameTime, etc..)
 		err = world.OnUpdate(frames.DeltaTime())
 		if err != nil {
 			return fmt.Errorf("can`t update world: %v", err)
