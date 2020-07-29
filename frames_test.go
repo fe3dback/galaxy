@@ -7,7 +7,7 @@ import (
 
 func TestNewFrames(t *testing.T) {
 	type args struct {
-		targetFps int64
+		targetFps int
 	}
 	tests := []struct {
 		name string

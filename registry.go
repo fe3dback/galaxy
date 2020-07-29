@@ -73,7 +73,7 @@ func makeRegistry() *registry {
 	world := reg.registerWorld()
 
 	// ui
-	layerFPS := reg.registerUILayerFPS(frames)
+	layerFPS := reg.registerUILayerFPS()
 	gameUI := reg.registerUI(layerFPS)
 
 	// build
@@ -159,9 +159,9 @@ func (r registerFactory) registerGameOptions() *gameOptions {
 	return &gameOptions{
 		debug: debugOpt{
 			inProfiling: *isProfiling,
-			system:      true,
-			frames:      false,
-			world:       true,
+			system:      false,
+			frames:      true,
+			world:       false,
 		},
 		frames: framesOpt{
 			targetFps: 60,
@@ -169,7 +169,7 @@ func (r registerFactory) registerGameOptions() *gameOptions {
 	}
 }
 
-func (r registerFactory) registerFrames(targetFps int64) *frames {
+func (r registerFactory) registerFrames(targetFps int) *frames {
 	return NewFrames(targetFps)
 }
 
@@ -181,8 +181,6 @@ func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {
 	return ui.NewUI(layers...)
 }
 
-func (r registerFactory) registerUILayerFPS(frm *frames) *ui.LayerFPS {
-	return ui.NewLayerFPS(
-		frm,
-	)
+func (r registerFactory) registerUILayerFPS() *ui.LayerFPS {
+	return ui.NewLayerFPS()
 }

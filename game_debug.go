@@ -41,7 +41,7 @@ func debugPrintFps(f *frames) {
 	fmt.Printf("frame throttle: %s\n", f.frameThrottle)
 	fmt.Printf("limit duration: %s\n", f.limitDuration)
 	fmt.Printf("    delta time: %f\n", f.DeltaTime())
-	fmt.Printf("       seconds: %s\n", f.Seconds())
+	fmt.Printf("       seconds: %s\n", f.SinceStart())
 }
 
 func debugPrintWorld(w *game.World) {

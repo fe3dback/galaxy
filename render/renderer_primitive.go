@@ -8,6 +8,9 @@ import (
 )
 
 func (r *Renderer) DrawSquare(col color.RGBA, x, y, w, h int) {
+	// todo make all engine staff compatible with sdl
+	// int -> int32, etc..
+
 	err := r.ref.SetDrawColor(col.R, col.G, col.B, col.A)
 	utils.Check("set color", err)
 
@@ -19,4 +22,12 @@ func (r *Renderer) DrawSquare(col color.RGBA, x, y, w, h int) {
 		{X: int32(x), Y: int32(y)},
 	})
 	utils.Check("draw square", err)
+}
+
+func (r *Renderer) DrawLine(col color.RGBA, a, b sdl.Point) {
+	err := r.ref.SetDrawColor(col.R, col.G, col.B, col.A)
+	utils.Check("set color", err)
+
+	err = r.ref.DrawLines([]sdl.Point{a, b})
+	utils.Check("draw line", err)
 }

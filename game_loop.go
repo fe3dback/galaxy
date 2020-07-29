@@ -22,15 +22,24 @@ func gameLoop(provider *provider) error {
 	gameUI := provider.registry.game.ui
 	renderer := provider.registry.engine.renderer
 
+	// clear first time screen (fix copy texture from underlying memory)
+	renderer.Clear(engine.ColorBlack)
+	renderer.Present()
+
+	// render frames
 	for frames.Ready() {
 		// start frame
 		frames.Begin()
 
 		// update
-		// todo: provide all game stats to OnUpdate (deltaTime, framesCount, gameTime, etc..)
-		err = world.OnUpdate(frames.DeltaTime())
+		err = world.OnUpdate(frames)
 		if err != nil {
 			return fmt.Errorf("can`t update world: %v", err)
+		}
+
+		err = gameUI.OnUpdate(frames)
+		if err != nil {
+			return fmt.Errorf("can`t update ui: %v", err)
 		}
 
 		// draw

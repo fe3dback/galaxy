@@ -28,7 +28,7 @@ func (w *World) Entities() EntityList {
 	return w.entities
 }
 
-func (w *World) OnUpdate(deltaTime float64) error {
+func (w *World) OnUpdate(moment engine.Moment) error {
 	needGc := false
 
 	for _, entity := range w.entities {
@@ -37,7 +37,7 @@ func (w *World) OnUpdate(deltaTime float64) error {
 			continue
 		}
 
-		err := entity.OnUpdate(deltaTime)
+		err := entity.OnUpdate(moment)
 		if err != nil {
 			return fmt.Errorf("can`t update world entity `%T`: %v", entity, err)
 		}

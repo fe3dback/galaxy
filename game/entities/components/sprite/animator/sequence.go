@@ -34,15 +34,18 @@ type (
 		frames    []*frame
 		fps       int
 		repeat    bool
-		continues bool
+		bounce    bool
 		direction SequenceDirection
 		offsetX   int
 		offsetY   int
 
 		// mutable data
+		progress     float64
 		currentFrame int
 		firstFrame   int
 		lastFrame    int
+		progressMod  float64
+		finished     bool
 	}
 
 	SequenceSetupFunc func(*Sequence)
@@ -62,17 +65,19 @@ func NewSequence(texId generated.ResourcePath, slice SequenceSlice, initializers
 
 	seq := &Sequence{
 		resource:     texId,
-		frames:       make([]*frame, 0),
 		slice:        slice,
-		fps:          10,
+		frames:       make([]*frame, 0),
+		fps:          0,
 		repeat:       true,
-		continues:    true,
+		bounce:       true,
 		direction:    SequenceDirectionForward,
 		offsetX:      0,
 		offsetY:      0,
 		currentFrame: 0,
 		firstFrame:   0,
 		lastFrame:    0,
+		progressMod:  0,
+		finished:     false,
 	}
 
 	for _, init := range initializers {
@@ -89,8 +94,24 @@ func (seq *Sequence) initialize(renderer *render.Renderer) {
 	frames := sliceFrames(seq.slice, int(tex.Width), int(tex.Height))
 
 	seq.texture = tex
+	seq.setFrames(frames)
+}
+
+func (seq *Sequence) clearFrames() {
+	seq.setFrames(seq.frames)
+}
+
+func (seq *Sequence) setFrames(frames []*frame) {
+	seq.finished = false
+	seq.currentFrame = 0
+	seq.firstFrame = 0
+	seq.lastFrame = len(frames) - 1
 	seq.frames = frames
-	seq.lastFrame = len(frames)
+	seq.progressMod = float64(seq.fps) / float64(seq.lastFrame)
+
+	if seq.fps == 0 {
+		seq.fps = len(frames)
+	}
 }
 
 func WithFps(fps int) SequenceSetupFunc {
@@ -99,10 +120,10 @@ func WithFps(fps int) SequenceSetupFunc {
 	}
 }
 
-func WithCustomPlayback(repeat bool, continues bool, direction SequenceDirection) SequenceSetupFunc {
+func WithCustomPlayback(repeat bool, bounce bool, direction SequenceDirection) SequenceSetupFunc {
 	return func(seq *Sequence) {
 		seq.repeat = repeat
-		seq.continues = continues
+		seq.bounce = bounce
 		seq.direction = direction
 	}
 }

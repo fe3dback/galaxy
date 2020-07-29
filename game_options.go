@@ -14,6 +14,6 @@ type (
 	}
 
 	framesOpt struct {
-		targetFps int64
+		targetFps int
 	}
 )

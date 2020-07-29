@@ -8,7 +8,7 @@ import (
 )
 
 type frames struct {
-	limitFps      int64
+	limitFps      int
 	limitDuration time.Duration
 
 	count         int
@@ -21,7 +21,7 @@ type frames struct {
 	isInterrupted bool
 }
 
-func NewFrames(targetFps int64) *frames {
+func NewFrames(targetFps int) *frames {
 	f := &frames{
 		limitFps:      targetFps,
 		limitDuration: time.Second / time.Duration(targetFps),
@@ -88,33 +88,23 @@ func (f *frames) FPS() int {
 	return f.fps
 }
 
-func (f *frames) TotalFPS() int {
-	// todo: return avg frame time in ms
+func (f *frames) TargetFPS() int {
+	return f.limitFps
+}
 
-	//      max 16ms
-	// throttle 15ms
-	//    frame 1ms
-	// framesSkippedAvg = 15
-	// avgFPS = 60
-	// totalFPS = 60 * 15 ~= 900
+func (f *frames) FrameDuration() time.Duration {
+	return f.frameDuration
+}
 
-	framesSkippedAvg := f.frameThrottle.Seconds() / f.frameDuration.Seconds()
-	if framesSkippedAvg <= 1 {
-		framesSkippedAvg = 0
-	}
-
-	skippedPerSecond := framesSkippedAvg * float64(f.fps)
-	totalFPS := f.FPS() + int(skippedPerSecond)
-
-	// round total fps
-	return totalFPS / 100 * 100
+func (f *frames) LimitDuration() time.Duration {
+	return f.limitDuration
 }
 
 func (f *frames) DeltaTime() float64 {
 	return f.deltaTime.Seconds()
 }
 
-func (f *frames) Seconds() time.Duration {
+func (f *frames) SinceStart() time.Duration {
 	return time.Since(f.gameStart)
 }
 

@@ -11,20 +11,38 @@ type Player = engine.Entity
 
 func NewPlayer() *Player {
 	p := engine.NewEntity(
-		engine.Vector2D{X: 0, Y: 0},
+		engine.Vector2D{X: 300, Y: 300},
 		engine.Anglef(0),
 	)
-	p.AddComponent(player.NewRandomMover(p))
 
+	// prepare components
 	anim := animator.NewAnimator(p)
 	anim.AddSequence("idle", animSequenceIdle())
+	anim.AddSequence("explode", animSequenceExplode())
 
+	// register components
 	p.AddComponent(anim)
+	p.AddComponent(player.NewRandomMover(p))
+	p.AddComponent(player.NewTestDrawer(p))
 
 	return p
 }
 
 func animSequenceIdle() *animator.Sequence {
+	texId := generated.ResourcesImgGfxAnimTestSheet2
+	slice := animator.SequenceSlice{
+		FrameWidth:  32,
+		FrameHeight: 32,
+		FirstX:      0,
+		FirstY:      0,
+		FramesCount: 8,
+		SliceType:   animator.SequenceSliceDirectionToRightToBottom,
+	}
+
+	return animator.NewSequence(texId, slice)
+}
+
+func animSequenceExplode() *animator.Sequence {
 	texId := generated.ResourcesImgGfxAnimTestScheet
 	slice := animator.SequenceSlice{
 		FrameWidth:  512,
@@ -35,5 +53,8 @@ func animSequenceIdle() *animator.Sequence {
 		SliceType:   animator.SequenceSliceDirectionToRightToBottom,
 	}
 
-	return animator.NewSequence(texId, slice, animator.WithFps(5))
+	return animator.NewSequence(texId, slice,
+		animator.WithFps(64),
+		animator.WithCustomPlayback(true, true, animator.SequenceDirectionBackward),
+	)
 }

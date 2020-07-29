@@ -57,9 +57,7 @@ func (anim *Animator) PlaySequence(name string) {
 	anim.activeSequence = seq
 
 	// reset
-	seq.currentFrame = 0
-	seq.firstFrame = 0
-	seq.lastFrame = len(seq.frames)
+	seq.clearFrames()
 }
 
 func (anim *Animator) Play() {

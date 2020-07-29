@@ -8,6 +8,6 @@ type (
 	}
 
 	Updater interface {
-		OnUpdate(deltaTime float64) error
+		OnUpdate(Moment) error
 	}
 )
