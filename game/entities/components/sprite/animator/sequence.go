@@ -3,9 +3,8 @@ package animator
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/generated"
-
-	"github.com/fe3dback/galaxy/render"
 	"github.com/fe3dback/galaxy/utils"
 )
 
@@ -29,7 +28,6 @@ type (
 	Sequence struct {
 		// static
 		resource  generated.ResourcePath
-		texture   *render.Texture
 		slice     SequenceSlice
 		frames    []*frame
 		fps       int
@@ -87,13 +85,12 @@ func NewSequence(texId generated.ResourcePath, slice SequenceSlice, initializers
 	return seq
 }
 
-func (seq *Sequence) initialize(renderer *render.Renderer) {
+func (seq *Sequence) initialize(renderer engine.Renderer) {
 	defer utils.CheckPanic(fmt.Sprintf("animation seq init `%s`", seq.resource))
 
-	tex := renderer.GetTexture(seq.resource)
-	frames := sliceFrames(seq.slice, int(tex.Width), int(tex.Height))
+	texInfo := renderer.TextureQuery(seq.resource)
+	frames := sliceFrames(seq.slice, texInfo.Width, texInfo.Height)
 
-	seq.texture = tex
 	seq.setFrames(frames)
 }
 

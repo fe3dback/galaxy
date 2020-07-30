@@ -1,11 +1,9 @@
 package render
 
 import (
-	"github.com/veandco/go-sdl2/ttf"
-
 	"github.com/fe3dback/galaxy/utils"
-
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 type SDLLib struct {

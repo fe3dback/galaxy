@@ -3,12 +3,11 @@ package game
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/render"
-
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/entity"
 )
 
-type EntityList []*engine.Entity
+type EntityList []*entity.Entity
 
 type World struct {
 	entities EntityList
@@ -20,7 +19,7 @@ func NewWorld() *World {
 	}
 }
 
-func (w *World) AddEntity(e *engine.Entity) {
+func (w *World) AddEntity(e *entity.Entity) {
 	w.entities = append(w.entities, e)
 }
 
@@ -31,15 +30,15 @@ func (w *World) Entities() EntityList {
 func (w *World) OnUpdate(moment engine.Moment) error {
 	needGc := false
 
-	for _, entity := range w.entities {
-		if entity.IsDestroyed() {
+	for _, e := range w.entities {
+		if e.IsDestroyed() {
 			needGc = true
 			continue
 		}
 
-		err := entity.OnUpdate(moment)
+		err := e.OnUpdate(moment)
 		if err != nil {
-			return fmt.Errorf("can`t update world entity `%T`: %v", entity, err)
+			return fmt.Errorf("can`t update world entity `%T`: %v", e, err)
 		}
 	}
 
@@ -50,15 +49,15 @@ func (w *World) OnUpdate(moment engine.Moment) error {
 	return nil
 }
 
-func (w *World) OnDraw(r *render.Renderer) error {
-	for _, entity := range w.entities {
-		if entity.IsDestroyed() {
+func (w *World) OnDraw(r engine.Renderer) error {
+	for _, e := range w.entities {
+		if e.IsDestroyed() {
 			continue
 		}
 
-		err := entity.OnDraw(r)
+		err := e.OnDraw(r)
 		if err != nil {
-			return fmt.Errorf("can`t draw world entity `%T`: %v", entity, err)
+			return fmt.Errorf("can`t draw world entity `%T`: %v", e, err)
 		}
 	}
 
@@ -68,12 +67,12 @@ func (w *World) OnDraw(r *render.Renderer) error {
 func (w *World) garbageCollect() {
 	list := make(EntityList, 0, len(w.entities))
 
-	for _, entity := range w.entities {
-		if entity.IsDestroyed() {
+	for _, e := range w.entities {
+		if e.IsDestroyed() {
 			continue
 		}
 
-		list = append(list, entity)
+		list = append(list, e)
 	}
 
 	w.entities = list

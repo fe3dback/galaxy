@@ -3,17 +3,16 @@ package player
 import (
 	"time"
 
-	"github.com/fe3dback/galaxy/game/entities/components/sprite/animator"
-	"github.com/fe3dback/galaxy/render"
-
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/entity"
+	"github.com/fe3dback/galaxy/game/entities/components/sprite/animator"
 )
 
 type RandomMover struct {
-	entity *engine.Entity
+	entity *entity.Entity
 }
 
-func NewRandomMover(entity *engine.Entity) *RandomMover {
+func NewRandomMover(entity *entity.Entity) *RandomMover {
 	// todo component codegen with typecast
 	anim := entity.GetComponent(&animator.Animator{}).(*animator.Animator)
 
@@ -32,7 +31,7 @@ func NewRandomMover(entity *engine.Entity) *RandomMover {
 	return mv
 }
 
-func (r *RandomMover) OnDraw(_ *render.Renderer) error {
+func (r *RandomMover) OnDraw(_ engine.Renderer) error {
 	return nil
 }
 

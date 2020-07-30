@@ -2,36 +2,35 @@ package player
 
 import (
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/render"
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/fe3dback/galaxy/engine/entity"
 )
 
 type TestDrawer struct {
-	entity *engine.Entity
+	entity *entity.Entity
 }
 
-func NewTestDrawer(entity *engine.Entity) *TestDrawer {
+func NewTestDrawer(entity *entity.Entity) *TestDrawer {
 	return &TestDrawer{
 		entity: entity,
 	}
 }
 
-func (td *TestDrawer) OnDraw(r *render.Renderer) error {
+func (td *TestDrawer) OnDraw(r engine.Renderer) error {
 	lx := td.entity.Position().X - 10
 	rx := td.entity.Position().X + 10
 	ty := td.entity.Position().Y - 10
 	by := td.entity.Position().Y + 10
 
 	r.DrawLine(
-		engine.ColorBlue,
-		sdl.Point{X: int32(lx), Y: int32(ty)},
-		sdl.Point{X: int32(rx), Y: int32(by)},
+		engine.ColorCyan,
+		engine.Point{X: int(lx), Y: int(ty)},
+		engine.Point{X: int(rx), Y: int(by)},
 	)
 
 	r.DrawLine(
-		engine.ColorBlue,
-		sdl.Point{X: int32(lx), Y: int32(by)},
-		sdl.Point{X: int32(rx), Y: int32(ty)},
+		engine.ColorCyan,
+		engine.Point{X: int(lx), Y: int(by)},
+		engine.Point{X: int(rx), Y: int(ty)},
 	)
 
 	return nil

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"time"
 )
 
@@ -77,8 +78,7 @@ func (f *frames) End() {
 	}
 
 	// do additional logic
-	// todo: GC can by here forced if frame have some left time to processing
-	f.throttleGame()
+	f.afterFrame()
 
 	// update state
 	f.deltaTime = time.Since(f.frameStart)
@@ -116,10 +116,15 @@ func (f *frames) Interrupt() {
 	f.isInterrupted = true
 }
 
-func (f *frames) throttleGame() {
+func (f *frames) afterFrame() {
 	if f.frameThrottle <= 0 {
 		return
 	}
 
-	time.Sleep(f.frameThrottle)
+	// force run GC, because we have free time in this frame
+	gcStart := time.Now()
+	runtime.GC()
+	runtime.Gosched()
+
+	time.Sleep(f.frameThrottle - time.Since(gcStart))
 }

@@ -3,15 +3,14 @@ package animator
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/render"
-
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/entity"
 )
 
 type (
 	Animator struct {
 		// static
-		entity *engine.Entity
+		entity *entity.Entity
 
 		// mutable
 		sequences        Sequences
@@ -22,7 +21,7 @@ type (
 	}
 )
 
-func NewAnimator(entity *engine.Entity) *Animator {
+func NewAnimator(entity *entity.Entity) *Animator {
 	return &Animator{
 		entity:           entity,
 		sequences:        make(Sequences, 0),
@@ -68,7 +67,7 @@ func (anim *Animator) Pause() {
 	anim.paused = true
 }
 
-func (anim *Animator) initialize(renderer *render.Renderer) {
+func (anim *Animator) initialize(renderer engine.Renderer) {
 	if anim.initialized {
 		return
 	}

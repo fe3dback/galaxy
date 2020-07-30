@@ -1,13 +1,12 @@
 package render
 
 import (
-	"image/color"
-
+	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
-func (r *Renderer) DrawText(fontId FontId, color color.RGBA, text string, x, y int) {
+func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, x, y int) {
 	r.SetDrawColor(color)
 
 	font := r.fontManager.Get(fontId)
@@ -23,14 +22,14 @@ func (r *Renderer) DrawText(fontId FontId, color color.RGBA, text string, x, y i
 		utils.Check("font texture destroy", err)
 	}()
 
-	src := sdl.Rect{
+	src := Rect{
 		X: 0,
 		Y: 0,
 		W: surface.W,
 		H: surface.H,
 	}
 
-	dest := sdl.Rect{
+	dest := Rect{
 		X: int32(x),
 		Y: int32(y),
 		W: surface.W,

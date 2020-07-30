@@ -4,8 +4,6 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
-
-	"github.com/fe3dback/galaxy/render"
 )
 
 type UI struct {
@@ -20,7 +18,7 @@ func NewUI(layers ...Layer) *UI {
 	return ui
 }
 
-func (u *UI) OnDraw(r *render.Renderer) error {
+func (u *UI) OnDraw(r engine.Renderer) error {
 	for _, layer := range u.layers {
 		err := layer.OnDraw(r)
 		if err != nil {

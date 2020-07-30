@@ -4,10 +4,9 @@ import (
 	"math"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/render"
 )
 
-func (anim *Animator) OnDraw(r *render.Renderer) error {
+func (anim *Animator) OnDraw(r engine.Renderer) error {
 	if !anim.initialized {
 		anim.initialize(r)
 	}
@@ -17,20 +16,20 @@ func (anim *Animator) OnDraw(r *render.Renderer) error {
 	frame := seq.frames[seq.currentFrame]
 	entityPos := anim.entity.Position()
 
-	dest := &render.Rect{
-		X: int32(entityPos.X) + int32(seq.offsetX) - (int32(frame.w) / 2),
-		Y: int32(entityPos.Y) + int32(seq.offsetY) - (int32(frame.h) / 2),
-		W: int32(frame.w),
-		H: int32(frame.h),
+	dest := engine.Rect{
+		X: int(entityPos.X) + seq.offsetX - (frame.w / 2),
+		Y: int(entityPos.Y) + seq.offsetY - (frame.h / 2),
+		W: frame.w,
+		H: frame.h,
 	}
 
 	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation().ToFloat())
 	r.DrawSquare(
 		engine.ColorGreen,
-		int(dest.X),
-		int(dest.Y),
-		int(dest.W),
-		int(dest.H),
+		dest.X,
+		dest.Y,
+		dest.W,
+		dest.H,
 	)
 
 	return nil

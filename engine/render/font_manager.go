@@ -7,22 +7,16 @@ import (
 	"github.com/fe3dback/galaxy/utils"
 )
 
-const (
-	FontDefaultMono FontId = "jet_brains_mono_regular"
-)
-
 var FontVars = FontsParamsMap{
-	FontDefaultMono: FontParams{
-		resourcePath: generated.ResourcesFontsJetBrainsMonoRegular,
-		size:         14,
+	generated.ResourcesFontsJetBrainsMonoRegular: FontParams{
+		size: 14,
 	},
 }
 
 type (
-	FontId     string
+	FontId     = generated.ResourcePath
 	FontParams struct {
-		resourcePath generated.ResourcePath
-		size         int
+		size int
 	}
 	FontsMap       map[FontId]*Font
 	FontsParamsMap map[FontId]FontParams
@@ -50,7 +44,7 @@ func (fc *FontManager) Load(id FontId) {
 		panic(fmt.Sprintf("font `%s` params not defined", id))
 	}
 
-	f, err := NewFont(params, fc.closer)
+	f, err := NewFont(id, params, fc.closer)
 	if err != nil {
 		panic(fmt.Sprintf("font `%s` loading failed: %v", id, err))
 	}

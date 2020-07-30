@@ -1,22 +1,22 @@
-package engine
+package entity
 
 import (
 	"fmt"
 	"reflect"
 
-	"github.com/fe3dback/galaxy/render"
+	"github.com/fe3dback/galaxy/engine"
 )
 
 type components map[string]Component
 
 type Entity struct {
-	position   Vector2D
-	rotation   Angle
+	position   engine.Vector2D
+	rotation   engine.Angle
 	components components
 	destroyed  bool
 }
 
-func NewEntity(pos Vector2D, rot Angle) *Entity {
+func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
 	return &Entity{
 		position:   pos,
 		rotation:   rot,
@@ -25,21 +25,21 @@ func NewEntity(pos Vector2D, rot Angle) *Entity {
 	}
 }
 
-func (e *Entity) SetPosition(pos Vector2D) {
+func (e *Entity) SetPosition(pos engine.Vector2D) {
 	e.position = pos
 
 	fmt.Printf("entity `%T` moved to %v\n", e, pos)
 }
 
-func (e *Entity) Position() Vector2D {
+func (e *Entity) Position() engine.Vector2D {
 	return e.position
 }
 
-func (e *Entity) SetRotation(rot Angle) {
+func (e *Entity) SetRotation(rot engine.Angle) {
 	e.rotation = rot
 }
 
-func (e *Entity) Rotation() Angle {
+func (e *Entity) Rotation() engine.Angle {
 	return e.rotation
 }
 
@@ -51,7 +51,7 @@ func (e *Entity) IsDestroyed() bool {
 	return e.destroyed
 }
 
-func (e *Entity) OnUpdate(moment Moment) error {
+func (e *Entity) OnUpdate(moment engine.Moment) error {
 	for id, component := range e.components {
 		err := component.OnUpdate(moment)
 		if err != nil {
@@ -62,7 +62,7 @@ func (e *Entity) OnUpdate(moment Moment) error {
 	return nil
 }
 
-func (e *Entity) OnDraw(r *render.Renderer) error {
+func (e *Entity) OnDraw(r engine.Renderer) error {
 	for id, component := range e.components {
 		err := component.OnDraw(r)
 		if err != nil {

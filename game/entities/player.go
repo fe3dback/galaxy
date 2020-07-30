@@ -2,15 +2,16 @@ package entities
 
 import (
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities/components/player"
 	"github.com/fe3dback/galaxy/game/entities/components/sprite/animator"
 	"github.com/fe3dback/galaxy/generated"
 )
 
-type Player = engine.Entity
+type Player = entity.Entity
 
 func NewPlayer() *Player {
-	p := engine.NewEntity(
+	p := entity.NewEntity(
 		engine.Vector2D{X: 300, Y: 300},
 		engine.Anglef(0),
 	)

@@ -3,7 +3,7 @@ package animator
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/render"
+	"github.com/fe3dback/galaxy/engine"
 )
 
 type sequenceWalkFunc func(frame *frame)
@@ -14,21 +14,21 @@ type (
 		x, y, w, h int
 		column     int
 		row        int
-		rect       *render.Rect
+		rect       *engine.Rect
 	}
 )
 
-func (f *frame) TextureRect() *render.Rect {
+func (f *frame) TextureRect() engine.Rect {
 	if f.rect == nil {
-		f.rect = &render.Rect{
-			X: int32(f.x),
-			Y: int32(f.y),
-			W: int32(f.w),
-			H: int32(f.h),
+		f.rect = &engine.Rect{
+			X: f.x,
+			Y: f.y,
+			W: f.w,
+			H: f.h,
 		}
 	}
 
-	return f.rect
+	return *f.rect
 }
 
 func sliceFrames(slice SequenceSlice, w, h int) []*frame {

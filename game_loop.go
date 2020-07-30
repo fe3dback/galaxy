@@ -23,7 +23,7 @@ func gameLoop(provider *provider) error {
 	renderer := provider.registry.engine.renderer
 
 	// clear first time screen (fix copy texture from underlying memory)
-	renderer.Clear(engine.ColorBlack)
+	renderer.Clear(engine.ColorBackground)
 	renderer.Present()
 
 	// render frames
@@ -43,7 +43,7 @@ func gameLoop(provider *provider) error {
 		}
 
 		// draw
-		renderer.Clear(engine.ColorBlack)
+		renderer.Clear(engine.ColorBackground)
 
 		err = world.OnDraw(renderer)
 		if err != nil {

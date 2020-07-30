@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/generated"
+
 	"github.com/fe3dback/galaxy/game/ui"
 
+	"github.com/fe3dback/galaxy/engine/render"
 	"github.com/fe3dback/galaxy/game"
-	"github.com/fe3dback/galaxy/render"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -133,7 +135,7 @@ func (r registerFactory) registerSdlRenderer(sdlLib *render.SDLLib) *sdl.Rendere
 
 func (r registerFactory) registerFontManager(closer *utils.Closer) *render.FontManager {
 	fonts := render.NewFontManager(closer)
-	fonts.Load(render.FontDefaultMono)
+	fonts.Load(generated.ResourcesFontsJetBrainsMonoRegular)
 
 	return fonts
 }
