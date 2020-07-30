@@ -2,6 +2,9 @@ gen:
 	go generate ./cmd/gen_resources
 	go fmt ./generated
 
+arch:
+	go run ./cmd/arch/arch.go
+
 dev:
 	go build -o /tmp/galaxy-tmp
 	/tmp/galaxy-tmp -profile=true -profileport=17999
