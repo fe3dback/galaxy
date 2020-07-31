@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/registry"
-
 	"github.com/fe3dback/galaxy/engine"
-
+	"github.com/fe3dback/galaxy/registry"
 	"github.com/veandco/go-sdl2/sdl"
 )
 

@@ -12,19 +12,31 @@ import (
 )
 
 type (
-	ComponentID = string
+	ComponentID  = string
+	VendorID     = string
+	RelativePath = string
 
 	Spec struct {
-		Path       string
-		Components map[ComponentID]SpecComponent
-		Common     []ComponentID
-		Deps       map[ComponentID]string
-		Exclude    []string
+		Path       string                        `yaml:"path"`
+		Vendors    map[VendorID]SpecVendor       `yaml:"vendors"`
+		Components map[ComponentID]SpecComponent `yaml:"components"`
+		Deps       map[ComponentID]SpecContract  `yaml:"deps"`
+		Common     []ComponentID                 `yaml:"common"`
+		Exclude    []RelativePath                `yaml:"exclude"`
 	}
 
 	SpecComponent struct {
-		In    string
-		Inner bool
+		In    string `yaml:"in"`
+		Depth bool   `yaml:"depth"`
+	}
+
+	SpecVendor struct {
+		In string `yaml:"in"`
+	}
+
+	SpecContract struct {
+		MayDependOn []ComponentID `yaml:"mayDependOn"`
+		CanUse      []VendorID    `yaml:"canUse"`
 	}
 
 	ParsedSpec struct {
@@ -37,8 +49,9 @@ type (
 		ID             string
 		PathRelative   string
 		PathAbsolute   string
-		IncludeSubDirs bool
+		Depth          bool
 		AllowedDeps    []string
+		AllowedVendors []string
 	}
 )
 
@@ -71,19 +84,11 @@ func parseSpec(path string) ParsedSpec {
 
 	for id, component := range spec.Components {
 		allowedDeps := make([]string, 0)
+		allowedVendors := make([]string, 0)
 
-		if deps, ok := spec.Deps[id]; ok {
-			deps = strings.TrimSpace(deps)
-			deps = strings.TrimPrefix(deps, "->")
-
-			for _, depName := range strings.Split(deps, ",") {
-				allowedDeps = append(allowedDeps, strings.TrimSpace(depName))
-			}
-		}
-
-		for _, depName := range spec.Common {
-			allowedDeps = append(allowedDeps, strings.TrimSpace(depName))
-		}
+		allowedDeps = append(allowedDeps, spec.Deps[id].MayDependOn...)
+		allowedDeps = append(allowedDeps, spec.Common...)
+		allowedVendors = append(allowedVendors, spec.Deps[id].CanUse...)
 
 		deps := make([]string, 0)
 		for _, depName := range allowedDeps {
@@ -95,7 +100,7 @@ func parseSpec(path string) ParsedSpec {
 			depAbsolutePath := cleanPath(fmt.Sprintf("%s/%s", dirPath, dep.In))
 			deps = append(deps, fmt.Sprintf("%s/%s", spec.Path, dep.In))
 
-			if dep.Inner {
+			if dep.Depth {
 				err = filepath.Walk(depAbsolutePath, func(path string, info os.FileInfo, err error) error {
 					if !info.IsDir() {
 						return nil
@@ -112,12 +117,23 @@ func parseSpec(path string) ParsedSpec {
 			}
 		}
 
+		vendors := make([]string, 0)
+		for _, vendorName := range allowedVendors {
+			vendor, ok := spec.Vendors[vendorName]
+			if !ok {
+				panic(fmt.Sprintf("can`t find vendor: %s", vendorName))
+			}
+
+			vendors = append(vendors, vendor.In)
+		}
+
 		parsed.Modules[id] = Module{
 			ID:             id,
 			PathRelative:   component.In,
 			PathAbsolute:   cleanPath(fmt.Sprintf("%s/%s", dirPath, component.In)),
-			IncludeSubDirs: component.Inner,
+			Depth:          component.Depth,
 			AllowedDeps:    uniqueStrings(deps),
+			AllowedVendors: uniqueStrings(vendors),
 		}
 	}
 
@@ -154,7 +170,7 @@ func (s ParsedSpec) getModule(path string) (Module, bool) {
 			return mod, true
 		}
 
-		if !mod.IncludeSubDirs {
+		if !mod.Depth {
 			continue
 		}
 

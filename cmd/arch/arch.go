@@ -12,6 +12,14 @@ import (
 	"strings"
 )
 
+type ImportType uint8
+
+const (
+	ImportTypeStdLib ImportType = iota
+	ImportTypeProject
+	ImportTypeVendor
+)
+
 func main() {
 	_, filename, _, ok := runtime.Caller(0)
 	if !ok {
@@ -66,29 +74,50 @@ func checkPackages(dirRoot string, spec ParsedSpec, packages map[string]*ast.Pac
 			for _, goImport := range goFile.Imports {
 				importPath := strings.Trim(goImport.Path.Value, "\"")
 
-				if !strings.HasPrefix(importPath, spec.Path) {
-					continue
-				}
-
-				if !inList(importPath, module.AllowedDeps) {
-					depsWarnings := ""
-					for _, dep := range module.AllowedDeps {
-						depsWarnings += fmt.Sprintf("\n - %s", strings.TrimPrefix(dep, spec.Path))
+				switch getImportType(importPath, spec) {
+				case ImportTypeVendor:
+					if !inList(importPath, module.AllowedVendors) {
+						warnings = append(warnings, fmt.Sprintf(
+							"Module `%s`, file `%s` can`t depend on vendor `%s`",
+							module.ID,
+							strings.TrimPrefix(goFileName, dirRoot),
+							importPath,
+						))
+						continue
 					}
+				case ImportTypeProject:
+					if !inList(importPath, module.AllowedDeps) {
+						depsWarnings := ""
+						for _, dep := range module.AllowedDeps {
+							depsWarnings += fmt.Sprintf("\n - %s", strings.TrimPrefix(dep, spec.Path))
+						}
 
-					warnings = append(warnings, fmt.Sprintf(
-						"Module `%s`, file `%s` should not depend on `%s`, may depend only on: %s",
-						module.ID,
-						strings.TrimPrefix(goFileName, dirRoot),
-						strings.TrimPrefix(importPath, spec.Path),
-						depsWarnings,
-					))
+						warnings = append(warnings, fmt.Sprintf(
+							"Module `%s`, file `%s` should not depend on `%s`, may depend only on: %s",
+							module.ID,
+							strings.TrimPrefix(goFileName, dirRoot),
+							strings.TrimPrefix(importPath, spec.Path),
+							depsWarnings,
+						))
+					}
 				}
 			}
 		}
 	}
 
 	return warnings
+}
+
+func getImportType(importPath string, spec ParsedSpec) ImportType {
+	if !strings.Contains(importPath, ".") {
+		return ImportTypeStdLib
+	}
+
+	if strings.HasPrefix(importPath, spec.Path) {
+		return ImportTypeProject
+	}
+
+	return ImportTypeVendor
 }
 
 func getProjectDirectories(dirRoot string, exclude []string) []string {

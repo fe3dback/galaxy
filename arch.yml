@@ -1,5 +1,13 @@
 path: github.com/fe3dback/galaxy
 
+vendors:
+  sdl:
+    in: github.com/veandco/go-sdl2/sdl
+  sdl-ttf:
+    in: github.com/veandco/go-sdl2/ttf
+  sdl-img:
+    in: github.com/veandco/go-sdl2/img
+
 components:
   main:
     in: .
@@ -21,7 +29,7 @@ components:
     in: game/entities
   game_component:
     in: game/entities/components
-    inner: true
+    depth: true
   game_ui:
     in: game/ui
 
@@ -35,15 +43,47 @@ common:
   - utils
 
 deps:
-  engine_render: -> engine
-  engine_entity: -> engine
+  engine_render:
+    mayDependOn:
+      - engine
+    canUse:
+      - sdl
+      - sdl-ttf
+      - sdl-img
 
-  game: -> engine, engine_entity, game_entities
-  game_entities: -> engine, engine_entity, game_component
-  game_component: -> engine, engine_entity, game_component
-  game_ui: -> engine
+  engine_entity:
+    mayDependOn:
+      - engine
 
-  main: -> game, registry, system, engine, game
+  game:
+    mayDependOn:
+      - engine
+      - engine_entity
+      - game_entities
+
+  game_entities:
+    mayDependOn:
+      - engine
+      - engine_entity
+      - game_component
+
+  game_component:
+    mayDependOn:
+      - engine
+      - engine_entity
+      - game_component
+
+  game_ui:
+    mayDependOn:
+      - engine
+
+  main:
+    mayDependOn:
+      - game
+      - registry
+      - system
+      - engine
+      - game
 
 exclude:
   - .idea
