@@ -3,7 +3,11 @@ package registry
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/engine/render"
+	"github.com/fe3dback/galaxy/engine/lib/event"
+
+	"github.com/fe3dback/galaxy/engine/lib"
+
+	"github.com/fe3dback/galaxy/engine/lib/render"
 	"github.com/fe3dback/galaxy/game"
 	"github.com/fe3dback/galaxy/game/ui"
 	"github.com/fe3dback/galaxy/generated"
@@ -28,6 +32,7 @@ type (
 	EngineRegistry struct {
 		FontCollection *render.FontManager
 		Renderer       *render.Renderer
+		Dispatcher     *event.Dispatcher
 	}
 
 	GameRegistry struct {
@@ -44,6 +49,10 @@ func makeRegistry(flags Flags) *Registry {
 	// main
 	closer := reg.registerCloser()
 	sdlLib := reg.registerSDLLib(closer)
+
+	// system
+	options := reg.registerGameOptions(flags)
+	frames := reg.registerFrames(options.Frames.TargetFps)
 
 	// sdl
 	sdlWindow := reg.registerSdlWindow(
@@ -67,10 +76,11 @@ func makeRegistry(flags Flags) *Registry {
 		fontManager,
 		textureManager,
 	)
+	dispatcher := reg.registerDispatcher(
+		reg.eventQuit(frames),
+	)
 
 	// game
-	options := reg.registerGameOptions(flags)
-	frames := reg.registerFrames(options.Frames.TargetFps)
 	world := reg.registerWorld()
 
 	// ui
@@ -83,6 +93,7 @@ func makeRegistry(flags Flags) *Registry {
 		Engine: &EngineRegistry{
 			FontCollection: fontManager,
 			Renderer:       renderer,
+			Dispatcher:     dispatcher,
 		},
 		Sdl: &SdlRegistry{
 			Window: sdlWindow,
@@ -108,8 +119,8 @@ func (r registerFactory) registerCloser() *utils.Closer {
 // SDL
 // ----------------------------------------
 
-func (r registerFactory) registerSDLLib(closer *utils.Closer) *render.SDLLib {
-	sdlLib, err := render.NewSDLLib(
+func (r registerFactory) registerSDLLib(closer *utils.Closer) *lib.SDLLib {
+	sdlLib, err := lib.NewSDLLib(
 		closer,
 	)
 
@@ -120,11 +131,11 @@ func (r registerFactory) registerSDLLib(closer *utils.Closer) *render.SDLLib {
 	return sdlLib
 }
 
-func (r registerFactory) registerSdlWindow(sdlLib *render.SDLLib) *sdl.Window {
+func (r registerFactory) registerSdlWindow(sdlLib *lib.SDLLib) *sdl.Window {
 	return sdlLib.Window()
 }
 
-func (r registerFactory) registerSdlRenderer(sdlLib *render.SDLLib) *sdl.Renderer {
+func (r registerFactory) registerSdlRenderer(sdlLib *lib.SDLLib) *sdl.Renderer {
 	return sdlLib.Renderer()
 }
 

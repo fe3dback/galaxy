@@ -1,4 +1,4 @@
-package render
+package lib
 
 import (
 	"github.com/fe3dback/galaxy/utils"
@@ -19,8 +19,8 @@ func (s *SDLLib) Renderer() *sdl.Renderer {
 	return s.renderer
 }
 
-func NewSDLLib(closer *utils.Closer) (lib *SDLLib, sdlError error) {
-	utils.Recover("sdl lib", &sdlError)
+func NewSDLLib(closer *utils.Closer) (*SDLLib, error) {
+	defer utils.CheckPanic("sdl lib")
 
 	// lib
 	err := sdl.Init(sdl.INIT_EVERYTHING)

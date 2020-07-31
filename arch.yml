@@ -18,8 +18,12 @@ components:
 
   engine:
     in: engine
+  engine_lib:
+    in: engine/lib
   engine_render:
-    in: engine/render
+    in: engine/lib/render
+  engine_event:
+    in: engine/lib/event
   engine_entity:
     in: engine/entity
 
@@ -43,13 +47,26 @@ common:
   - utils
 
 deps:
-  engine_render:
-    mayDependOn:
-      - engine
+  engine_lib:
     canUse:
       - sdl
       - sdl-ttf
       - sdl-img
+
+  engine_render:
+    mayDependOn:
+      - engine
+      - engine_lib
+    canUse:
+      - sdl
+      - sdl-ttf
+      - sdl-img
+
+  engine_event:
+    mayDependOn:
+      - engine
+    canUse:
+      - sdl
 
   engine_entity:
     mayDependOn:

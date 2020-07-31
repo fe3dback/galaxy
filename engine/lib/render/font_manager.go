@@ -44,12 +44,7 @@ func (fc *FontManager) Load(id FontId) {
 		panic(fmt.Sprintf("font `%s` params not defined", id))
 	}
 
-	f, err := NewFont(id, params, fc.closer)
-	if err != nil {
-		panic(fmt.Sprintf("font `%s` loading failed: %v", id, err))
-	}
-
-	fc.fonts[id] = f
+	fc.fonts[id] = NewFont(id, params, fc.closer)
 }
 
 func (fc *FontManager) Get(id FontId) *Font {

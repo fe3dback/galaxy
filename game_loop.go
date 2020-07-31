@@ -5,14 +5,7 @@ import (
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/registry"
-	"github.com/veandco/go-sdl2/sdl"
 )
-
-type SdlQuitErr struct{}
-
-func (s SdlQuitErr) Error() string {
-	panic("sdl quit")
-}
 
 func gameLoop(provider *registry.Provider) error {
 	var err error
@@ -21,6 +14,7 @@ func gameLoop(provider *registry.Provider) error {
 	world := provider.Registry.Game.World
 	gameUI := provider.Registry.Game.Ui
 	renderer := provider.Registry.Engine.Renderer
+	dispatcher := provider.Registry.Engine.Dispatcher
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(engine.ColorBackground)
@@ -61,31 +55,10 @@ func gameLoop(provider *registry.Provider) error {
 		debug(provider)
 
 		// handle events
-		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			err := handleSdlEvent(event)
-
-			if err != nil {
-				switch err.(type) {
-				case SdlQuitErr:
-					frames.Interrupt()
-				default:
-					return fmt.Errorf("can`t process sdl event: %v", err)
-				}
-			}
-		}
+		dispatcher.HandleQueue()
 
 		// finalize frame
 		frames.End()
-	}
-
-	return nil
-}
-
-func handleSdlEvent(ev sdl.Event) error {
-	switch ev.(type) {
-	case *sdl.QuitEvent:
-		fmt.Printf("sdl quit event handled\n")
-		return SdlQuitErr{}
 	}
 
 	return nil

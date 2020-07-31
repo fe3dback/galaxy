@@ -14,8 +14,8 @@ type Font struct {
 	closer *utils.Closer
 }
 
-func NewFont(resource FontId, params FontParams, closer *utils.Closer) (font *Font, err error) {
-	utils.Recover(fmt.Sprintf("create font `%s`", resource), &err)
+func NewFont(resource FontId, params FontParams, closer *utils.Closer) *Font {
+	defer utils.CheckPanic(fmt.Sprintf("create font `%s`", resource))
 
 	f, err := ttf.OpenFont(string(resource), params.size)
 	utils.Check("open", err)
@@ -27,7 +27,7 @@ func NewFont(resource FontId, params FontParams, closer *utils.Closer) (font *Fo
 	return &Font{
 		ref:    f,
 		closer: closer,
-	}, nil
+	}
 }
 
 func (f *Font) RenderText(text string, color engine.Color) *sdl.Surface {

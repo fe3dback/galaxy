@@ -3,7 +3,7 @@ gen:
 	go fmt ./generated
 
 arch:
-	go run ./cmd/arch/arch.go
+	go run ./cmd/arch/*.go
 
 dev:
 	go build -o /tmp/galaxy-tmp
