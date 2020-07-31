@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/registry"
+
 	"github.com/fe3dback/galaxy/engine"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -14,13 +16,13 @@ func (s SdlQuitErr) Error() string {
 	panic("sdl quit")
 }
 
-func gameLoop(provider *provider) error {
+func gameLoop(provider *registry.Provider) error {
 	var err error
 
-	frames := provider.registry.game.frames
-	world := provider.registry.game.world
-	gameUI := provider.registry.game.ui
-	renderer := provider.registry.engine.renderer
+	frames := provider.Registry.Game.Frames
+	world := provider.Registry.Game.World
+	gameUI := provider.Registry.Game.Ui
+	renderer := provider.Registry.Engine.Renderer
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(engine.ColorBackground)

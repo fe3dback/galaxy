@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 )
 
@@ -25,31 +26,15 @@ func main() {
 	warnings := make([]string, 0)
 
 	fSet := token.NewFileSet()
-	err := filepath.Walk(dirRoot, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			return nil
-		}
+	checkDirs := getProjectDirectories(dirRoot, spec.Exclude)
 
-		for _, excludeDir := range spec.Exclude {
-			if path == excludeDir {
-				return nil
-			}
-
-			if strings.HasPrefix(path, excludeDir) {
-				return nil
-			}
-		}
-
+	for _, path := range checkDirs {
 		packages, err := parser.ParseDir(fSet, path, fileFilter, parser.ImportsOnly)
 		if err != nil {
 			panic(fmt.Sprintf("can`t parse dir `%s`: %v", path, err))
 		}
 
-		warnings = append(warnings, checkPackages(spec, packages)...)
-		return nil
-	})
-	if err != nil {
-		panic(fmt.Sprintf("can`t walk: %v", err))
+		warnings = append(warnings, checkPackages(dirRoot, spec, packages)...)
 	}
 
 	fmt.Println("--------------------------------")
@@ -62,19 +47,19 @@ func main() {
 	for _, warning := range warnings {
 		fmt.Printf("[WARN] %s\n\n", warning)
 	}
+
+	fmt.Printf("Total: %d warnings\n", len(warnings))
+	os.Exit(1)
 }
 
-func checkPackages(spec ParsedSpec, packages map[string]*ast.Package) []string {
+func checkPackages(dirRoot string, spec ParsedSpec, packages map[string]*ast.Package) []string {
 	warnings := make([]string, 0)
 
 	for _, pack := range packages {
-		fmt.Println(pack.Name)
-
 		for goFileName, goFile := range pack.Files {
-			fmt.Printf("- %s\n", goFileName)
 			module, ok := spec.getModule(goFileName)
 			if !ok {
-				fmt.Printf("[!] Can`t find module for file: %s\n", goFileName)
+				warnings = append(warnings, fmt.Sprintf("Can`t find module for file: %s", goFileName))
 				continue
 			}
 
@@ -86,26 +71,58 @@ func checkPackages(spec ParsedSpec, packages map[string]*ast.Package) []string {
 				}
 
 				if !inList(importPath, module.AllowedDeps) {
+					depsWarnings := ""
+					for _, dep := range module.AllowedDeps {
+						depsWarnings += fmt.Sprintf("\n - %s", strings.TrimPrefix(dep, spec.Path))
+					}
+
 					warnings = append(warnings, fmt.Sprintf(
-						"Module `%s`, file `%s` should not depend on `%s`, may depend only on %v",
+						"Module `%s`, file `%s` should not depend on `%s`, may depend only on: %s",
 						module.ID,
-						goFileName,
-						importPath,
-						module.AllowedDeps,
+						strings.TrimPrefix(goFileName, dirRoot),
+						strings.TrimPrefix(importPath, spec.Path),
+						depsWarnings,
 					))
 				}
-
-				fmt.Printf("    [imp] %s\n", importPath)
 			}
-
-			for _, dep := range module.AllowedDeps {
-				fmt.Printf("    [dep] %s\n", dep)
-			}
-
 		}
 	}
 
 	return warnings
+}
+
+func getProjectDirectories(dirRoot string, exclude []string) []string {
+	checkDirs := make([]string, 0)
+
+	err := filepath.Walk(dirRoot, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			return nil
+		}
+
+		for _, excludeDir := range exclude {
+			if path == excludeDir {
+				return nil
+			}
+
+			if strings.HasPrefix(path, excludeDir) {
+				return nil
+			}
+		}
+
+		checkDirs = append(checkDirs, path)
+
+		return nil
+	})
+
+	if err != nil {
+		panic(fmt.Sprintf("can`t walk: %v", err))
+	}
+
+	sort.SliceStable(checkDirs, func(i, j int) bool {
+		return len(checkDirs[j]) < len(checkDirs[i])
+	})
+
+	return checkDirs
 }
 
 func fileFilter(file os.FileInfo) bool {

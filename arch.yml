@@ -1,24 +1,30 @@
 path: github.com/fe3dback/galaxy
 
 components:
-  # engine layer
+  main:
+    in: .
+  registry:
+    in: registry
+  system:
+    in: system
+
+  engine:
+    in: engine
   engine_render:
     in: engine/render
   engine_entity:
     in: engine/entity
-  engine:
-    in: engine
 
-  # game layer
-  entities:
-    in: game/entities
-    inner: true
-  ui:
-    in: game/ui
   game:
     in: game
+  game_entities:
+    in: game/entities
+  game_component:
+    in: game/entities/components
+    inner: true
+  game_ui:
+    in: game/ui
 
-  # other
   generated:
     in: generated
   utils:
@@ -29,16 +35,19 @@ common:
   - utils
 
 deps:
-  # engine
   engine_render: -> engine
   engine_entity: -> engine
 
-  # game
-  game: -> engine, engine_entity, entities
-  entities: -> engine, engine_entity
-  ui: -> engine
+  game: -> engine, engine_entity, game_entities
+  game_entities: -> engine, engine_entity, game_component
+  game_component: -> engine, engine_entity, game_component
+  game_ui: -> engine
+
+  main: -> game, registry, system, engine, game
 
 exclude:
+  - .idea
   - vendor
   - cmd
   - resources
+  - registry

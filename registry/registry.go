@@ -1,45 +1,44 @@
-package main
+package registry
 
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/generated"
-
-	"github.com/fe3dback/galaxy/game/ui"
-
 	"github.com/fe3dback/galaxy/engine/render"
 	"github.com/fe3dback/galaxy/game"
+	"github.com/fe3dback/galaxy/game/ui"
+	"github.com/fe3dback/galaxy/generated"
+	"github.com/fe3dback/galaxy/system"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 type (
 	registerFactory struct{}
-	registry        struct {
-		closer *utils.Closer
-		sdl    *sdlRegistry
-		engine *engineRegistry
-		game   *gameRegistry
+	Registry        struct {
+		Closer *utils.Closer
+		Sdl    *SdlRegistry
+		Engine *EngineRegistry
+		Game   *GameRegistry
 	}
 
-	sdlRegistry struct {
-		window *sdl.Window
+	SdlRegistry struct {
+		Window *sdl.Window
 	}
 
-	engineRegistry struct {
-		fontCollection *render.FontManager
-		renderer       *render.Renderer
+	EngineRegistry struct {
+		FontCollection *render.FontManager
+		Renderer       *render.Renderer
 	}
 
-	gameRegistry struct {
-		options *gameOptions
-		frames  *frames
-		world   *game.World
-		ui      *ui.UI
+	GameRegistry struct {
+		Options *system.GameOptions
+		Frames  *system.Frames
+		World   *game.World
+		Ui      *ui.UI
 	}
 )
 
-func makeRegistry() *registry {
+func makeRegistry(flags Flags) *Registry {
 	reg := &registerFactory{}
 
 	// main
@@ -70,8 +69,8 @@ func makeRegistry() *registry {
 	)
 
 	// game
-	options := reg.registerGameOptions()
-	frames := reg.registerFrames(options.frames.targetFps)
+	options := reg.registerGameOptions(flags)
+	frames := reg.registerFrames(options.Frames.TargetFps)
 	world := reg.registerWorld()
 
 	// ui
@@ -79,20 +78,20 @@ func makeRegistry() *registry {
 	gameUI := reg.registerUI(layerFPS)
 
 	// build
-	return &registry{
-		closer: closer,
-		engine: &engineRegistry{
-			fontCollection: fontManager,
-			renderer:       renderer,
+	return &Registry{
+		Closer: closer,
+		Engine: &EngineRegistry{
+			FontCollection: fontManager,
+			Renderer:       renderer,
 		},
-		sdl: &sdlRegistry{
-			window: sdlWindow,
+		Sdl: &SdlRegistry{
+			Window: sdlWindow,
 		},
-		game: &gameRegistry{
-			options: options,
-			frames:  frames,
-			world:   world,
-			ui:      gameUI,
+		Game: &GameRegistry{
+			Options: options,
+			Frames:  frames,
+			World:   world,
+			Ui:      gameUI,
 		},
 	}
 }
@@ -157,22 +156,22 @@ func (r registerFactory) registerRenderer(
 // Game
 // ----------------------------------------
 
-func (r registerFactory) registerGameOptions() *gameOptions {
-	return &gameOptions{
-		debug: debugOpt{
-			inProfiling: *isProfiling,
-			system:      false,
-			frames:      true,
-			world:       false,
+func (r registerFactory) registerGameOptions(flags Flags) *system.GameOptions {
+	return &system.GameOptions{
+		Debug: system.DebugOpt{
+			InProfiling: flags.IsProfiling,
+			System:      false,
+			Frames:      true,
+			World:       false,
 		},
-		frames: framesOpt{
-			targetFps: 60,
+		Frames: system.FramesOpt{
+			TargetFps: 60,
 		},
 	}
 }
 
-func (r registerFactory) registerFrames(targetFps int) *frames {
-	return NewFrames(targetFps)
+func (r registerFactory) registerFrames(targetFps int) *system.Frames {
+	return system.NewFrames(targetFps)
 }
 
 func (r registerFactory) registerWorld() *game.World {

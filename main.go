@@ -6,6 +6,8 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
+
+	"github.com/fe3dback/galaxy/registry"
 )
 
 // -- flags
@@ -16,13 +18,17 @@ func main() {
 	runtime.LockOSThread()
 
 	flag.Parse()
-	provider := newProvider()
+	flags := registry.Flags{
+		IsProfiling:   *isProfiling,
+		ProfilingPort: *profilingPort,
+	}
 
+	provider := registry.NewProvider(flags)
 	run(provider)
 }
 
-func run(provider *provider) {
-	if provider.registry.game.options.debug.inProfiling {
+func run(provider *registry.Provider) {
+	if provider.Registry.Game.Options.Debug.InProfiling {
 		profile()
 	}
 

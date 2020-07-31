@@ -4,23 +4,26 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/fe3dback/galaxy/registry"
+	"github.com/fe3dback/galaxy/system"
+
 	"github.com/fe3dback/galaxy/game"
 	"github.com/fe3dback/galaxy/utils"
 )
 
-func debug(provider *provider) {
-	debug := provider.registry.game.options.debug
+func debug(provider *registry.Provider) {
+	debug := provider.Registry.Game.Options.Debug
 
-	if debug.system {
+	if debug.System {
 		debugSystem()
 	}
 
-	if debug.frames {
-		debugPrintFps(provider.registry.game.frames)
+	if debug.Frames {
+		debugPrintFps(provider.Registry.Game.Frames)
 	}
 
-	if debug.world {
-		debugPrintWorld(provider.registry.game.world)
+	if debug.World {
+		debugPrintWorld(provider.Registry.Game.World)
 	}
 }
 
@@ -34,12 +37,12 @@ func debugSystem() {
 	fmt.Printf("  sys mem: %s\n", utils.FormatBytes(m.Sys))
 }
 
-func debugPrintFps(f *frames) {
+func debugPrintFps(f *system.Frames) {
 	fmt.Printf("-- frames:\n")
-	fmt.Printf("           FPS: %d / %d\n", f.fps, f.limitFps)
-	fmt.Printf("frame duration: %s\n", f.frameDuration)
-	fmt.Printf("frame throttle: %s\n", f.frameThrottle)
-	fmt.Printf("limit duration: %s\n", f.limitDuration)
+	fmt.Printf("           FPS: %d / %d\n", f.FPS(), f.TargetFPS())
+	fmt.Printf("frame duration: %s\n", f.FrameDuration())
+	fmt.Printf("frame throttle: %s\n", f.LimitDuration())
+	fmt.Printf("limit duration: %s\n", f.FrameThrottle())
 	fmt.Printf("    delta time: %f\n", f.DeltaTime())
 	fmt.Printf("       seconds: %s\n", f.SinceStart())
 }

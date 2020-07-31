@@ -1,4 +1,4 @@
-package main
+package system
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type frames struct {
+type Frames struct {
 	limitFps      int
 	limitDuration time.Duration
 
@@ -22,8 +22,8 @@ type frames struct {
 	isInterrupted bool
 }
 
-func NewFrames(targetFps int) *frames {
-	f := &frames{
+func NewFrames(targetFps int) *Frames {
+	f := &Frames{
 		limitFps:      targetFps,
 		limitDuration: time.Second / time.Duration(targetFps),
 		count:         0,
@@ -41,7 +41,7 @@ func NewFrames(targetFps int) *frames {
 	return f
 }
 
-func (f *frames) listenTimer() {
+func (f *Frames) listenTimer() {
 	go func() {
 		for range time.Tick(time.Second) {
 			// count fps
@@ -51,7 +51,7 @@ func (f *frames) listenTimer() {
 	}()
 }
 
-func (f *frames) listenOsSignals() {
+func (f *Frames) listenOsSignals() {
 	go func() {
 		c := make(chan os.Signal, 1)
 		signal.Notify(c, os.Interrupt)
@@ -63,11 +63,11 @@ func (f *frames) listenOsSignals() {
 	}()
 }
 
-func (f *frames) Begin() {
+func (f *Frames) Begin() {
 	f.frameStart = time.Now()
 }
 
-func (f *frames) End() {
+func (f *Frames) End() {
 	f.count++
 	f.frameDuration = time.Since(f.frameStart)
 
@@ -84,39 +84,43 @@ func (f *frames) End() {
 	f.deltaTime = time.Since(f.frameStart)
 }
 
-func (f *frames) FPS() int {
+func (f *Frames) FPS() int {
 	return f.fps
 }
 
-func (f *frames) TargetFPS() int {
+func (f *Frames) TargetFPS() int {
 	return f.limitFps
 }
 
-func (f *frames) FrameDuration() time.Duration {
+func (f *Frames) FrameDuration() time.Duration {
 	return f.frameDuration
 }
 
-func (f *frames) LimitDuration() time.Duration {
+func (f *Frames) LimitDuration() time.Duration {
 	return f.limitDuration
 }
 
-func (f *frames) DeltaTime() float64 {
+func (f *Frames) FrameThrottle() time.Duration {
+	return f.frameThrottle
+}
+
+func (f *Frames) DeltaTime() float64 {
 	return f.deltaTime.Seconds()
 }
 
-func (f *frames) SinceStart() time.Duration {
+func (f *Frames) SinceStart() time.Duration {
 	return time.Since(f.gameStart)
 }
 
-func (f *frames) Ready() bool {
+func (f *Frames) Ready() bool {
 	return !f.isInterrupted
 }
 
-func (f *frames) Interrupt() {
+func (f *Frames) Interrupt() {
 	f.isInterrupted = true
 }
 
-func (f *frames) afterFrame() {
+func (f *Frames) afterFrame() {
 	if f.frameThrottle <= 0 {
 		return
 	}

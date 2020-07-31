@@ -1,4 +1,4 @@
-package main
+package system
 
 import (
 	"testing"
@@ -12,12 +12,12 @@ func TestNewFrames(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *frames
+		want *Frames
 	}{
 		{
 			name: "fps 60",
 			args: args{targetFps: 60},
-			want: &frames{
+			want: &Frames{
 				limitFps:      60,
 				limitDuration: time.Second / 60,
 			},
@@ -25,7 +25,7 @@ func TestNewFrames(t *testing.T) {
 		{
 			name: "fps 30",
 			args: args{targetFps: 30},
-			want: &frames{
+			want: &Frames{
 				limitFps:      30,
 				limitDuration: time.Second / 30,
 			},
