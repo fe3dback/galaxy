@@ -11,7 +11,8 @@ import (
 const (
 	maxHandlers = 1024
 
-	typeQuit handlerType = "quit"
+	typeQuit     handlerType = "quit"
+	typeKeyboard handlerType = "Keyboard"
 )
 
 type (
@@ -44,6 +45,7 @@ func (d *Dispatcher) registryHandler(t handlerType, h handlerFunc) {
 		panic(fmt.Sprintf("Can`t register more than %d `%s` handlers", maxHandlers, t))
 	}
 
+	fmt.Printf("registered `%s` handler\n", t)
 	d.handlers[t] = append(d.handlers[t], h)
 }
 
@@ -52,6 +54,8 @@ func (d *Dispatcher) dispatch(ev sdl.Event) error {
 	switch ev.(type) {
 	case *sdl.QuitEvent:
 		return d.send(typeQuit, ev)
+	case *sdl.KeyboardEvent:
+		return d.send(typeKeyboard, ev)
 	}
 
 	return nil

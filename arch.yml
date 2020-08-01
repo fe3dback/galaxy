@@ -73,6 +73,7 @@ deps:
   engine_control:
     mayDependOn:
       - engine
+      - engine_event
     canUse:
       - sdl
 

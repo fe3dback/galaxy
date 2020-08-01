@@ -93,14 +93,18 @@ func makeRegistry(flags Flags) *Registry {
 
 	// ui
 	layerFPS := reg.registerUILayerFPS()
-	layerCamera := reg.registerUILayerCamera()
 	gameUI := reg.registerUI(
 		layerFPS,
-		layerCamera,
 	)
 
 	// game state
-	gameState := reg.registerGameState(frames, camera, mouse)
+	movement := reg.registerMovement(dispatcher)
+	gameState := reg.registerGameState(
+		frames,
+		camera,
+		mouse,
+		movement,
+	)
 
 	// build
 	return &Registry{
@@ -173,16 +177,15 @@ func (r registerFactory) registerTextureManager(sdlRenderer *sdl.Renderer, close
 func (r registerFactory) registerCamera(window *sdl.Window) *render.Camera {
 	w, h := window.GetSize()
 
-	return render.NewCamera(engine.Rect{
-		X: 0,
-		Y: 0,
-		W: int(w),
-		H: int(h),
-	})
+	return render.NewCamera(engine.Vector2D{}, int(w), int(h))
 }
 
 func (r registerFactory) registerMouse() *control.Mouse {
 	return control.NewMouse()
+}
+
+func (r registerFactory) registerMovement(dispatcher *event.Dispatcher) *control.Movement {
+	return control.NewMovement(dispatcher)
 }
 
 func (r registerFactory) registerRenderer(
@@ -204,11 +207,11 @@ func (r registerFactory) registerGameOptions(flags Flags) *system.GameOptions {
 		Debug: system.DebugOpt{
 			InProfiling: flags.IsProfiling,
 			System:      false,
-			Frames:      true,
+			Frames:      false,
 			World:       false,
 		},
 		Frames: system.FramesOpt{
-			TargetFps: 60,
+			TargetFps: 30,
 		},
 	}
 }
@@ -229,14 +232,11 @@ func (r registerFactory) registerUILayerFPS() *ui.LayerFPS {
 	return ui.NewLayerFPS()
 }
 
-func (r registerFactory) registerUILayerCamera() *ui.LayerCamera {
-	return ui.NewLayerCamera()
-}
-
 func (r registerFactory) registerGameState(
 	moment engine.Moment,
 	camera engine.Camera,
 	mouse engine.Mouse,
+	movement engine.Movement,
 ) *engine.GameState {
-	return engine.NewGameState(moment, camera, mouse)
+	return engine.NewGameState(moment, camera, mouse, movement)
 }

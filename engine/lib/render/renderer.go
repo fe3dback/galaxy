@@ -54,7 +54,7 @@ func (r *Renderer) Origin() *sdl.Renderer {
 
 func (r *Renderer) transformX(x int) int32 {
 	if r.renderMode == engine.RenderModeWorld {
-		return int32(x - r.camera.rect.X)
+		return int32(x - int(r.camera.position.X))
 	}
 
 	return int32(x)
@@ -62,7 +62,7 @@ func (r *Renderer) transformX(x int) int32 {
 
 func (r *Renderer) transformY(y int) int32 {
 	if r.renderMode == engine.RenderModeWorld {
-		return int32(y - r.camera.rect.Y)
+		return int32(y - int(r.camera.position.Y))
 	}
 
 	return int32(y)
@@ -127,11 +127,10 @@ func (r *Renderer) isRectInsideCamera(rect engine.Rect) bool {
 		return true
 	}
 
-	cam := r.camera.rect
-	return !(rect.X > cam.X+cam.W ||
-		rect.X+rect.W < cam.X ||
-		rect.Y > cam.Y+cam.H ||
-		rect.Y+rect.H < cam.Y)
+	return !(rect.X > int(r.camera.position.X)+r.camera.width ||
+		rect.X+rect.W < int(r.camera.position.X) ||
+		rect.Y > int(r.camera.position.Y)+r.camera.height ||
+		rect.Y+rect.H < int(r.camera.position.Y))
 }
 
 func (r *Renderer) isPointInsideCamera(point engine.Point) bool {
@@ -139,9 +138,8 @@ func (r *Renderer) isPointInsideCamera(point engine.Point) bool {
 		return true
 	}
 
-	cam := r.camera.rect
-	return point.X >= cam.X &&
-		point.Y >= cam.Y &&
-		point.X <= cam.X+cam.W &&
-		point.Y <= cam.Y+cam.H
+	return point.X >= int(r.camera.position.X) &&
+		point.Y >= int(r.camera.position.Y) &&
+		point.X <= int(r.camera.position.X)+r.camera.width &&
+		point.Y <= int(r.camera.position.Y)+r.camera.height
 }

@@ -10,11 +10,6 @@ import (
 func (r registerFactory) registerDispatcher(onQuit event.HandlerQuit) *event.Dispatcher {
 	dispatcher := event.NewEventDispatcher()
 	dispatcher.OnQuit(onQuit)
-	dispatcher.OnQuit(func(quit event.EvQuit) error {
-		fmt.Printf("another quit handler triggered!\n")
-
-		return nil
-	})
 
 	return dispatcher
 }

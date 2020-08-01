@@ -28,6 +28,7 @@ const (
 
 type LayerFPS struct {
 	moment      engine.Moment
+	mousePos    engine.Point
 	graph       [graphCapacity]uint8
 	graphCursor int
 }
@@ -41,8 +42,10 @@ func NewLayerFPS() *LayerFPS {
 
 func (l *LayerFPS) OnUpdate(s engine.State) error {
 	l.moment = s.Moment()
+	l.mousePos = s.Mouse().MouseCoords()
 
-	metric := graphHeight * uint8(l.moment.FrameDuration()/l.moment.LimitDuration())
+	metricRate := l.moment.FrameDuration().Seconds() / l.moment.LimitDuration().Seconds()
+	metric := uint8(graphHeight * metricRate)
 	if metric > graphHeight {
 		metric = graphHeight
 	}
@@ -75,9 +78,9 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 	r.DrawText(
 		generated.ResourcesFontsJetBrainsMonoRegular,
 		engine.ColorGreen,
-		fmt.Sprintf("cam: %d, %d",
-			r.Camera().Rect().X,
-			r.Camera().Rect().Y,
+		fmt.Sprintf("cam: %.2f, %.2f",
+			r.Camera().Position().X,
+			r.Camera().Position().Y,
 		),
 		engine.Point{
 			X: uiInfoCamX,
@@ -86,6 +89,9 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 	)
 
 	l.drawGraph(r)
+
+	// draw mouse
+	r.DrawCrossLines(engine.ColorOrange, 3, l.mousePos)
 
 	return nil
 }
@@ -106,9 +112,22 @@ func (l *LayerFPS) drawGraph(r engine.Renderer) {
 
 	// draw graph
 	xOffset := 0
+	var graphColor engine.Color
 	for i := l.graphCursor - graphWidth; i < l.graphCursor; i++ {
+		ratePercent := float32(l.graph[i]) / graphHeight
+
+		if ratePercent > 0.75 {
+			graphColor = engine.ColorRed
+		} else if ratePercent > 0.5 {
+			graphColor = engine.ColorOrange
+		} else if ratePercent > 0.25 {
+			graphColor = engine.ColorYellow
+		} else {
+			graphColor = engine.ColorSelection
+		}
+
 		r.DrawLine(
-			engine.ColorOrange,
+			graphColor,
 			engine.Line{
 				A: engine.Point{X: xl + xOffset, Y: yb},
 				B: engine.Point{X: xl + xOffset, Y: yb - int(l.graph[i])},

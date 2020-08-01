@@ -13,9 +13,11 @@ const (
 
 type (
 	Camera interface {
-		Rect() Rect
-		MoveTo(p Point)
-		CenterOn(p Point)
+		Position() Vector2D
+		Width() int
+		Height() int
+		MoveTo(p Vector2D)
+		CenterOn(p Vector2D)
 	}
 
 	Drawer interface {
@@ -69,11 +71,17 @@ type (
 		MouseCoords() Point
 	}
 
+	Movement interface {
+		Vector() Vector2D
+		Shift() bool
+	}
+
 	// Game State
 
 	State interface {
 		Camera() Camera
 		Moment() Moment
 		Mouse() Mouse
+		Movement() Movement
 	}
 )

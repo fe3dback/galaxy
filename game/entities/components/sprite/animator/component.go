@@ -17,8 +17,8 @@ func (anim *Animator) OnDraw(r engine.Renderer) error {
 	entityPos := anim.entity.Position()
 
 	dest := engine.Rect{
-		X: int(entityPos.X) + seq.offsetX - (frame.w / 2),
-		Y: int(entityPos.Y) + seq.offsetY - (frame.h / 2),
+		X: entityPos.RoundX() + seq.offsetX - (frame.w / 2),
+		Y: entityPos.RoundY() + seq.offsetY - (frame.h / 2),
 		W: frame.w,
 		H: frame.h,
 	}

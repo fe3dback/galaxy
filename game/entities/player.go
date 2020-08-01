@@ -3,6 +3,7 @@ package entities
 import (
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
+	"github.com/fe3dback/galaxy/game/entities/components/game"
 	"github.com/fe3dback/galaxy/game/entities/components/player"
 	"github.com/fe3dback/galaxy/game/entities/components/sprite/animator"
 	"github.com/fe3dback/galaxy/generated"
@@ -23,8 +24,8 @@ func NewPlayer() *Player {
 
 	// register components
 	p.AddComponent(anim)
-	p.AddComponent(player.NewRandomMover(p))
-	p.AddComponent(player.NewTestDrawer(p))
+	p.AddComponent(player.NewMovement(p))
+	p.AddComponent(game.NewCameraFollower(p))
 
 	return p
 }

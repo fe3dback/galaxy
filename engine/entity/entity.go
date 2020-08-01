@@ -27,8 +27,10 @@ func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
 
 func (e *Entity) SetPosition(pos engine.Vector2D) {
 	e.position = pos
+}
 
-	fmt.Printf("entity `%T` moved to %v\n", e, pos)
+func (e *Entity) AddPosition(v engine.Vector2D) {
+	e.SetPosition(e.Position().Add(v))
 }
 
 func (e *Entity) Position() engine.Vector2D {
