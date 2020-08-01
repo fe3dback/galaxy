@@ -7,7 +7,7 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 )
 
-type components map[string]Component
+type components []Component
 
 type Entity struct {
 	position   engine.Vector2D
@@ -20,7 +20,7 @@ func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
 	return &Entity{
 		position:   pos,
 		rotation:   rot,
-		components: make(components),
+		components: make(components, 0),
 		destroyed:  false,
 	}
 }
@@ -54,10 +54,10 @@ func (e *Entity) IsDestroyed() bool {
 }
 
 func (e *Entity) OnUpdate(s engine.State) error {
-	for id, component := range e.components {
+	for _, component := range e.components {
 		err := component.OnUpdate(s)
 		if err != nil {
-			return fmt.Errorf("can`t update component `%s` from element `%T`: %v", id, e, err)
+			return fmt.Errorf("can`t update entity `%T` component `%T`: %v", e, component, err)
 		}
 	}
 
@@ -65,10 +65,10 @@ func (e *Entity) OnUpdate(s engine.State) error {
 }
 
 func (e *Entity) OnDraw(r engine.Renderer) error {
-	for id, component := range e.components {
+	for _, component := range e.components {
 		err := component.OnDraw(r)
 		if err != nil {
-			return fmt.Errorf("can`t draw component `%s` from element `%T`: %v", id, e, err)
+			return fmt.Errorf("can`t draw entity `%T` component `%s`: %v", e, component, err)
 		}
 	}
 
@@ -78,19 +78,25 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 func (e *Entity) AddComponent(c Component) {
 	id := reflect.TypeOf(c).String()
 
-	if _, ok := e.components[id]; ok {
-		panic(fmt.Sprintf("can`t add component `%s` to element, already exist", id))
+	for _, component := range e.components {
+		newId := reflect.TypeOf(component).String()
+		if id == newId {
+			panic(fmt.Sprintf("can`t add component `%s` to entity `%T`, already exist", id, e))
+		}
 	}
 
-	e.components[id] = c
+	e.components = append(e.components, c)
 }
 
 func (e *Entity) GetComponent(ref Component) Component {
 	id := reflect.TypeOf(ref).String()
 
-	if c, ok := e.components[id]; ok {
-		return c
+	for _, component := range e.components {
+		newId := reflect.TypeOf(component).String()
+		if id == newId {
+			return component
+		}
 	}
 
-	panic(fmt.Sprintf("can`t find component by id: %v", id))
+	panic(fmt.Sprintf("can`t find component `%s` in `%T`", id, e))
 }

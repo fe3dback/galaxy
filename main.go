@@ -13,6 +13,7 @@ import (
 // -- flags
 var isProfiling = flag.Bool("profile", false, "run in profile mode")
 var profilingPort = flag.Int("profileport", 15600, "http port for profiling")
+var fullScreen = flag.Bool("fullscreen", false, "run in fullscreen mode")
 
 func main() {
 	runtime.LockOSThread()
@@ -21,6 +22,7 @@ func main() {
 	flags := registry.Flags{
 		IsProfiling:   *isProfiling,
 		ProfilingPort: *profilingPort,
+		FullScreen:    *fullScreen,
 	}
 
 	provider := registry.NewProvider(flags)

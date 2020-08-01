@@ -16,27 +16,96 @@ const (
 	graphWindowWidth = graphCapacity / 2
 
 	// Table Pos:
-	uiInfoX      = 5
-	uiInfoY      = 5
-	uiInfoFpsX   = uiInfoX
-	uiInfoFpsY   = uiInfoY
-	uiInfoCamX   = uiInfoX
-	uiInfoCamY   = uiInfoFpsY + 15
-	uiInfoGraphX = uiInfoX
-	uiInfoGraphY = uiInfoCamY + 20
+	uiInfoX           = 5
+	uiInfoY           = 5
+	uiInfoFpsX        = uiInfoX
+	uiInfoFpsY        = uiInfoY
+	uiInfoCamX        = uiInfoX
+	uiInfoCamY        = uiInfoFpsY + 15
+	uiInfoGraphFpsX   = uiInfoX
+	uiInfoGraphFpsY   = uiInfoCamY + 20
+	uiInfoGraphDeltaX = uiInfoX
+	uiInfoGraphDeltaY = uiInfoGraphFpsY + 20
 )
 
-type LayerFPS struct {
-	moment      engine.Moment
-	mousePos    engine.Point
-	graph       [graphCapacity]uint8
-	graphCursor int
-}
+const (
+	graphIdFps graphId = iota
+	graphIdDelta
+)
+
+type (
+	graphId = uint8
+
+	graph struct {
+		x, y   int
+		cursor int
+		metric [graphCapacity]uint8
+		width  int
+		height int
+		middle bool
+	}
+
+	LayerFPS struct {
+		moment            engine.Moment
+		mousePos          engine.Point
+		graphs            map[graphId]*graph
+		previousDeltaTime float64
+	}
+)
 
 func NewLayerFPS() *LayerFPS {
 	return &LayerFPS{
-		graph:       [graphCapacity]uint8{},
-		graphCursor: graphIndexFirst,
+		graphs: createGraphs(),
+	}
+}
+
+func createGraphs() map[graphId]*graph {
+	graphs := make(map[graphId]*graph)
+
+	graphs[graphIdFps] = &graph{
+		x:      uiInfoGraphFpsX,
+		y:      uiInfoGraphFpsY,
+		cursor: graphIndexFirst,
+		metric: [graphCapacity]uint8{},
+		width:  graphWidth,
+		height: graphHeight,
+		middle: false,
+	}
+
+	graphs[graphIdDelta] = &graph{
+		x:      uiInfoGraphDeltaX,
+		y:      uiInfoGraphDeltaY,
+		cursor: graphIndexFirst,
+		metric: [graphCapacity]uint8{},
+		width:  graphWidth,
+		height: graphHeight,
+		middle: true,
+	}
+
+	return graphs
+}
+
+func (g *graph) write(metricRate float64) {
+	if metricRate < 0 {
+		metricRate = 0
+	}
+
+	if metricRate > 1 {
+		metricRate = 1
+	}
+
+	metric := uint8(float64(g.height) * metricRate)
+	if metric > uint8(g.height) {
+		metric = uint8(g.height)
+	}
+
+	g.metric[g.cursor] = metric
+	g.metric[g.cursor-graphWindowWidth] = metric
+
+	g.cursor++
+
+	if g.cursor > graphIndexLast {
+		g.cursor = graphIndexFirst
 	}
 }
 
@@ -44,21 +113,16 @@ func (l *LayerFPS) OnUpdate(s engine.State) error {
 	l.moment = s.Moment()
 	l.mousePos = s.Mouse().MouseCoords()
 
-	metricRate := l.moment.FrameDuration().Seconds() / l.moment.LimitDuration().Seconds()
-	metric := uint8(graphHeight * metricRate)
-	if metric > graphHeight {
-		metric = graphHeight
-	}
+	fpsRate := l.moment.FrameDuration().Seconds() / l.moment.LimitDuration().Seconds()
+	l.graphs[graphIdFps].write(fpsRate)
 
-	l.graph[l.graphCursor] = metric
-	l.graph[l.graphCursor-graphWindowWidth] = metric
+	deltaA := l.previousDeltaTime
+	deltaB := l.moment.DeltaTime()
 
-	l.graphCursor++
+	deltaRate := (((deltaA + deltaB) / 2) / deltaB) - 0.5
+	l.graphs[graphIdDelta].write(deltaRate)
 
-	if l.graphCursor > graphIndexLast {
-		l.graphCursor = graphIndexFirst
-	}
-
+	l.previousDeltaTime = l.moment.DeltaTime()
 	return nil
 }
 
@@ -88,7 +152,8 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 		},
 	)
 
-	l.drawGraph(r)
+	l.drawGraph(r, l.graphs[graphIdFps])
+	l.drawGraph(r, l.graphs[graphIdDelta])
 
 	// draw mouse
 	r.DrawCrossLines(engine.ColorOrange, 3, l.mousePos)
@@ -96,41 +161,50 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 	return nil
 }
 
-func (l *LayerFPS) drawGraph(r engine.Renderer) {
-	xl := uiInfoGraphX
-	xr := uiInfoGraphX + graphWidth
-	yb := uiInfoGraphY + graphHeight
+func (l *LayerFPS) drawGraph(r engine.Renderer, g *graph) {
+	xl := g.x
+	xr := g.x + g.width
+	yb := g.y + g.height
+
+	if g.middle {
+		yb -= g.height / 2
+	}
 
 	// draw graph bottom border
 	r.DrawLine(
 		engine.ColorSelection,
 		engine.Line{
-			A: engine.Point{X: xl, Y: yb + 2},
-			B: engine.Point{X: xr, Y: yb + 2},
+			A: engine.Point{X: xl, Y: g.y + g.height + 2},
+			B: engine.Point{X: xr, Y: g.y + g.height + 2},
 		},
 	)
 
 	// draw graph
 	xOffset := 0
 	var graphColor engine.Color
-	for i := l.graphCursor - graphWidth; i < l.graphCursor; i++ {
-		ratePercent := float32(l.graph[i]) / graphHeight
+	for i := g.cursor - g.width; i < g.cursor; i++ {
+		ratePercent := float32(g.metric[i]) / float32(g.height)
 
-		if ratePercent > 0.75 {
-			graphColor = engine.ColorRed
-		} else if ratePercent > 0.5 {
-			graphColor = engine.ColorOrange
-		} else if ratePercent > 0.25 {
-			graphColor = engine.ColorYellow
+		if g.middle {
+			ratePercent -= 0.5
+			graphColor = engine.ColorPink
 		} else {
-			graphColor = engine.ColorSelection
+			if ratePercent > 0.75 {
+				graphColor = engine.ColorRed
+			} else if ratePercent > 0.5 {
+				graphColor = engine.ColorOrange
+			} else if ratePercent > 0.25 {
+				graphColor = engine.ColorYellow
+			} else {
+				graphColor = engine.ColorSelection
+			}
 		}
 
 		r.DrawLine(
 			graphColor,
 			engine.Line{
 				A: engine.Point{X: xl + xOffset, Y: yb},
-				B: engine.Point{X: xl + xOffset, Y: yb - int(l.graph[i])},
+				B: engine.Point{X: xl + xOffset, Y: yb - int(ratePercent*float32(g.height))},
 			},
 		)
 

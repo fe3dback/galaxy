@@ -55,20 +55,21 @@ deps:
       - sdl-ttf
       - sdl-img
 
-  engine_render:
-    mayDependOn:
-      - engine
-      - engine_lib
-    canUse:
-      - sdl
-      - sdl-ttf
-      - sdl-img
-
   engine_event:
     mayDependOn:
       - engine
     canUse:
       - sdl
+
+  engine_render:
+    mayDependOn:
+      - engine
+      - engine_lib
+      - engine_event
+    canUse:
+      - sdl
+      - sdl-ttf
+      - sdl-img
 
   engine_control:
     mayDependOn:

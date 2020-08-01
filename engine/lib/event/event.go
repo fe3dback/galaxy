@@ -13,6 +13,7 @@ const (
 
 	typeQuit     handlerType = "quit"
 	typeKeyboard handlerType = "Keyboard"
+	typeWindow   handlerType = "Window"
 )
 
 type (
@@ -25,15 +26,39 @@ type (
 )
 
 func NewEventDispatcher() *Dispatcher {
-	return &Dispatcher{
+	d := &Dispatcher{
 		handlers: map[handlerType][]handlerFunc{},
 	}
+
+	sdl.SetEventFilter(d, struct{}{})
+
+	return d
+}
+
+func (d *Dispatcher) FilterEvent(e sdl.Event, _ interface{}) bool {
+	switch e.(type) {
+	case *sdl.QuitEvent:
+		return true
+	case *sdl.KeyboardEvent:
+		return true
+	case *sdl.MouseMotionEvent:
+		return true
+	case *sdl.WindowEvent:
+		return true
+	}
+
+	return false
 }
 
 func (d *Dispatcher) HandleQueue() {
 	defer utils.CheckPanic("handle events")
 
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+	for {
+		event := sdl.PollEvent()
+		if event == nil {
+			return
+		}
+
 		dispatchErr := d.dispatch(event)
 		utils.Check(fmt.Sprintf("process sdl event `%s`", reflect.TypeOf(event)), dispatchErr)
 	}
@@ -56,6 +81,8 @@ func (d *Dispatcher) dispatch(ev sdl.Event) error {
 		return d.send(typeQuit, ev)
 	case *sdl.KeyboardEvent:
 		return d.send(typeKeyboard, ev)
+	case *sdl.WindowEvent:
+		return d.send(typeWindow, ev)
 	}
 
 	return nil

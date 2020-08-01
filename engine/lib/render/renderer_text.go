@@ -42,8 +42,8 @@ func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, t
 	}
 
 	dest := Rect{
-		X: r.transformX(p.X),
-		Y: r.transformY(p.Y),
+		X: r.screenX(p.X),
+		Y: r.screenY(p.Y),
 		W: surface.W,
 		H: surface.H,
 	}

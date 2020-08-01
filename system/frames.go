@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const gameSpeedMultiplier = 50
+
 type Frames struct {
 	limitFps      int
 	limitDuration time.Duration
@@ -105,7 +107,7 @@ func (f *Frames) FrameThrottle() time.Duration {
 }
 
 func (f *Frames) DeltaTime() float64 {
-	return f.deltaTime.Seconds()
+	return f.deltaTime.Seconds() * gameSpeedMultiplier
 }
 
 func (f *Frames) SinceStart() time.Duration {

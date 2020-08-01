@@ -60,7 +60,7 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 			W: int32(src.W),
 			H: int32(src.H),
 		},
-		r.transformRectRef(dest),
+		r.screenRectPtr(dest),
 		angle,
 		&sdl.Point{ // point relative to dest [X,Y]
 			X: int32(src.W / 2),

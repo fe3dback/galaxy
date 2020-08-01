@@ -1,10 +1,15 @@
 package render
 
 import (
+	"fmt"
+
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/lib/event"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
+
+const fullScreenScaleFactor = 1
 
 type Renderer struct {
 	window         *sdl.Window
@@ -24,14 +29,49 @@ func NewRenderer(
 	fontManager *FontManager,
 	textureManager *TextureManager,
 	camera *Camera,
+	dispatcher *event.Dispatcher,
 ) *Renderer {
-	return &Renderer{
+	renderer := &Renderer{
 		window:         sdlWindow,
 		ref:            sdlRenderer,
 		fontManager:    fontManager,
 		textureManager: textureManager,
 		camera:         camera,
 	}
+
+	dispatcher.OnWindow(func(window event.EvWindow) error {
+		if window.EventType == event.WindowEventTypeSizeChanged {
+			renderer.resetView()
+		}
+
+		return nil
+	})
+
+	renderer.resetView()
+	return renderer
+}
+
+func (r *Renderer) resetView() {
+	width, height := r.window.GetSize()
+	flags := r.window.GetFlags()
+	fullscreen := flags&sdl.WINDOW_FULLSCREEN != 0
+
+	if fullscreen {
+		err := r.ref.SetViewport(&sdl.Rect{
+			X: 0,
+			Y: 0,
+			W: width * fullScreenScaleFactor,
+			H: height * fullScreenScaleFactor,
+		})
+		utils.Check("set viewport", err)
+
+		err = r.ref.SetScale(fullScreenScaleFactor, fullScreenScaleFactor)
+		utils.Check("set scale", err)
+	}
+
+	fmt.Printf("Resize to %d, %d (fullscreen = %v, scale = %d)\n", width, height, fullscreen, fullScreenScaleFactor)
+
+	r.Camera().Resize(int(width), int(height))
 }
 
 func (r *Renderer) SetDrawColor(color engine.Color) {
@@ -52,58 +92,58 @@ func (r *Renderer) Origin() *sdl.Renderer {
 
 // -- Base transforms (include camera relative pos)
 
-func (r *Renderer) transformX(x int) int32 {
-	if r.renderMode == engine.RenderModeWorld {
-		return int32(x - int(r.camera.position.X))
+func (r *Renderer) screenX(x int) int32 {
+	if r.renderMode == engine.RenderModeUI {
+		return int32(x)
 	}
 
-	return int32(x)
+	return int32(x - int(r.camera.position.X))
 }
 
-func (r *Renderer) transformY(y int) int32 {
-	if r.renderMode == engine.RenderModeWorld {
-		return int32(y - int(r.camera.position.Y))
+func (r *Renderer) screenY(y int) int32 {
+	if r.renderMode == engine.RenderModeUI {
+		return int32(y)
 	}
 
-	return int32(y)
+	return int32(y - int(r.camera.position.Y))
 }
 
 // -- Complex transforms (should depend on base transforms)
 
-func (r *Renderer) transformRect(rect engine.Rect) Rect {
+func (r *Renderer) screenRect(rect engine.Rect) Rect {
 	return Rect{
-		X: r.transformX(rect.X),
-		Y: r.transformY(rect.Y),
+		X: r.screenX(rect.X),
+		Y: r.screenY(rect.Y),
 		W: int32(rect.W),
 		H: int32(rect.H),
 	}
 }
 
-func (r *Renderer) transformRectRef(rect engine.Rect) *Rect {
-	rRect := r.transformRect(rect)
+func (r *Renderer) screenRectPtr(rect engine.Rect) *Rect {
+	rRect := r.screenRect(rect)
 	return &rRect
 }
 
-func (r *Renderer) transformPoint(point engine.Point) Point {
+func (r *Renderer) screenPoint(point engine.Point) Point {
 	return Point{
-		X: r.transformX(point.X),
-		Y: r.transformY(point.Y),
+		X: r.screenX(point.X),
+		Y: r.screenY(point.Y),
 	}
 }
 
-func (r *Renderer) transformPointRef(point engine.Point) *Point {
-	rPoint := r.transformPoint(point)
+func (r *Renderer) screenPointPtr(point engine.Point) *Point {
+	rPoint := r.screenPoint(point)
 	return &rPoint
 }
 
-func (r *Renderer) transformLine(line engine.Line) []sdl.Point {
+func (r *Renderer) screenLine(line engine.Line) []sdl.Point {
 	return []sdl.Point{
-		r.transformPoint(line.A),
-		r.transformPoint(line.B),
+		r.screenPoint(line.A),
+		r.screenPoint(line.B),
 
 		// close lines back will fix render glitches
-		r.transformPoint(line.B),
-		r.transformPoint(line.A),
+		r.screenPoint(line.B),
+		r.screenPoint(line.A),
 	}
 }
 

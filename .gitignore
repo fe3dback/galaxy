@@ -2,3 +2,5 @@
 vendor
 go_build_github_com_fe3dback_galaxy
 galaxy
+run
+fullscreen

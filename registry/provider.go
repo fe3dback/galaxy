@@ -7,6 +7,7 @@ type Provider struct {
 type Flags struct {
 	IsProfiling   bool
 	ProfilingPort int
+	FullScreen    bool
 }
 
 func NewProvider(flags Flags) *Provider {

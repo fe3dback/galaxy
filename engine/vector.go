@@ -21,9 +21,9 @@ func (v Vector2D) Mul(n float64) Vector2D {
 }
 
 func (v Vector2D) RoundX() int {
-	return int(math.Round(v.X))
+	return int(math.Floor(v.X))
 }
 
 func (v Vector2D) RoundY() int {
-	return int(math.Round(v.Y))
+	return int(math.Floor(v.Y))
 }

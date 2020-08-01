@@ -18,6 +18,7 @@ type (
 		Height() int
 		MoveTo(p Vector2D)
 		CenterOn(p Vector2D)
+		Resize(width, height int)
 	}
 
 	Drawer interface {

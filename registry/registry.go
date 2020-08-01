@@ -53,7 +53,7 @@ func makeRegistry(flags Flags) *Registry {
 
 	// main
 	closer := reg.registerCloser()
-	sdlLib := reg.registerSDLLib(closer)
+	sdlLib := reg.registerSDLLib(closer, flags.FullScreen)
 
 	// system
 	options := reg.registerGameOptions(flags)
@@ -68,7 +68,7 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// engine
-	camera := reg.registerCamera(sdlWindow)
+	camera := reg.registerCamera()
 	mouse := reg.registerMouse()
 	fontManager := reg.registerFontManager(
 		closer,
@@ -77,15 +77,16 @@ func makeRegistry(flags Flags) *Registry {
 		sdlRenderer,
 		closer,
 	)
+	dispatcher := reg.registerDispatcher(
+		reg.eventQuit(frames),
+	)
 	renderer := reg.registerRenderer(
 		sdlWindow,
 		sdlRenderer,
 		fontManager,
 		textureManager,
 		camera,
-	)
-	dispatcher := reg.registerDispatcher(
-		reg.eventQuit(frames),
+		dispatcher,
 	)
 
 	// game
@@ -139,9 +140,12 @@ func (r registerFactory) registerCloser() *utils.Closer {
 // SDL
 // ----------------------------------------
 
-func (r registerFactory) registerSDLLib(closer *utils.Closer) *lib.SDLLib {
+func (r registerFactory) registerSDLLib(closer *utils.Closer, fullscreen bool) *lib.SDLLib {
 	sdlLib, err := lib.NewSDLLib(
 		closer,
+		960,
+		540,
+		fullscreen,
 	)
 
 	if err != nil {
@@ -174,10 +178,8 @@ func (r registerFactory) registerTextureManager(sdlRenderer *sdl.Renderer, close
 	return render.NewTextureManager(sdlRenderer, closer)
 }
 
-func (r registerFactory) registerCamera(window *sdl.Window) *render.Camera {
-	w, h := window.GetSize()
-
-	return render.NewCamera(engine.Vector2D{}, int(w), int(h))
+func (r registerFactory) registerCamera() *render.Camera {
+	return render.NewCamera()
 }
 
 func (r registerFactory) registerMouse() *control.Mouse {
@@ -194,8 +196,9 @@ func (r registerFactory) registerRenderer(
 	fontManager *render.FontManager,
 	textureManager *render.TextureManager,
 	camera *render.Camera,
+	dispatcher *event.Dispatcher,
 ) *render.Renderer {
-	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera)
+	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera, dispatcher)
 }
 
 // ----------------------------------------

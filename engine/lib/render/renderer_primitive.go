@@ -13,11 +13,11 @@ func (r *Renderer) DrawSquare(color engine.Color, rect engine.Rect) {
 
 	r.SetDrawColor(color)
 	err := r.ref.DrawLines([]sdl.Point{
-		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y}),
-		r.transformPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y}),
-		r.transformPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y + rect.H}),
-		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y + rect.H}),
-		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y}),
+		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y}),
+		r.screenPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y}),
+		r.screenPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y + rect.H}),
+		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y + rect.H}),
+		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y}),
 	})
 	utils.Check("draw square", err)
 }
@@ -28,7 +28,7 @@ func (r *Renderer) DrawLine(color engine.Color, line engine.Line) {
 	}
 
 	r.SetDrawColor(color)
-	err := r.ref.DrawLines(r.transformLine(line))
+	err := r.ref.DrawLines(r.screenLine(line))
 	utils.Check("draw line", err)
 }
 
@@ -56,8 +56,8 @@ func (r *Renderer) DrawPoint(color engine.Color, point engine.Point) {
 
 	r.SetDrawColor(color)
 	err := r.ref.DrawPoint(
-		r.transformX(point.X),
-		r.transformY(point.Y),
+		r.screenX(point.X),
+		r.screenY(point.Y),
 	)
 	utils.Check("draw point", err)
 }

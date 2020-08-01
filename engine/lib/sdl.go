@@ -19,11 +19,11 @@ func (s *SDLLib) Renderer() *sdl.Renderer {
 	return s.renderer
 }
 
-func NewSDLLib(closer *utils.Closer) (*SDLLib, error) {
+func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen bool) (*SDLLib, error) {
 	defer utils.CheckPanic("sdl lib")
 
 	// lib
-	err := sdl.Init(sdl.INIT_EVERYTHING)
+	err := sdl.Init(sdl.INIT_VIDEO & sdl.INIT_EVENTS)
 	utils.Check("init", err)
 
 	err = ttf.Init()
@@ -34,13 +34,30 @@ func NewSDLLib(closer *utils.Closer) (*SDLLib, error) {
 		return nil
 	})
 
+	var winFlags uint32
+	winFlags &= sdl.WINDOW_SHOWN
+	winFlags &= sdl.WINDOW_ALLOW_HIGHDPI
+	winFlags &= sdl.WINDOW_BORDERLESS
+
+	winWidth := defaultWidth
+	winHeight := defaultHeight
+
+	if fullscreen {
+		mode, err := sdl.GetCurrentDisplayMode(0)
+		utils.Check("get display mode", err)
+
+		winFlags &= sdl.WINDOW_FULLSCREEN
+		winWidth = int(mode.W)
+		winHeight = int(mode.H)
+	}
+
 	// window
 	window, err := sdl.CreateWindow(
 		"Galaxy",
-		sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED,
-		800, 600,
-		sdl.WINDOW_SHOWN,
+		sdl.WINDOWPOS_CENTERED,
+		sdl.WINDOWPOS_CENTERED,
+		int32(winWidth), int32(winHeight),
+		winFlags,
 	)
 	utils.Check("create window", err)
 	closer.Enqueue(window.Destroy)

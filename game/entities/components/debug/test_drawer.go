@@ -29,6 +29,13 @@ func (td *GridDrawer) OnDraw(r engine.Renderer) error {
 		Y: int(py),
 	})
 
+	r.DrawSquare(engine.ColorPurple, engine.Rect{
+		X: int(r.Camera().Position().X),
+		Y: int(r.Camera().Position().Y),
+		W: r.Camera().Width() - 1,
+		H: r.Camera().Height() - 1,
+	})
+
 	for x := px - 1024; x < px+1024; x += 128 {
 		for y := py - 1024; y < py+1024; y += 128 {
 			r.DrawPoint(engine.ColorYellow, engine.Point{
