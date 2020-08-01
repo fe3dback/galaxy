@@ -3,6 +3,10 @@ package registry
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine/lib/control"
+
+	"github.com/fe3dback/galaxy/engine"
+
 	"github.com/fe3dback/galaxy/engine/lib/event"
 
 	"github.com/fe3dback/galaxy/engine/lib"
@@ -36,6 +40,7 @@ type (
 	}
 
 	GameRegistry struct {
+		State   engine.State
 		Options *system.GameOptions
 		Frames  *system.Frames
 		World   *game.World
@@ -63,6 +68,8 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// engine
+	camera := reg.registerCamera(sdlWindow)
+	mouse := reg.registerMouse()
 	fontManager := reg.registerFontManager(
 		closer,
 	)
@@ -75,6 +82,7 @@ func makeRegistry(flags Flags) *Registry {
 		sdlRenderer,
 		fontManager,
 		textureManager,
+		camera,
 	)
 	dispatcher := reg.registerDispatcher(
 		reg.eventQuit(frames),
@@ -85,7 +93,14 @@ func makeRegistry(flags Flags) *Registry {
 
 	// ui
 	layerFPS := reg.registerUILayerFPS()
-	gameUI := reg.registerUI(layerFPS)
+	layerCamera := reg.registerUILayerCamera()
+	gameUI := reg.registerUI(
+		layerFPS,
+		layerCamera,
+	)
+
+	// game state
+	gameState := reg.registerGameState(frames, camera, mouse)
 
 	// build
 	return &Registry{
@@ -99,6 +114,7 @@ func makeRegistry(flags Flags) *Registry {
 			Window: sdlWindow,
 		},
 		Game: &GameRegistry{
+			State:   gameState,
 			Options: options,
 			Frames:  frames,
 			World:   world,
@@ -154,13 +170,29 @@ func (r registerFactory) registerTextureManager(sdlRenderer *sdl.Renderer, close
 	return render.NewTextureManager(sdlRenderer, closer)
 }
 
+func (r registerFactory) registerCamera(window *sdl.Window) *render.Camera {
+	w, h := window.GetSize()
+
+	return render.NewCamera(engine.Rect{
+		X: 0,
+		Y: 0,
+		W: int(w),
+		H: int(h),
+	})
+}
+
+func (r registerFactory) registerMouse() *control.Mouse {
+	return control.NewMouse()
+}
+
 func (r registerFactory) registerRenderer(
 	sdlWindow *sdl.Window,
 	sdlRenderer *sdl.Renderer,
 	fontManager *render.FontManager,
 	textureManager *render.TextureManager,
+	camera *render.Camera,
 ) *render.Renderer {
-	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager)
+	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera)
 }
 
 // ----------------------------------------
@@ -195,4 +227,16 @@ func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {
 
 func (r registerFactory) registerUILayerFPS() *ui.LayerFPS {
 	return ui.NewLayerFPS()
+}
+
+func (r registerFactory) registerUILayerCamera() *ui.LayerCamera {
+	return ui.NewLayerCamera()
+}
+
+func (r registerFactory) registerGameState(
+	moment engine.Moment,
+	camera engine.Camera,
+	mouse engine.Mouse,
+) *engine.GameState {
+	return engine.NewGameState(moment, camera, mouse)
 }

@@ -14,8 +14,16 @@ const (
 	graphIndexFirst  = graphCapacity / 2
 	graphIndexLast   = graphCapacity - 1
 	graphWindowWidth = graphCapacity / 2
-	graphX           = 5
-	graphY           = 20
+
+	// Table Pos:
+	uiInfoX      = 5
+	uiInfoY      = 5
+	uiInfoFpsX   = uiInfoX
+	uiInfoFpsY   = uiInfoY
+	uiInfoCamX   = uiInfoX
+	uiInfoCamY   = uiInfoFpsY + 15
+	uiInfoGraphX = uiInfoX
+	uiInfoGraphY = uiInfoCamY + 20
 )
 
 type LayerFPS struct {
@@ -31,10 +39,10 @@ func NewLayerFPS() *LayerFPS {
 	}
 }
 
-func (l *LayerFPS) OnUpdate(moment engine.Moment) error {
-	l.moment = moment
+func (l *LayerFPS) OnUpdate(s engine.State) error {
+	l.moment = s.Moment()
 
-	metric := graphHeight * uint8(moment.FrameDuration()/moment.LimitDuration())
+	metric := graphHeight * uint8(l.moment.FrameDuration()/l.moment.LimitDuration())
 	if metric > graphHeight {
 		metric = graphHeight
 	}
@@ -55,8 +63,26 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 	r.DrawText(
 		generated.ResourcesFontsJetBrainsMonoRegular,
 		engine.ColorGreen,
-		fmt.Sprintf("fps: %d / %s", l.moment.FPS(), l.moment.FrameDuration().String()),
-		5, 5,
+		fmt.Sprintf("fps: %d / %s",
+			l.moment.FPS(),
+			l.moment.FrameDuration().String(),
+		),
+		engine.Point{
+			X: uiInfoFpsX,
+			Y: uiInfoFpsY,
+		},
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorGreen,
+		fmt.Sprintf("cam: %d, %d",
+			r.Camera().Rect().X,
+			r.Camera().Rect().Y,
+		),
+		engine.Point{
+			X: uiInfoCamX,
+			Y: uiInfoCamY,
+		},
 	)
 
 	l.drawGraph(r)
@@ -65,15 +91,17 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 }
 
 func (l *LayerFPS) drawGraph(r engine.Renderer) {
-	xl := graphX
-	xr := graphX + graphWidth
-	yb := graphY + graphHeight
+	xl := uiInfoGraphX
+	xr := uiInfoGraphX + graphWidth
+	yb := uiInfoGraphY + graphHeight
 
 	// draw graph bottom border
 	r.DrawLine(
 		engine.ColorSelection,
-		engine.Point{X: xl, Y: yb + 2},
-		engine.Point{X: xr, Y: yb + 2},
+		engine.Line{
+			A: engine.Point{X: xl, Y: yb + 2},
+			B: engine.Point{X: xr, Y: yb + 2},
+		},
 	)
 
 	// draw graph
@@ -81,8 +109,10 @@ func (l *LayerFPS) drawGraph(r engine.Renderer) {
 	for i := l.graphCursor - graphWidth; i < l.graphCursor; i++ {
 		r.DrawLine(
 			engine.ColorOrange,
-			engine.Point{X: xl + xOffset, Y: yb},
-			engine.Point{X: xl + xOffset, Y: yb - int(l.graph[i])},
+			engine.Line{
+				A: engine.Point{X: xl + xOffset, Y: yb},
+				B: engine.Point{X: xl + xOffset, Y: yb - int(l.graph[i])},
+			},
 		)
 
 		xOffset++

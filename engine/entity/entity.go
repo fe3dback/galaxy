@@ -51,9 +51,9 @@ func (e *Entity) IsDestroyed() bool {
 	return e.destroyed
 }
 
-func (e *Entity) OnUpdate(moment engine.Moment) error {
+func (e *Entity) OnUpdate(s engine.State) error {
 	for id, component := range e.components {
-		err := component.OnUpdate(moment)
+		err := component.OnUpdate(s)
 		if err != nil {
 			return fmt.Errorf("can`t update component `%s` from element `%T`: %v", id, e, err)
 		}

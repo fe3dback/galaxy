@@ -24,18 +24,12 @@ func (anim *Animator) OnDraw(r engine.Renderer) error {
 	}
 
 	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation().ToFloat())
-	r.DrawSquare(
-		engine.ColorGreen,
-		dest.X,
-		dest.Y,
-		dest.W,
-		dest.H,
-	)
+	r.DrawSquare(engine.ColorGreen, dest)
 
 	return nil
 }
 
-func (anim *Animator) OnUpdate(moment engine.Moment) error {
+func (anim *Animator) OnUpdate(s engine.State) error {
 	if !anim.initialized || anim.paused {
 		return nil
 	}
@@ -48,9 +42,9 @@ func (anim *Animator) OnUpdate(moment engine.Moment) error {
 	}
 
 	// move frames
-	deltaProgress := moment.DeltaTime() * float64(moment.TargetFPS())
+	deltaProgress := s.Moment().DeltaTime() * float64(s.Moment().TargetFPS())
 	seq.progress += deltaProgress * seq.progressMod
-	if seq.progress > float64(moment.TargetFPS()) {
+	if seq.progress > float64(s.Moment().TargetFPS()) {
 		seq.progress = 0
 
 		// end of sequence
@@ -67,7 +61,7 @@ func (anim *Animator) OnUpdate(moment engine.Moment) error {
 	}
 
 	// calculate current frame depend on fps and game time
-	frameIndex := int(math.Floor(float64(seq.lastFrame) * seq.progress / float64(moment.TargetFPS())))
+	frameIndex := int(math.Floor(float64(seq.lastFrame) * seq.progress / float64(s.Moment().TargetFPS())))
 
 	if seq.direction == SequenceDirectionForward {
 		seq.currentFrame = frameIndex

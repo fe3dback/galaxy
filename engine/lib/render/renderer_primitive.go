@@ -6,23 +6,58 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func (r *Renderer) DrawSquare(color engine.Color, x, y, w, h int) {
+func (r *Renderer) DrawSquare(color engine.Color, rect engine.Rect) {
+	if !r.isRectInsideCamera(rect) {
+		return
+	}
+
 	r.SetDrawColor(color)
 	err := r.ref.DrawLines([]sdl.Point{
-		{X: int32(x), Y: int32(y)},
-		{X: int32(x) + int32(w), Y: int32(y)},
-		{X: int32(x) + int32(w), Y: int32(y) + int32(h)},
-		{X: int32(x), Y: int32(y) + int32(h)},
-		{X: int32(x), Y: int32(y)},
+		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y}),
+		r.transformPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y}),
+		r.transformPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y + rect.H}),
+		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y + rect.H}),
+		r.transformPoint(engine.Point{X: rect.X, Y: rect.Y}),
 	})
 	utils.Check("draw square", err)
 }
 
-func (r *Renderer) DrawLine(col engine.Color, a, b engine.Point) {
-	r.SetDrawColor(col)
-	err := r.ref.DrawLines([]sdl.Point{
-		r.transformPoint(a),
-		r.transformPoint(b),
-	})
+func (r *Renderer) DrawLine(color engine.Color, line engine.Line) {
+	if !r.isLineInsideCamera(line) {
+		return
+	}
+
+	r.SetDrawColor(color)
+	err := r.ref.DrawLines(r.transformLine(line))
 	utils.Check("draw line", err)
+}
+
+func (r *Renderer) DrawCrossLines(color engine.Color, size int, point engine.Point) {
+	r.DrawLine(
+		color,
+		engine.Line{
+			A: engine.Point{X: point.X - size, Y: point.Y - size},
+			B: engine.Point{X: point.X + size, Y: point.Y + size},
+		},
+	)
+	r.DrawLine(
+		color,
+		engine.Line{
+			A: engine.Point{X: point.X - size, Y: point.Y + size},
+			B: engine.Point{X: point.X + size, Y: point.Y - size},
+		},
+	)
+}
+
+func (r *Renderer) DrawPoint(color engine.Color, point engine.Point) {
+	if !r.isPointInsideCamera(point) {
+		return
+	}
+
+	r.SetDrawColor(color)
+	err := r.ref.DrawPoint(
+		r.transformX(point.X),
+		r.transformY(point.Y),
+	)
+	utils.Check("draw point", err)
 }

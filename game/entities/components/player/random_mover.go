@@ -20,13 +20,13 @@ func NewRandomMover(entity *entity.Entity) *RandomMover {
 		entity: entity,
 	}
 
-	time.AfterFunc(time.Second*3, func() {
+	time.AfterFunc(time.Second*1, func() {
 		anim.PlaySequence("explode")
 	})
 
-	time.AfterFunc(time.Second*10, func() {
-		anim.PlaySequence("idle")
-	})
+	//time.AfterFunc(time.Second*10, func() {
+	//	anim.PlaySequence("idle")
+	//})
 
 	return mv
 }
@@ -35,13 +35,13 @@ func (r *RandomMover) OnDraw(_ engine.Renderer) error {
 	return nil
 }
 
-func (r *RandomMover) OnUpdate(moment engine.Moment) error {
+func (r *RandomMover) OnUpdate(s engine.State) error {
 	pos := r.entity.Position()
 	//pos.X = pos.X + (15 * moment.DeltaTime())
 	//pos.Y = pos.Y - (15 * moment.DeltaTime())
 
 	r.entity.SetPosition(pos)
-	r.entity.SetRotation(r.entity.Rotation() + engine.Anglef(90*moment.DeltaTime()))
+	r.entity.SetRotation(r.entity.Rotation() + engine.Anglef(90*s.Moment().DeltaTime()))
 
 	return nil
 }

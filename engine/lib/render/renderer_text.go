@@ -6,7 +6,19 @@ import (
 	"github.com/fe3dback/galaxy/utils"
 )
 
-func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, x, y int) {
+const avgTextWidthOptRender = 150
+const avgTextHeightOptRender = 20
+
+func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, p engine.Point) {
+	if !r.isRectInsideCamera(engine.Rect{
+		X: p.X,
+		Y: p.Y,
+		W: avgTextWidthOptRender,
+		H: avgTextHeightOptRender,
+	}) {
+		return
+	}
+
 	r.SetDrawColor(color)
 
 	font := r.fontManager.Get(fontId)
@@ -30,8 +42,8 @@ func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, t
 	}
 
 	dest := Rect{
-		X: int32(x),
-		Y: int32(y),
+		X: r.transformX(p.X),
+		Y: r.transformY(p.Y),
 		W: surface.W,
 		H: surface.H,
 	}

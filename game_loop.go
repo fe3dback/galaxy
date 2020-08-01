@@ -15,6 +15,7 @@ func gameLoop(provider *registry.Provider) error {
 	gameUI := provider.Registry.Game.Ui
 	renderer := provider.Registry.Engine.Renderer
 	dispatcher := provider.Registry.Engine.Dispatcher
+	gameState := provider.Registry.Game.State
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(engine.ColorBackground)
@@ -26,12 +27,12 @@ func gameLoop(provider *registry.Provider) error {
 		frames.Begin()
 
 		// update
-		err = world.OnUpdate(frames)
+		err = world.OnUpdate(gameState)
 		if err != nil {
 			return fmt.Errorf("can`t update world: %v", err)
 		}
 
-		err = gameUI.OnUpdate(frames)
+		err = gameUI.OnUpdate(gameState)
 		if err != nil {
 			return fmt.Errorf("can`t update ui: %v", err)
 		}
@@ -39,11 +40,13 @@ func gameLoop(provider *registry.Provider) error {
 		// draw
 		renderer.Clear(engine.ColorBackground)
 
+		renderer.SetRenderMode(engine.RenderModeWorld)
 		err = world.OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}
 
+		renderer.SetRenderMode(engine.RenderModeUI)
 		err = gameUI.OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw ui: %v", err)

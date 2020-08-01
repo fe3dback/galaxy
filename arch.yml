@@ -24,6 +24,8 @@ components:
     in: engine/lib/render
   engine_event:
     in: engine/lib/event
+  engine_control:
+    in: engine/lib/control
   engine_entity:
     in: engine/entity
 
@@ -63,6 +65,12 @@ deps:
       - sdl-img
 
   engine_event:
+    mayDependOn:
+      - engine
+    canUse:
+      - sdl
+
+  engine_control:
     mayDependOn:
       - engine
     canUse:

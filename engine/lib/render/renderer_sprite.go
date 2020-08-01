@@ -18,9 +18,9 @@ func (r *Renderer) TextureQuery(res generated.ResourcePath) engine.TextureInfo {
 	}
 }
 
-func (r *Renderer) DrawSprite(res generated.ResourcePath, x, y int) {
+func (r *Renderer) DrawSprite(res generated.ResourcePath, p engine.Point) {
 	src := engine.Rect{X: 0, Y: 0, W: 0, H: 0}
-	dest := engine.Rect{X: x, Y: y, W: 0, H: 0}
+	dest := engine.Rect{X: p.X, Y: p.Y, W: 0, H: 0}
 
 	r.draw(res, src, dest, 0)
 }
@@ -34,12 +34,6 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 
 	texture := r.getTexture(res)
 
-	if src.W == 0 {
-		src.W = int(texture.Width)
-	}
-	if src.H == 0 {
-		src.H = int(texture.Height)
-	}
 	if dest.W == 0 {
 		dest.W = int(texture.Width)
 	}
@@ -47,14 +41,30 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 		dest.H = int(texture.Height)
 	}
 
+	if !r.isRectInsideCamera(dest) {
+		return
+	}
+
+	if src.W == 0 {
+		src.W = int(texture.Width)
+	}
+	if src.H == 0 {
+		src.H = int(texture.Height)
+	}
+
 	err := r.ref.CopyEx(
 		texture.Tex,
-		r.transformRectRef(src),
+		&sdl.Rect{
+			X: int32(src.X),
+			Y: int32(src.Y),
+			W: int32(src.W),
+			H: int32(src.H),
+		},
 		r.transformRectRef(dest),
 		angle,
-		&sdl.Point{
-			X: int32(src.W) / 2,
-			Y: int32(src.H) / 2,
+		&sdl.Point{ // point relative to dest [X,Y]
+			X: int32(src.W / 2),
+			Y: int32(src.H / 2),
 		},
 		sdl.FLIP_NONE,
 	)

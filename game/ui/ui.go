@@ -29,9 +29,9 @@ func (u *UI) OnDraw(r engine.Renderer) error {
 	return nil
 }
 
-func (u *UI) OnUpdate(moment engine.Moment) error {
+func (u *UI) OnUpdate(s engine.State) error {
 	for _, layer := range u.layers {
-		err := layer.OnUpdate(moment)
+		err := layer.OnUpdate(s)
 		if err != nil {
 			return fmt.Errorf("draw ui: %v", err)
 		}

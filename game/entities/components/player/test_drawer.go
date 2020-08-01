@@ -16,26 +16,14 @@ func NewTestDrawer(entity *entity.Entity) *TestDrawer {
 }
 
 func (td *TestDrawer) OnDraw(r engine.Renderer) error {
-	lx := td.entity.Position().X - 10
-	rx := td.entity.Position().X + 10
-	ty := td.entity.Position().Y - 10
-	by := td.entity.Position().Y + 10
-
-	r.DrawLine(
-		engine.ColorCyan,
-		engine.Point{X: int(lx), Y: int(ty)},
-		engine.Point{X: int(rx), Y: int(by)},
-	)
-
-	r.DrawLine(
-		engine.ColorCyan,
-		engine.Point{X: int(lx), Y: int(by)},
-		engine.Point{X: int(rx), Y: int(ty)},
-	)
+	r.DrawCrossLines(engine.ColorCyan, 10, engine.Point{
+		X: int(td.entity.Position().X),
+		Y: int(td.entity.Position().Y),
+	})
 
 	return nil
 }
 
-func (td *TestDrawer) OnUpdate(_ engine.Moment) error {
+func (td *TestDrawer) OnUpdate(_ engine.State) error {
 	return nil
 }
