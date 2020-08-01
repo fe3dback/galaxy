@@ -100,6 +100,10 @@ func (r *Renderer) transformLine(line engine.Line) []sdl.Point {
 	return []sdl.Point{
 		r.transformPoint(line.A),
 		r.transformPoint(line.B),
+
+		// close lines back will fix render glitches
+		r.transformPoint(line.B),
+		r.transformPoint(line.A),
 	}
 }
 
