@@ -1,3 +1,3 @@
 [submodule "resources"]
 	path = resources
-	url = ./resources
+	url = git@github.com:fe3dback/galaxy-res.git
