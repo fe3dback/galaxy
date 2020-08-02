@@ -20,12 +20,7 @@ func (r *CameraFollower) OnDraw(_ engine.Renderer) error {
 }
 
 func (r *CameraFollower) OnUpdate(s engine.State) error {
-	pos := r.entity.Position().Add(engine.Vector2D{
-		X: 300,
-		Y: 0,
-	})
-
-	s.Camera().CenterOn(pos)
+	s.Camera().CenterOn(r.entity.Position())
 
 	return nil
 }

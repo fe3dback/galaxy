@@ -2,6 +2,9 @@ gen:
 	go generate ./cmd/gen_resources
 	go fmt ./generated
 
+test:
+	go test
+
 arch:
 	go run ./cmd/arch/*.go
 

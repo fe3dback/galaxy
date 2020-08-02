@@ -25,6 +25,10 @@ func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
 	}
 }
 
+func (e *Entity) Position() engine.Vector2D {
+	return e.position
+}
+
 func (e *Entity) SetPosition(pos engine.Vector2D) {
 	e.position = pos
 }
@@ -33,16 +37,16 @@ func (e *Entity) AddPosition(v engine.Vector2D) {
 	e.SetPosition(e.Position().Add(v))
 }
 
-func (e *Entity) Position() engine.Vector2D {
-	return e.position
+func (e *Entity) Rotation() engine.Angle {
+	return e.rotation
 }
 
 func (e *Entity) SetRotation(rot engine.Angle) {
 	e.rotation = rot
 }
 
-func (e *Entity) Rotation() engine.Angle {
-	return e.rotation
+func (e *Entity) AddRotation(rot engine.Angle) {
+	e.SetRotation(e.Rotation().Add(rot))
 }
 
 func (e *Entity) Destroy() {

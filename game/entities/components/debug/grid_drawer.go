@@ -3,6 +3,8 @@ package debug
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/game/units"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/generated"
@@ -24,20 +26,17 @@ func (td *GridDrawer) OnDraw(r engine.Renderer) error {
 	px := td.entity.Position().X
 	py := td.entity.Position().Y
 
-	r.DrawCrossLines(engine.ColorSelection, 15, engine.Point{
-		X: int(px),
-		Y: int(py),
-	})
+	worldX := units.Meters(int(px/units.DistanceMeter) * int(units.DistanceMeter))
+	worldY := units.Meters(int(py/units.DistanceMeter) * int(units.DistanceMeter))
 
-	r.DrawSquare(engine.ColorPurple, engine.Rect{
-		X: int(r.Camera().Position().X),
-		Y: int(r.Camera().Position().Y),
-		W: r.Camera().Width() - 1,
-		H: r.Camera().Height() - 1,
-	})
+	startX := worldX - units.DistanceMeter*5
+	startY := worldY - units.DistanceMeter*5
+	endX := worldX + units.DistanceMeter*5
+	endY := worldY + units.DistanceMeter*5
 
-	for x := px - 1024; x < px+1024; x += 128 {
-		for y := py - 1024; y < py+1024; y += 128 {
+	for x := startX; x < endX; x += units.DistanceMeter {
+		for y := startY; y < endY; y += units.DistanceMeter {
+
 			r.DrawPoint(engine.ColorYellow, engine.Point{
 				X: int(x),
 				Y: int(y),
@@ -46,7 +45,7 @@ func (td *GridDrawer) OnDraw(r engine.Renderer) error {
 			r.DrawText(
 				generated.ResourcesFontsJetBrainsMonoRegular,
 				engine.ColorSelection,
-				fmt.Sprintf("%d, %d", int(x), int(y)),
+				fmt.Sprintf("%.0f, %.0f", x/units.DistanceMeter, y/units.DistanceMeter),
 				engine.Point{
 					X: int(x + 3),
 					Y: int(y + 3),

@@ -31,7 +31,9 @@ type (
 		// base
 		SetDrawColor(Color)
 		DrawSquare(color Color, rect Rect)
+		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)
+		DrawVector(color Color, dist float64, vec Vector2D, angle Angle)
 		DrawCrossLines(color Color, size int, p Point)
 		DrawPoint(color Color, p Point)
 
@@ -41,7 +43,8 @@ type (
 		// sprite
 		TextureQuery(res generated.ResourcePath) TextureInfo
 		DrawSprite(res generated.ResourcePath, p Point)
-		DrawSpriteEx(res generated.ResourcePath, src, dest Rect, angle float64)
+		DrawSpriteAngle(res generated.ResourcePath, p Point, angle Angle)
+		DrawSpriteEx(res generated.ResourcePath, src, dest Rect, angle Angle)
 
 		// text
 		DrawText(fontId generated.ResourcePath, color Color, text string, p Point)

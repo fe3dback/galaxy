@@ -23,7 +23,7 @@ func (anim *Animator) OnDraw(r engine.Renderer) error {
 		H: frame.h,
 	}
 
-	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation().ToFloat())
+	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation())
 	r.DrawSquare(engine.ColorGreen, dest)
 
 	return nil

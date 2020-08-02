@@ -25,11 +25,18 @@ func (r *Renderer) DrawSprite(res generated.ResourcePath, p engine.Point) {
 	r.draw(res, src, dest, 0)
 }
 
-func (r *Renderer) DrawSpriteEx(res generated.ResourcePath, src, dest engine.Rect, angle float64) {
+func (r *Renderer) DrawSpriteAngle(res generated.ResourcePath, p engine.Point, angle engine.Angle) {
+	src := engine.Rect{X: 0, Y: 0, W: 0, H: 0}
+	dest := engine.Rect{X: p.X, Y: p.Y, W: 0, H: 0}
+
 	r.draw(res, src, dest, angle)
 }
 
-func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle float64) {
+func (r *Renderer) DrawSpriteEx(res generated.ResourcePath, src, dest engine.Rect, angle engine.Angle) {
+	r.draw(res, src, dest, angle)
+}
+
+func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle engine.Angle) {
 	defer utils.CheckPanic(fmt.Sprintf("draw sprite `%s`", res))
 
 	texture := r.getTexture(res)
@@ -41,6 +48,11 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 		dest.H = int(texture.Height)
 	}
 
+	// apply offset tex to dest
+	dest.X -= dest.W / 2
+	dest.Y -= dest.H / 2
+
+	// check is visible
 	if !r.isRectInsideCamera(dest) {
 		return
 	}
@@ -61,7 +73,7 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 			H: int32(src.H),
 		},
 		r.screenRectPtr(dest),
-		angle,
+		angle.ToFloat(),
 		&sdl.Point{ // point relative to dest [X,Y]
 			X: int32(src.W / 2),
 			Y: int32(src.H / 2),

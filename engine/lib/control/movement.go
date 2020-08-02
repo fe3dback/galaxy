@@ -85,4 +85,6 @@ func (m *Movement) update() {
 	if m.pressedBottom {
 		m.vector.Y++
 	}
+
+	m.vector = m.vector.Normalize()
 }
