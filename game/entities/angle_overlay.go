@@ -11,8 +11,8 @@ type AngleOverlay = entity.Entity
 
 func NewAngleOverlay() *AngleOverlay {
 	g := entity.NewEntity(
-		engine.Vector2D{X: 0, Y: 0},
-		engine.Anglef(0),
+		engine.Vec{X: 0, Y: 0},
+		engine.NewAngle(0),
 	)
 	g.AddComponent(debug.NewAngleOverlay(g))
 	g.AddComponent(game.NewCameraFollower(g))

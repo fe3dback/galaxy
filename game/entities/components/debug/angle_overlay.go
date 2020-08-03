@@ -23,53 +23,53 @@ func NewAngleOverlay(entity *entity.Entity) *AngleOverlay {
 func (td *AngleOverlay) OnDraw(r engine.Renderer) error {
 
 	// center
-	r.DrawCrossLines(engine.ColorOrange, 10, td.entity.Position().ToPoint())
+	r.DrawCrossLines(engine.ColorOrange, 10, td.entity.Position())
 
 	// helper
-	r.DrawSprite(generated.ResourcesSystemAngles, td.entity.Position().ToPoint())
+	r.DrawSprite(generated.ResourcesSystemAngles, td.entity.Position())
 
 	// direction
 	r.DrawVector(engine.ColorGreen, 300, td.entity.Position(), td.entity.Rotation())
 
 	// real data
-	direction := fmt.Sprintf("%.2f %.2f", td.entity.Rotation(), engine.Radian(td.entity.Rotation()))
-	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorGreen, direction, td.entity.Position().ToPoint())
+	direction := fmt.Sprintf("%.2f %.2f", td.entity.Rotation().Radians(), td.entity.Rotation().Degrees())
+	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorGreen, direction, td.entity.Position())
 
 	// test vectors
 	// rotate around
-	rotateAround := td.entity.Position().Add(engine.Vector2D{
+	rotateAround := td.entity.Position().Add(engine.Vec{
 		X: 500,
 		Y: 0,
 	}).RotateAround(td.entity.Position(), td.entity.Rotation())
-	r.DrawCrossLines(engine.ColorGreen, 10, rotateAround.ToPoint())
+	r.DrawCrossLines(engine.ColorGreen, 10, rotateAround)
 
 	// polar offset
 	polarOffset := td.entity.Position().PolarOffset(550, td.entity.Rotation())
-	r.DrawCrossLines(engine.ColorGreen, 5, polarOffset.ToPoint())
+	r.DrawCrossLines(engine.ColorGreen, 5, polarOffset)
 
 	// rotate 90deg
-	vec := engine.Vector2D{
+	vec := engine.Vec{
 		X: 1,
 		Y: 0,
 	}
-	vec = vec.Rotate(td.entity.Rotation().Add(90))
+	vec = vec.Rotate(td.entity.Rotation().Add(engine.NewAngle(90)))
 	r.DrawVector(engine.ColorOrange, 50, td.entity.Position(), vec.Direction())
 	rotateDir := fmt.Sprintf("S+90 (%.2f)", vec.Direction())
-	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorOrange, rotateDir, td.entity.Position().Add(engine.Vector2D{
+	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorOrange, rotateDir, td.entity.Position().Add(engine.Vec{
 		X: -20,
 		Y: 20,
-	}).ToPoint())
+	}))
 
 	return nil
 }
 
 func (td *AngleOverlay) OnUpdate(s engine.State) error {
 	if s.Movement().Vector().Y < -0.1 {
-		td.entity.AddRotation(5)
+		td.entity.AddRotation(engine.Angle5)
 	}
 
 	if s.Movement().Vector().Y > 0.1 {
-		td.entity.AddRotation(-5)
+		td.entity.AddRotation(-engine.Angle5)
 	}
 
 	return nil

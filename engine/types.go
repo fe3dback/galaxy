@@ -13,11 +13,11 @@ const (
 
 type (
 	Camera interface {
-		Position() Vector2D
+		Position() Vec
 		Width() int
 		Height() int
-		MoveTo(p Vector2D)
-		CenterOn(p Vector2D)
+		MoveTo(p Vec)
+		CenterOn(p Vec)
 		Resize(width, height int)
 	}
 
@@ -33,21 +33,21 @@ type (
 		DrawSquare(color Color, rect Rect)
 		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)
-		DrawVector(color Color, dist float64, vec Vector2D, angle Angle)
-		DrawCrossLines(color Color, size int, p Point)
-		DrawPoint(color Color, p Point)
+		DrawVector(color Color, dist float64, vec Vec, angle Angle)
+		DrawCrossLines(color Color, size int, vec Vec)
+		DrawPoint(color Color, vec Vec)
 
 		// camera
 		Camera() Camera
 
 		// sprite
 		TextureQuery(res generated.ResourcePath) TextureInfo
-		DrawSprite(res generated.ResourcePath, p Point)
-		DrawSpriteAngle(res generated.ResourcePath, p Point, angle Angle)
+		DrawSprite(res generated.ResourcePath, vec Vec)
+		DrawSpriteAngle(res generated.ResourcePath, vec Vec, angle Angle)
 		DrawSpriteEx(res generated.ResourcePath, src, dest Rect, angle Angle)
 
 		// text
-		DrawText(fontId generated.ResourcePath, color Color, text string, p Point)
+		DrawText(fontId generated.ResourcePath, color Color, text string, vec Vec)
 
 		// system
 		SetRenderMode(RenderMode)
@@ -72,11 +72,11 @@ type (
 	// Controls
 
 	Mouse interface {
-		MouseCoords() Point
+		MouseCoords() Vec
 	}
 
 	Movement interface {
-		Vector() Vector2D
+		Vector() Vec
 		Shift() bool
 	}
 

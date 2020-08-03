@@ -18,14 +18,14 @@ type Car = entity.Entity
 
 func NewCar(texture, physics generated.ResourcePath) *Car {
 	e := entity.NewEntity(
-		engine.Vector2D{X: 300, Y: 250},
-		engine.Anglef(0),
+		engine.Vec{X: 300, Y: 250},
+		engine.NewAngle(0),
 	)
 
 	go func() {
 		tick := time.Tick(time.Millisecond * 100)
 		for range tick {
-			e.AddRotation(1)
+			e.AddRotation(engine.NewAngle(1))
 		}
 	}()
 

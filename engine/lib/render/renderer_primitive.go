@@ -13,36 +13,31 @@ func (r *Renderer) DrawSquare(color engine.Color, rect engine.Rect) {
 
 	r.SetDrawColor(color)
 	err := r.ref.DrawLines([]sdl.Point{
-		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y}),
-		r.screenPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y}),
-		r.screenPoint(engine.Point{X: rect.X + rect.W, Y: rect.Y + rect.H}),
-		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y + rect.H}),
-		r.screenPoint(engine.Point{X: rect.X, Y: rect.Y}),
+		r.screenPoint(engine.Vec{X: rect.Min.X, Y: rect.Min.Y}),
+		r.screenPoint(engine.Vec{X: rect.Min.X + rect.Max.X, Y: rect.Min.Y}),
+		r.screenPoint(engine.Vec{X: rect.Min.X + rect.Max.X, Y: rect.Min.Y + rect.Max.Y}),
+		r.screenPoint(engine.Vec{X: rect.Min.X, Y: rect.Min.Y + rect.Max.Y}),
+		r.screenPoint(engine.Vec{X: rect.Min.X, Y: rect.Min.Y}),
 	})
 	utils.Check("draw square", err)
 }
 
 func (r *Renderer) DrawSquareEx(color engine.Color, angle engine.Angle, rect engine.Rect) {
-	orig := engine.Vector2D{
-		X: float64(rect.X),
-		Y: float64(rect.Y),
-	}
+	hw := rect.Max.X / 2
+	hh := rect.Max.Y / 2
 
-	hw := rect.W / 2
-	hh := rect.H / 2
-
-	tl := engine.Vector2D{X: float64(rect.X - hw), Y: float64(rect.Y - hh)}.RotateAround(orig, angle)
-	tr := engine.Vector2D{X: float64(rect.X - hw + rect.W), Y: float64(rect.Y - hh)}.RotateAround(orig, angle)
-	br := engine.Vector2D{X: float64(rect.X - hw + rect.W), Y: float64(rect.Y - hh + rect.H)}.RotateAround(orig, angle)
-	bl := engine.Vector2D{X: float64(rect.X - hw), Y: float64(rect.Y - hh + rect.H)}.RotateAround(orig, angle)
+	tl := engine.Vec{X: rect.Min.X - hw, Y: rect.Min.Y - hh}.RotateAround(rect.Min, angle)
+	tr := engine.Vec{X: rect.Min.X - hw + rect.Max.X, Y: rect.Min.Y - hh}.RotateAround(rect.Min, angle)
+	br := engine.Vec{X: rect.Min.X - hw + rect.Max.X, Y: rect.Min.Y - hh + rect.Max.Y}.RotateAround(rect.Min, angle)
+	bl := engine.Vec{X: rect.Min.X - hw, Y: rect.Min.Y - hh + rect.Max.Y}.RotateAround(rect.Min, angle)
 
 	r.SetDrawColor(color)
 	err := r.ref.DrawLines([]sdl.Point{
-		r.screenPoint(tl.ToPoint()),
-		r.screenPoint(tr.ToPoint()),
-		r.screenPoint(br.ToPoint()),
-		r.screenPoint(bl.ToPoint()),
-		r.screenPoint(tl.ToPoint()),
+		r.screenPoint(tl),
+		r.screenPoint(tr),
+		r.screenPoint(br),
+		r.screenPoint(bl),
+		r.screenPoint(tl),
 	})
 	utils.Check("draw square angled", err)
 }
@@ -57,15 +52,15 @@ func (r *Renderer) DrawLine(color engine.Color, line engine.Line) {
 	utils.Check("draw line", err)
 }
 
-func (r *Renderer) DrawPoint(color engine.Color, point engine.Point) {
-	if !r.isPointInsideCamera(point) {
+func (r *Renderer) DrawPoint(color engine.Color, vec engine.Vec) {
+	if !r.isPointInsideCamera(vec) {
 		return
 	}
 
 	r.SetDrawColor(color)
 	err := r.ref.DrawPoint(
-		r.screenX(point.X),
-		r.screenY(point.Y),
+		int32(r.screenX(vec.X)),
+		int32(r.screenY(vec.Y)),
 	)
 	utils.Check("draw point", err)
 }
@@ -74,22 +69,22 @@ func (r *Renderer) DrawPoint(color engine.Color, point engine.Point) {
 // extended function (based on originals)
 // -------------------------------------------
 
-func (r *Renderer) DrawVector(color engine.Color, dist float64, vec engine.Vector2D, angle engine.Angle) {
+func (r *Renderer) DrawVector(color engine.Color, dist float64, vec engine.Vec, angle engine.Angle) {
 	target := vec.PolarOffset(dist, angle)
 
 	line := engine.Line{
-		A: vec.ToPoint(),
-		B: target.ToPoint(),
+		A: vec,
+		B: target,
 	}
 
-	counterDeg := angle.Add(180)
+	counterDeg := angle.Add(engine.NewAngle(180))
 	arrowLeft := engine.Line{
-		A: target.ToPoint(),
-		B: target.PolarOffset(6, counterDeg-30).ToPoint(),
+		A: target,
+		B: target.PolarOffset(6, counterDeg.Add(engine.NewAngle(-30))),
 	}
 	arrowRight := engine.Line{
-		A: target.ToPoint(),
-		B: target.PolarOffset(6, counterDeg+30).ToPoint(),
+		A: target,
+		B: target.PolarOffset(6, counterDeg.Add(engine.NewAngle(+30))),
 	}
 
 	r.DrawLine(color, line)
@@ -97,19 +92,21 @@ func (r *Renderer) DrawVector(color engine.Color, dist float64, vec engine.Vecto
 	r.DrawLine(color, arrowRight)
 }
 
-func (r *Renderer) DrawCrossLines(color engine.Color, size int, point engine.Point) {
+func (r *Renderer) DrawCrossLines(color engine.Color, size int, vec engine.Vec) {
+	sf := float64(size)
+
 	r.DrawLine(
 		color,
 		engine.Line{
-			A: engine.Point{X: point.X - size, Y: point.Y - size},
-			B: engine.Point{X: point.X + size, Y: point.Y + size},
+			A: engine.Vec{X: vec.X - sf, Y: vec.Y - sf},
+			B: engine.Vec{X: vec.X + sf, Y: vec.Y + sf},
 		},
 	)
 	r.DrawLine(
 		color,
 		engine.Line{
-			A: engine.Point{X: point.X - size, Y: point.Y + size},
-			B: engine.Point{X: point.X + size, Y: point.Y - size},
+			A: engine.Vec{X: vec.X - sf, Y: vec.Y + sf},
+			B: engine.Vec{X: vec.X + sf, Y: vec.Y - sf},
 		},
 	)
 }

@@ -34,12 +34,12 @@ func (phys *Physics) debugDrawBoundingBox(r engine.Renderer) {
 
 	// draw bounding box
 	// 90 spin because car width is not image width, is car width (and car angle direct to right)
-	r.DrawSquareEx(engine.ColorSelection, carAngle-90, engine.Rect{
-		X: int(carPos.X),
-		Y: int(carPos.Y),
-		W: carSize.width,
-		H: carSize.height,
-	})
+	r.DrawSquareEx(engine.ColorSelection, carAngle-90, engine.RectScreen(
+		int(carPos.X),
+		int(carPos.Y),
+		carSize.width,
+		carSize.height,
+	))
 }
 
 func (phys *Physics) debugDrawWeights(r engine.Renderer) {
@@ -60,12 +60,12 @@ func (phys *Physics) debugDrawWeights(r engine.Renderer) {
 		}
 
 		vector := phys.entity.Position().
-			Add(engine.Vector2D{
+			Add(engine.Vec{
 				X: float64(weightTarget.posRelative.x),
 				Y: float64(weightTarget.posRelative.y),
 			}).
 			RotateAround(phys.entity.Position(), phys.entity.Rotation())
 
-		r.DrawCrossLines(col, 3, vector.ToPoint())
+		r.DrawCrossLines(col, 3, vector)
 	}
 }

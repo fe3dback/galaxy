@@ -92,30 +92,30 @@ func (r *Renderer) Origin() *sdl.Renderer {
 
 // -- Base transforms (include camera relative pos)
 
-func (r *Renderer) screenX(x int) int32 {
+func (r *Renderer) screenX(x float64) float64 {
 	if r.renderMode == engine.RenderModeUI {
-		return int32(x)
+		return x
 	}
 
-	return int32(x - int(r.camera.position.X))
+	return x - r.camera.position.X
 }
 
-func (r *Renderer) screenY(y int) int32 {
+func (r *Renderer) screenY(y float64) float64 {
 	if r.renderMode == engine.RenderModeUI {
-		return int32(y)
+		return y
 	}
 
-	return int32(y - int(r.camera.position.Y))
+	return y - r.camera.position.Y
 }
 
 // -- Complex transforms (should depend on base transforms)
 
 func (r *Renderer) screenRect(rect engine.Rect) Rect {
 	return Rect{
-		X: r.screenX(rect.X),
-		Y: r.screenY(rect.Y),
-		W: int32(rect.W),
-		H: int32(rect.H),
+		X: int32(r.screenX(rect.Min.X)),
+		Y: int32(r.screenY(rect.Min.Y)),
+		W: int32(rect.Max.X),
+		H: int32(rect.Max.Y),
 	}
 }
 
@@ -124,14 +124,14 @@ func (r *Renderer) screenRectPtr(rect engine.Rect) *Rect {
 	return &rRect
 }
 
-func (r *Renderer) screenPoint(point engine.Point) Point {
+func (r *Renderer) screenPoint(point engine.Vec) Point {
 	return Point{
-		X: r.screenX(point.X),
-		Y: r.screenY(point.Y),
+		X: int32(r.screenX(point.X)),
+		Y: int32(r.screenY(point.Y)),
 	}
 }
 
-func (r *Renderer) screenPointPtr(point engine.Point) *Point {
+func (r *Renderer) screenPointPtr(point engine.Vec) *Point {
 	rPoint := r.screenPoint(point)
 	return &rPoint
 }
@@ -155,10 +155,8 @@ func (r *Renderer) isLineInsideCamera(line engine.Line) bool {
 	}
 
 	return r.isRectInsideCamera(engine.Rect{
-		X: line.A.X,
-		Y: line.A.Y,
-		W: line.B.X - line.A.X,
-		H: line.B.Y - line.A.Y,
+		Min: line.A,
+		Max: line.B,
 	})
 }
 
@@ -167,19 +165,22 @@ func (r *Renderer) isRectInsideCamera(rect engine.Rect) bool {
 		return true
 	}
 
-	return !(rect.X > int(r.camera.position.X)+r.camera.width ||
-		rect.X+rect.W < int(r.camera.position.X) ||
-		rect.Y > int(r.camera.position.Y)+r.camera.height ||
-		rect.Y+rect.H < int(r.camera.position.Y))
+	xB := rect.Min.X > r.camera.position.X+float64(r.camera.width)
+	xL := rect.Min.X+rect.Max.X < r.camera.position.X
+
+	yB := rect.Min.Y > r.camera.position.Y+float64(r.camera.height)
+	yL := rect.Min.Y+rect.Max.Y < r.camera.position.Y
+
+	return !(xB || xL || yB || yL)
 }
 
-func (r *Renderer) isPointInsideCamera(point engine.Point) bool {
+func (r *Renderer) isPointInsideCamera(vec engine.Vec) bool {
 	if r.renderMode == engine.RenderModeUI {
 		return true
 	}
 
-	return point.X >= int(r.camera.position.X) &&
-		point.Y >= int(r.camera.position.Y) &&
-		point.X <= int(r.camera.position.X)+r.camera.width &&
-		point.Y <= int(r.camera.position.Y)+r.camera.height
+	return vec.X >= r.camera.position.X &&
+		vec.Y >= r.camera.position.Y &&
+		vec.X <= r.camera.position.X+float64(r.camera.width) &&
+		vec.Y <= r.camera.position.Y+float64(r.camera.height)
 }

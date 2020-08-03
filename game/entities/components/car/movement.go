@@ -11,8 +11,8 @@ const wheelAxisTop = "top"
 
 type movements struct {
 	calc      Calculator
-	position  engine.Vector2D
-	velocity  engine.Vector2D
+	position  engine.Vec
+	velocity  engine.Vec
 	direction engine.Angle
 	wheels    []*wheel
 	spec      spec
@@ -25,12 +25,12 @@ type wheel struct {
 	spec   specWheel
 }
 
-func newMovements(position engine.Vector2D, angle engine.Angle, spec spec) *movements {
+func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements {
 	wheels := make([]*wheel, 0)
 
 	for _, specWheel := range spec.wheels {
 		wheels = append(wheels, &wheel{
-			angle:  0,
+			angle:  engine.NewAngle(0),
 			torque: 0,
 			radius: 30, // todo
 			spec:   specWheel,
@@ -48,7 +48,7 @@ func newMovements(position engine.Vector2D, angle engine.Angle, spec spec) *move
 }
 
 // return new position and direction
-func (mv *movements) update(s engine.State) (engine.Vector2D, engine.Angle) {
+func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	mv.updateWheels(s)
 	mv.updateDirection()
 
@@ -61,22 +61,22 @@ func (mv *movements) draw(r engine.Renderer) {
 		pos := mv.position.Add(Vec{
 			X: float64(wheel.spec.posRelative.x),
 			Y: float64(wheel.spec.posRelative.y),
-		}).RotateAround(mv.position, mv.direction+90)
+		}).RotateAround(mv.position, mv.direction+engine.NewAngle(90))
 
 		r.DrawText(
 			generated.ResourcesFontsJetBrainsMonoRegular,
 			engine.ColorPink,
 			fmt.Sprintf("#%d %s", id, wheel.spec.axis),
-			pos.ToPoint(),
+			pos,
 		)
 
 		// draw bounding box
-		r.DrawSquareEx(engine.ColorOrange, mv.direction+90+wheel.angle, engine.Rect{
-			X: pos.RoundX(),
-			Y: pos.RoundY(),
-			W: wheel.spec.size.width,
-			H: wheel.spec.size.height,
-		})
+		r.DrawSquareEx(engine.ColorOrange, mv.direction+engine.NewAngle(90)+wheel.angle, engine.RectScreen(
+			pos.RoundX(),
+			pos.RoundY(),
+			wheel.spec.size.width,
+			wheel.spec.size.height,
+		))
 	}
 
 	// draw velocity
@@ -89,7 +89,7 @@ func (mv *movements) updateWheels(s engine.State) {
 			continue
 		}
 
-		wheel.angle = engine.Anglef(float64(25) * s.Movement().Vector().X)
+		wheel.angle = engine.NewAngle(float64(25) * s.Movement().Vector().X)
 	}
 }
 
@@ -97,7 +97,7 @@ func (mv *movements) updateDirection() {
 	mv.direction = mv.velocity.Direction()
 }
 
-func (mv *movements) updateVelocity(s engine.State) (engine.Vector2D, engine.Angle) {
+func (mv *movements) updateVelocity(s engine.State) (engine.Vec, engine.Angle) {
 	c := mv.calc
 
 	isBraking := true  // todo

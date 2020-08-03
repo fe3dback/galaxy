@@ -6,7 +6,7 @@ import (
 	"github.com/fe3dback/galaxy/generated"
 )
 
-type Vec = engine.Vector2D
+type Vec = engine.Vec
 
 type Physics struct {
 	entity    *entity.Entity

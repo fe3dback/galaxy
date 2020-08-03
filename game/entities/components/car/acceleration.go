@@ -24,7 +24,7 @@ func (c Calculator) drag(velocity Vec, cDrag float64) Vec {
 		Y: math.Abs(velocity.Y),
 	}
 
-	return velocity.Mul(-cDrag).MulTo(abs)
+	return velocity.Scale(-cDrag).Mul(abs)
 }
 
 // Rolling resistance is caused by friction between the rubber and road surfaces
@@ -34,7 +34,7 @@ func (c Calculator) drag(velocity Vec, cDrag float64) Vec {
 //
 // roadSurface = 0 .. 1
 func (c Calculator) rollingResistance(roadSurface float64, velocity Vec) Vec {
-	return velocity.Mul(roadSurface)
+	return velocity.Scale(roadSurface)
 }
 
 // Gravity pulls the car towards the earth. The parallel component of
@@ -88,7 +88,7 @@ func (c Calculator) netForce(
 	var wheelForce Vec
 
 	if isBraking {
-		wheelForce = direction.Mul(-breakingFactor)
+		wheelForce = direction.Scale(-breakingFactor)
 	} else {
 		wheelForce = traction
 	}
@@ -102,7 +102,7 @@ func (c Calculator) netForce(
 // a = F / M
 //
 func (c Calculator) acceleration(netForce Vec, mass float64) Vec {
-	return netForce.Divide(mass)
+	return netForce.Decrease(mass)
 }
 
 // The car’s velocity is determined by integrating the acceleration over time
@@ -114,7 +114,7 @@ func (c Calculator) acceleration(netForce Vec, mass float64) Vec {
 // physics engine.
 func (c Calculator) velocity(velocity Vec, acceleration Vec, dt float64) Vec {
 	return velocity.Add(
-		acceleration.Mul(dt),
+		acceleration.Scale(dt),
 	)
 }
 
@@ -129,6 +129,6 @@ func (c Calculator) velocity(velocity Vec, acceleration Vec, dt float64) Vec {
 // reached its top speed.
 func (c Calculator) nextPosition(position Vec, velocity Vec, dt float64) Vec {
 	return position.Add(
-		velocity.Mul(dt),
+		velocity.Scale(dt),
 	)
 }

@@ -7,20 +7,20 @@ import (
 )
 
 type Camera struct {
-	position engine.Vector2D
+	position engine.Vec
 	width    int
 	height   int
 }
 
 func NewCamera() *Camera {
 	return &Camera{
-		position: engine.Vector2D{},
+		position: engine.Vec{},
 		width:    320,
 		height:   240,
 	}
 }
 
-func (c *Camera) Position() engine.Vector2D {
+func (c *Camera) Position() engine.Vec {
 	return c.position
 }
 
@@ -32,12 +32,12 @@ func (c *Camera) Height() int {
 	return c.height
 }
 
-func (c *Camera) MoveTo(p engine.Vector2D) {
+func (c *Camera) MoveTo(p engine.Vec) {
 	c.position = p
 }
 
-func (c *Camera) CenterOn(p engine.Vector2D) {
-	c.MoveTo(engine.Vector2D{
+func (c *Camera) CenterOn(p engine.Vec) {
+	c.MoveTo(engine.Vec{
 		X: float64(p.RoundX() - c.width/2),
 		Y: float64(p.RoundY() - c.height/2),
 	})

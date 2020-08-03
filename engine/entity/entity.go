@@ -10,13 +10,13 @@ import (
 type components []Component
 
 type Entity struct {
-	position   engine.Vector2D
+	position   engine.Vec
 	rotation   engine.Angle
 	components components
 	destroyed  bool
 }
 
-func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
+func NewEntity(pos engine.Vec, rot engine.Angle) *Entity {
 	return &Entity{
 		position:   pos,
 		rotation:   rot,
@@ -25,15 +25,15 @@ func NewEntity(pos engine.Vector2D, rot engine.Angle) *Entity {
 	}
 }
 
-func (e *Entity) Position() engine.Vector2D {
+func (e *Entity) Position() engine.Vec {
 	return e.position
 }
 
-func (e *Entity) SetPosition(pos engine.Vector2D) {
+func (e *Entity) SetPosition(pos engine.Vec) {
 	e.position = pos
 }
 
-func (e *Entity) AddPosition(v engine.Vector2D) {
+func (e *Entity) AddPosition(v engine.Vec) {
 	e.SetPosition(e.Position().Add(v))
 }
 

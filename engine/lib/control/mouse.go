@@ -12,11 +12,11 @@ func NewMouse() *Mouse {
 	return &Mouse{}
 }
 
-func (m Mouse) MouseCoords() engine.Point {
+func (m Mouse) MouseCoords() engine.Vec {
 	x, y, _ := sdl.GetMouseState()
 
-	return engine.Point{
-		X: int(x),
-		Y: int(y),
+	return engine.Vec{
+		X: float64(x),
+		Y: float64(y),
 	}
 }

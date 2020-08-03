@@ -47,7 +47,7 @@ type (
 
 	LayerFPS struct {
 		moment            engine.Moment
-		mousePos          engine.Point
+		mousePos          engine.Vec
 		graphs            map[graphId]*graph
 		previousDeltaTime float64
 	}
@@ -134,7 +134,7 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 			l.moment.FPS(),
 			l.moment.FrameDuration().String(),
 		),
-		engine.Point{
+		engine.Vec{
 			X: uiInfoFpsX,
 			Y: uiInfoFpsY,
 		},
@@ -146,7 +146,7 @@ func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 			r.Camera().Position().X,
 			r.Camera().Position().Y,
 		),
-		engine.Point{
+		engine.Vec{
 			X: uiInfoCamX,
 			Y: uiInfoCamY,
 		},
@@ -174,8 +174,8 @@ func (l *LayerFPS) drawGraph(r engine.Renderer, g *graph) {
 	r.DrawLine(
 		engine.ColorSelection,
 		engine.Line{
-			A: engine.Point{X: xl, Y: g.y + g.height + 2},
-			B: engine.Point{X: xr, Y: g.y + g.height + 2},
+			A: engine.Vec{X: float64(xl), Y: float64(g.y + g.height + 2)},
+			B: engine.Vec{X: float64(xr), Y: float64(g.y + g.height + 2)},
 		},
 	)
 
@@ -203,8 +203,8 @@ func (l *LayerFPS) drawGraph(r engine.Renderer, g *graph) {
 		r.DrawLine(
 			graphColor,
 			engine.Line{
-				A: engine.Point{X: xl + xOffset, Y: yb},
-				B: engine.Point{X: xl + xOffset, Y: yb - int(ratePercent*float32(g.height))},
+				A: engine.Vec{X: float64(xl + xOffset), Y: float64(yb)},
+				B: engine.Vec{X: float64(xl + xOffset), Y: float64(yb - int(ratePercent*float32(g.height)))},
 			},
 		)
 

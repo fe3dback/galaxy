@@ -20,12 +20,8 @@ type (
 
 func (f *frame) TextureRect() engine.Rect {
 	if f.rect == nil {
-		f.rect = &engine.Rect{
-			X: f.x,
-			Y: f.y,
-			W: f.w,
-			H: f.h,
-		}
+		r := engine.RectScreen(f.x, f.y, f.w, f.h)
+		f.rect = &r
 	}
 
 	return *f.rect

@@ -9,12 +9,13 @@ import (
 const avgTextWidthOptRender = 150
 const avgTextHeightOptRender = 20
 
-func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, p engine.Point) {
+func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, vec engine.Vec) {
 	if !r.isRectInsideCamera(engine.Rect{
-		X: p.X,
-		Y: p.Y,
-		W: avgTextWidthOptRender,
-		H: avgTextHeightOptRender,
+		Min: vec,
+		Max: engine.Vec{
+			X: avgTextWidthOptRender,
+			Y: avgTextHeightOptRender,
+		},
 	}) {
 		return
 	}
@@ -42,8 +43,8 @@ func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, t
 	}
 
 	dest := Rect{
-		X: r.screenX(p.X),
-		Y: r.screenY(p.Y),
+		X: int32(r.screenX(vec.X)),
+		Y: int32(r.screenY(vec.Y)),
 		W: surface.W,
 		H: surface.H,
 	}

@@ -13,7 +13,7 @@ const speedMultiplier = 5
 
 type Movement struct {
 	entity *entity.Entity
-	vec    engine.Vector2D
+	vec    engine.Vec
 }
 
 func NewMovement(entity *entity.Entity) *Movement {
@@ -24,20 +24,17 @@ func NewMovement(entity *entity.Entity) *Movement {
 
 func (r *Movement) OnDraw(d engine.Renderer) error {
 	text := fmt.Sprintf("%.4f, %.4f", r.vec.X, r.vec.Y)
-	d.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorCyan, text, engine.Point{
-		X: r.entity.Position().RoundX() + 50,
-		Y: r.entity.Position().RoundY() + 50,
-	})
+	d.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorCyan, text, r.entity.Position().Plus(50))
 
 	return nil
 }
 
 func (r *Movement) OnUpdate(state engine.State) error {
-	move := state.Movement().Vector().Mul(speed * state.Moment().DeltaTime())
+	move := state.Movement().Vector().Scale(speed * state.Moment().DeltaTime())
 	r.vec = state.Movement().Vector()
 
 	if state.Movement().Shift() {
-		move = move.Mul(speedMultiplier)
+		move = move.Scale(speedMultiplier)
 	}
 
 	r.entity.AddPosition(move)

@@ -13,8 +13,8 @@ type Player = entity.Entity
 
 func NewPlayer() *Player {
 	p := entity.NewEntity(
-		engine.Vector2D{X: 300, Y: 300},
-		engine.Anglef(0),
+		engine.Vec{X: 300, Y: 300},
+		engine.NewAngle(0),
 	)
 
 	// prepare components

@@ -2,12 +2,22 @@ package engine
 
 import "math"
 
+func roundTo(n float64) float64 {
+	if n == 0 {
+		return 0
+	}
+
+	return math.Round(floatRoundPow*n) / floatRoundPow
+}
+
 func floatPrecision(num float64) float64 {
+	// todo: remove
 	output := math.Pow(10, float64(5))
 	return floatRound(num*output) / output
 }
 
 func floatRound(x float64) float64 {
+	// todo: remove
 	if math.IsNaN(x) {
 		return x
 	}

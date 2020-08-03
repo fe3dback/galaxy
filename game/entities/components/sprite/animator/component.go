@@ -17,10 +17,14 @@ func (anim *Animator) OnDraw(r engine.Renderer) error {
 	entityPos := anim.entity.Position()
 
 	dest := engine.Rect{
-		X: entityPos.RoundX() + seq.offsetX - (frame.w / 2),
-		Y: entityPos.RoundY() + seq.offsetY - (frame.h / 2),
-		W: frame.w,
-		H: frame.h,
+		Min: engine.Vec{
+			X: float64(entityPos.RoundX() + seq.offsetX - (frame.w / 2)),
+			Y: float64(entityPos.RoundY() + seq.offsetY - (frame.h / 2)),
+		},
+		Max: engine.Vec{
+			X: float64(frame.w),
+			Y: float64(frame.h),
+		},
 	}
 
 	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation())

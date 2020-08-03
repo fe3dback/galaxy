@@ -25,12 +25,12 @@ func (s2d *Sprite2D) OnDraw(r engine.Renderer) error {
 	// draw sprite
 	r.DrawSpriteAngle(
 		s2d.resource,
-		s2d.entity.Position().ToPoint(),
+		s2d.entity.Position(),
 		s2d.entity.Rotation(),
 	)
 
 	// draw center
-	r.DrawCrossLines(engine.ColorCyan, 5, s2d.entity.Position().ToPoint())
+	r.DrawCrossLines(engine.ColorCyan, 5, s2d.entity.Position())
 
 	// draw vector
 	r.DrawVector(engine.ColorCyan, 50, s2d.entity.Position(), s2d.entity.Rotation())

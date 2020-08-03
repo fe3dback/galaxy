@@ -5,6 +5,17 @@ import (
 	"testing"
 )
 
+func testNormAngle(angle Angle) float64 {
+	return NewAngle(roundTo(clampDeg(angle.Degrees()))).Radians()
+}
+
+func testNormVec(vec Vec) Vec {
+	return Vec{
+		X: roundTo(vec.X),
+		Y: roundTo(vec.Y),
+	}
+}
+
 func TestRadian(t *testing.T) {
 	type args struct {
 		angle Angle
@@ -12,41 +23,41 @@ func TestRadian(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want float64
+		want Angle
 	}{
 		{
 			name: "0",
 			args: args{
-				angle: Anglef(0),
+				angle: NewAngle(0),
 			},
-			want: 0,
+			want: Angle(0),
 		},
 		{
 			name: "360",
 			args: args{
-				angle: Anglef(360),
+				angle: NewAngle(360),
 			},
-			want: 0,
+			want: Angle(0),
 		},
 		{
 			name: "240",
 			args: args{
-				angle: Anglef(240),
+				angle: NewAngle(240),
 			},
-			want: 4.1887902047863905,
+			want: Angle(4.1887902047863905),
 		},
 		{
 			name: "125",
 			args: args{
-				angle: Anglef(125),
+				angle: NewAngle(125),
 			},
-			want: 2.1816615649929116,
+			want: Angle(2.181661564992912),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Radian(tt.args.angle); got != tt.want {
-				t.Errorf("Radian() = %v, want %v", got, tt.want)
+			if got := tt.args.angle; got != tt.want {
+				t.Errorf("deg2rad() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -58,13 +69,13 @@ func TestVector2D_Add(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		n Vector2D
+		n Vec
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "plus",
@@ -73,12 +84,12 @@ func TestVector2D_Add(t *testing.T) {
 				Y: 3,
 			},
 			args: args{
-				n: Vector2D{
+				n: Vec{
 					X: 1,
 					Y: 1,
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 5,
 				Y: 4,
 			},
@@ -90,12 +101,12 @@ func TestVector2D_Add(t *testing.T) {
 				Y: 6,
 			},
 			args: args{
-				n: Vector2D{
+				n: Vec{
 					X: -3,
 					Y: -2,
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 6,
 				Y: 4,
 			},
@@ -107,12 +118,12 @@ func TestVector2D_Add(t *testing.T) {
 				Y: 14.1,
 			},
 			args: args{
-				n: Vector2D{
+				n: Vec{
 					X: 3.25,
 					Y: -1.85,
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 28.450,
 				Y: 12.25,
 			},
@@ -120,7 +131,7 @@ func TestVector2D_Add(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -137,7 +148,7 @@ func TestVector2D_AngleBetween(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		to Vector2D
+		to Vec
 	}
 	tests := []struct {
 		name   string
@@ -152,7 +163,7 @@ func TestVector2D_AngleBetween(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 1,
 					Y: 1,
 				},
@@ -166,12 +177,12 @@ func TestVector2D_AngleBetween(t *testing.T) {
 				Y: 5,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: -5,
 					Y: -3,
 				},
 			},
-			want: 165.9637565320735,
+			want: NewAngle(165.9637565320735),
 		},
 		{
 			name: "simple",
@@ -180,21 +191,21 @@ func TestVector2D_AngleBetween(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 0,
 					Y: 10,
 				},
 			},
-			want: 90,
+			want: NewAngle(90),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.AngleBetween(tt.args.to); got != tt.want {
+			if got := v.AngleBetween(tt.args.to); roundTo(float64(got)) != roundTo(float64(tt.want)) {
 				t.Errorf("AngleBetween() = %v, want %v", got, tt.want)
 			}
 		})
@@ -207,7 +218,7 @@ func TestVector2D_Cross(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		to Vector2D
+		to Vec
 	}
 	tests := []struct {
 		name   string
@@ -222,7 +233,7 @@ func TestVector2D_Cross(t *testing.T) {
 				Y: -90,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 147,
 					Y: -63,
 				},
@@ -232,7 +243,7 @@ func TestVector2D_Cross(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -259,7 +270,7 @@ func TestVector2D_Direction(t *testing.T) {
 				X: -1,
 				Y: 1,
 			},
-			want: 225,
+			want: NewAngle(225),
 		},
 		{
 			name: "1.5h",
@@ -267,7 +278,7 @@ func TestVector2D_Direction(t *testing.T) {
 				X: 1,
 				Y: -1,
 			},
-			want: 45,
+			want: NewAngle(45),
 		},
 		{
 			name: "left",
@@ -275,7 +286,7 @@ func TestVector2D_Direction(t *testing.T) {
 				X: -1,
 				Y: 0,
 			},
-			want: 180,
+			want: NewAngle(180),
 		},
 		{
 			name: "right",
@@ -283,7 +294,7 @@ func TestVector2D_Direction(t *testing.T) {
 				X: 1,
 				Y: 0,
 			},
-			want: 0,
+			want: NewAngle(0),
 		},
 		{
 			name: "top",
@@ -291,7 +302,7 @@ func TestVector2D_Direction(t *testing.T) {
 				X: 0,
 				Y: -1,
 			},
-			want: 90,
+			want: NewAngle(90),
 		},
 		{
 			name: "bottom",
@@ -299,16 +310,16 @@ func TestVector2D_Direction(t *testing.T) {
 				X: 0,
 				Y: 1,
 			},
-			want: 270,
+			want: NewAngle(270),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.Direction(); got != tt.want {
+			if got := v.Direction(); testNormAngle(got) != testNormAngle(tt.want) {
 				t.Errorf("Direction() = %v, want %v", got, tt.want)
 			}
 		})
@@ -321,7 +332,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		to Vector2D
+		to Vec
 	}
 	tests := []struct {
 		name   string
@@ -336,7 +347,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 5,
 					Y: 0,
 				},
@@ -350,7 +361,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: -4,
 					Y: 0,
 				},
@@ -364,7 +375,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 0,
 					Y: 3,
 				},
@@ -378,7 +389,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 20,
 					Y: 0,
 				},
@@ -392,7 +403,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 10,
 					Y: 0,
 				},
@@ -406,7 +417,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 				Y: 1,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 2,
 					Y: 2,
 				},
@@ -416,7 +427,7 @@ func TestVector2D_DistanceTo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -439,7 +450,7 @@ func TestVector2D_Divide(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "simple",
@@ -450,7 +461,7 @@ func TestVector2D_Divide(t *testing.T) {
 			args: args{
 				n: 2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 4,
 				Y: 2,
 			},
@@ -464,7 +475,7 @@ func TestVector2D_Divide(t *testing.T) {
 			args: args{
 				n: -2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -4,
 				Y: -2,
 			},
@@ -472,12 +483,12 @@ func TestVector2D_Divide(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.Divide(tt.args.n); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Divide() = %v, want %v", got, tt.want)
+			if got := v.Decrease(tt.args.n); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Decrease() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -489,7 +500,7 @@ func TestVector2D_Dot(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		to Vector2D
+		to Vec
 	}
 	tests := []struct {
 		name   string
@@ -504,7 +515,7 @@ func TestVector2D_Dot(t *testing.T) {
 				Y: 2,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 3,
 					Y: 4,
 				},
@@ -518,7 +529,7 @@ func TestVector2D_Dot(t *testing.T) {
 				Y: -4,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 4,
 					Y: 1,
 				},
@@ -528,7 +539,7 @@ func TestVector2D_Dot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -576,12 +587,12 @@ func TestVector2D_Length(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.Length(); got != tt.want {
-				t.Errorf("Length() = %v, want %v", got, tt.want)
+			if got := v.Magnitude(); got != tt.want {
+				t.Errorf("Magnitude() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -599,7 +610,7 @@ func TestVector2D_Mul(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "simple",
@@ -610,7 +621,7 @@ func TestVector2D_Mul(t *testing.T) {
 			args: args{
 				n: 3,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 6,
 				Y: 9,
 			},
@@ -624,7 +635,7 @@ func TestVector2D_Mul(t *testing.T) {
 			args: args{
 				n: 2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -4,
 				Y: 10,
 			},
@@ -632,12 +643,12 @@ func TestVector2D_Mul(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.Mul(tt.args.n); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Mul() = %v, want %v", got, tt.want)
+			if got := v.Scale(tt.args.n); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Scale() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -651,7 +662,7 @@ func TestVector2D_Normalize(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "only x",
@@ -659,7 +670,7 @@ func TestVector2D_Normalize(t *testing.T) {
 				X: 1,
 				Y: 0,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 1,
 				Y: 0,
 			},
@@ -670,7 +681,7 @@ func TestVector2D_Normalize(t *testing.T) {
 				X: -1,
 				Y: 0,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -1,
 				Y: 0,
 			},
@@ -681,7 +692,7 @@ func TestVector2D_Normalize(t *testing.T) {
 				X: 0,
 				Y: -1,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -1,
 			},
@@ -692,7 +703,7 @@ func TestVector2D_Normalize(t *testing.T) {
 				X: 1,
 				Y: 1,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0.7071067811865475,
 				Y: 0.7071067811865475,
 			},
@@ -703,7 +714,7 @@ func TestVector2D_Normalize(t *testing.T) {
 				X: 10,
 				Y: 10,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0.7071067811865475,
 				Y: 0.7071067811865475,
 			},
@@ -711,7 +722,7 @@ func TestVector2D_Normalize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -735,7 +746,7 @@ func TestVector2D_PolarOffset(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "x right",
@@ -745,9 +756,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: 5,
-				angle:    0,
+				angle:    NewAngle(0),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 5,
 				Y: 0,
 			},
@@ -760,9 +771,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: -5,
-				angle:    0,
+				angle:    NewAngle(0),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -5,
 				Y: 0,
 			},
@@ -775,9 +786,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: 2,
-				angle:    90,
+				angle:    NewAngle(90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -2,
 			},
@@ -790,9 +801,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: 2,
-				angle:    270,
+				angle:    NewAngle(270),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 2,
 			},
@@ -805,9 +816,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: 2,
-				angle:    270,
+				angle:    NewAngle(270),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 0,
 			},
@@ -820,9 +831,9 @@ func TestVector2D_PolarOffset(t *testing.T) {
 			},
 			args: args{
 				distance: -2,
-				angle:    270,
+				angle:    NewAngle(270),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -4,
 			},
@@ -830,7 +841,7 @@ func TestVector2D_PolarOffset(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -853,7 +864,7 @@ func TestVector2D_Rotate(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "turn to zero",
@@ -862,9 +873,9 @@ func TestVector2D_Rotate(t *testing.T) {
 				Y: 1,
 			},
 			args: args{
-				angle: -45,
+				angle: NewAngle(-45),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 1.41421,
 				Y: 0,
 			},
@@ -876,9 +887,9 @@ func TestVector2D_Rotate(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				angle: 90,
+				angle: NewAngle(90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -1,
 			},
@@ -890,9 +901,9 @@ func TestVector2D_Rotate(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				angle: -90,
+				angle: NewAngle(-90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 1,
 			},
@@ -904,9 +915,9 @@ func TestVector2D_Rotate(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				angle: -90,
+				angle: NewAngle(-90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -1,
 			},
@@ -918,9 +929,9 @@ func TestVector2D_Rotate(t *testing.T) {
 				Y: 5,
 			},
 			args: args{
-				angle: -45,
+				angle: NewAngle(-45),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 7.07107,
 				Y: 0,
 			},
@@ -928,7 +939,7 @@ func TestVector2D_Rotate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -945,14 +956,14 @@ func TestVector2D_RotateAround(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		orig  Vector2D
+		orig  Vec
 		angle Angle
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		args   args
-		want   Vector2D
+		want   Vec
 	}{
 		{
 			name: "simple",
@@ -961,13 +972,13 @@ func TestVector2D_RotateAround(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				orig: Vector2D{
+				orig: Vec{
 					X: 0,
 					Y: 0,
 				},
-				angle: 180,
+				angle: NewAngle(180),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -1,
 				Y: 0,
 			},
@@ -979,13 +990,13 @@ func TestVector2D_RotateAround(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				orig: Vector2D{
+				orig: Vec{
 					X: 0,
 					Y: 0,
 				},
-				angle: 180,
+				angle: NewAngle(180),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 1,
 				Y: 0,
 			},
@@ -997,13 +1008,13 @@ func TestVector2D_RotateAround(t *testing.T) {
 				Y: -1,
 			},
 			args: args{
-				orig: Vector2D{
+				orig: Vec{
 					X: 0,
 					Y: 0,
 				},
-				angle: Anglef(-90),
+				angle: NewAngle(-90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 1,
 				Y: 0,
 			},
@@ -1015,13 +1026,13 @@ func TestVector2D_RotateAround(t *testing.T) {
 				Y: 1,
 			},
 			args: args{
-				orig: Vector2D{
+				orig: Vec{
 					X: 0,
 					Y: 0,
 				},
-				angle: -90,
+				angle: NewAngle(-90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -1,
 				Y: 0,
 			},
@@ -1033,13 +1044,13 @@ func TestVector2D_RotateAround(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				orig: Vector2D{
+				orig: Vec{
 					X: 0,
 					Y: 0,
 				},
-				angle: 180,
+				angle: NewAngle(180),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 2,
 				Y: 0,
 			},
@@ -1047,7 +1058,7 @@ func TestVector2D_RotateAround(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -1087,7 +1098,7 @@ func TestVector2D_RoundX(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
@@ -1127,58 +1138,12 @@ func TestVector2D_RoundY(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
 			if got := v.RoundY(); got != tt.want {
 				t.Errorf("RoundY() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestVector2D_ToPoint(t *testing.T) {
-	type fields struct {
-		X float64
-		Y float64
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   Point
-	}{
-		{
-			name: "simple",
-			fields: fields{
-				X: 2,
-				Y: 2,
-			},
-			want: Point{
-				X: 2,
-				Y: 2,
-			},
-		},
-		{
-			name: "always lower",
-			fields: fields{
-				X: 2.01,
-				Y: 2.99,
-			},
-			want: Point{
-				X: 2,
-				Y: 2,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
-				X: tt.fields.X,
-				Y: tt.fields.Y,
-			}
-			if got := v.ToPoint(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ToPoint() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1191,14 +1156,14 @@ func TestVectorForward(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Vector2D
+		want Vec
 	}{
 		{
 			name: "simple",
 			args: args{
 				y: 2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -2,
 			},
@@ -1208,7 +1173,7 @@ func TestVectorForward(t *testing.T) {
 			args: args{
 				y: -2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 2,
 			},
@@ -1230,14 +1195,14 @@ func TestVectorLeft(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Vector2D
+		want Vec
 	}{
 		{
 			name: "simple",
 			args: args{
 				x: 2.01,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -2.01,
 				Y: 0,
 			},
@@ -1247,7 +1212,7 @@ func TestVectorLeft(t *testing.T) {
 			args: args{
 				x: 2,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -2,
 				Y: 0,
 			},
@@ -1264,17 +1229,17 @@ func TestVectorLeft(t *testing.T) {
 
 func TestVectorSum(t *testing.T) {
 	type args struct {
-		list []Vector2D
+		list []Vec
 	}
 	tests := []struct {
 		name string
 		args args
-		want Vector2D
+		want Vec
 	}{
 		{
 			name: "all pos",
 			args: args{
-				list: []Vector2D{
+				list: []Vec{
 					{
 						X: 1,
 						Y: 1,
@@ -1289,7 +1254,7 @@ func TestVectorSum(t *testing.T) {
 					},
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 6,
 				Y: 6,
 			},
@@ -1297,7 +1262,7 @@ func TestVectorSum(t *testing.T) {
 		{
 			name: "all neg",
 			args: args{
-				list: []Vector2D{
+				list: []Vec{
 					{
 						X: -1,
 						Y: -1,
@@ -1312,7 +1277,7 @@ func TestVectorSum(t *testing.T) {
 					},
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -6,
 				Y: -6,
 			},
@@ -1320,7 +1285,7 @@ func TestVectorSum(t *testing.T) {
 		{
 			name: "zero final",
 			args: args{
-				list: []Vector2D{
+				list: []Vec{
 					{
 						X: 1,
 						Y: -1,
@@ -1339,7 +1304,7 @@ func TestVectorSum(t *testing.T) {
 					},
 				},
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 0,
 			},
@@ -1361,14 +1326,14 @@ func TestVectorTowards(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Vector2D
+		want Vec
 	}{
 		{
 			name: "right",
 			args: args{
 				a: 0,
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 1,
 				Y: 0,
 			},
@@ -1376,9 +1341,9 @@ func TestVectorTowards(t *testing.T) {
 		{
 			name: "top",
 			args: args{
-				a: 90,
+				a: NewAngle(90),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: -1,
 			},
@@ -1386,9 +1351,9 @@ func TestVectorTowards(t *testing.T) {
 		{
 			name: "left",
 			args: args{
-				a: 180,
+				a: NewAngle(180),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: -1,
 				Y: 0,
 			},
@@ -1396,9 +1361,9 @@ func TestVectorTowards(t *testing.T) {
 		{
 			name: "bottom",
 			args: args{
-				a: 270,
+				a: NewAngle(270),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0,
 				Y: 1,
 			},
@@ -1406,9 +1371,9 @@ func TestVectorTowards(t *testing.T) {
 		{
 			name: "bottom",
 			args: args{
-				a: 45,
+				a: NewAngle(45),
 			},
-			want: Vector2D{
+			want: Vec{
 				X: 0.70711,
 				Y: -0.70711,
 			},
@@ -1416,7 +1381,7 @@ func TestVectorTowards(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := VectorTowards(tt.args.a); !reflect.DeepEqual(got, tt.want) {
+			if got := VectorTowards(tt.args.a); !reflect.DeepEqual(testNormVec(got), testNormVec(tt.want)) {
 				t.Errorf("VectorTowards() = %v, want %v", got, tt.want)
 			}
 		})
@@ -1429,7 +1394,7 @@ func TestVector2D_AngleTo(t *testing.T) {
 		Y float64
 	}
 	type args struct {
-		to Vector2D
+		to Vec
 	}
 	tests := []struct {
 		name   string
@@ -1444,12 +1409,12 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 1,
 					Y: 0,
 				},
 			},
-			want: 0,
+			want: NewAngle(0),
 		},
 		{
 			name: "top on 12h",
@@ -1458,12 +1423,12 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 0,
 					Y: -1,
 				},
 			},
-			want: 90,
+			want: NewAngle(90),
 		},
 		{
 			name: "left at 9h",
@@ -1472,12 +1437,12 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: -1,
 					Y: 0,
 				},
 			},
-			want: 180,
+			want: NewAngle(180),
 		},
 		{
 			name: "bottom at 6h",
@@ -1486,12 +1451,12 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 0,
 					Y: 1,
 				},
 			},
-			want: 270,
+			want: NewAngle(270),
 		},
 		{
 			name: "real",
@@ -1500,12 +1465,12 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: 1,
 					Y: -1,
 				},
 			},
-			want: 45,
+			want: NewAngle(45),
 		},
 		{
 			name: "real negative",
@@ -1514,21 +1479,21 @@ func TestVector2D_AngleTo(t *testing.T) {
 				Y: 0,
 			},
 			args: args{
-				to: Vector2D{
+				to: Vec{
 					X: -1,
 					Y: 1,
 				},
 			},
-			want: 225,
+			want: NewAngle(225),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			v := Vector2D{
+			v := Vec{
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.AngleTo(tt.args.to); got != tt.want {
+			if got := v.AngleTo(tt.args.to); testNormAngle(got) != testNormAngle(tt.want) {
 				t.Errorf("AngleTo() = %v, want %v", got, tt.want)
 			}
 		})
