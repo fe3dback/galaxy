@@ -90,6 +90,10 @@ func (r *Renderer) DrawVector(color engine.Color, dist float64, vec engine.Vec, 
 	r.DrawLine(color, line)
 	r.DrawLine(color, arrowLeft)
 	r.DrawLine(color, arrowRight)
+	r.DrawSquare(color, engine.Rect{
+		Min: vec,
+		Max: target.Sub(vec),
+	}.Screen())
 }
 
 func (r *Renderer) DrawCrossLines(color engine.Color, size int, vec engine.Vec) {

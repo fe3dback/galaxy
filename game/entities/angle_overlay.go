@@ -11,7 +11,7 @@ type AngleOverlay = entity.Entity
 
 func NewAngleOverlay() *AngleOverlay {
 	g := entity.NewEntity(
-		engine.Vec{X: 0, Y: 0},
+		engine.Vec{X: 1024, Y: 512},
 		engine.NewAngle(0),
 	)
 	g.AddComponent(debug.NewAngleOverlay(g))

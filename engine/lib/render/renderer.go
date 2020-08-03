@@ -71,7 +71,7 @@ func (r *Renderer) resetView() {
 
 	fmt.Printf("Resize to %d, %d (fullscreen = %v, scale = %d)\n", width, height, fullscreen, fullScreenScaleFactor)
 
-	r.Camera().Resize(int(width), int(height))
+	// r.Camera().Resize(int(width), int(height)) // todo
 }
 
 func (r *Renderer) SetDrawColor(color engine.Color) {
@@ -93,6 +93,7 @@ func (r *Renderer) Origin() *sdl.Renderer {
 // -- Base transforms (include camera relative pos)
 
 func (r *Renderer) screenX(x float64) float64 {
+	return x //todo
 	if r.renderMode == engine.RenderModeUI {
 		return x
 	}
@@ -101,6 +102,7 @@ func (r *Renderer) screenX(x float64) float64 {
 }
 
 func (r *Renderer) screenY(y float64) float64 {
+	return y
 	if r.renderMode == engine.RenderModeUI {
 		return y
 	}
@@ -156,8 +158,8 @@ func (r *Renderer) isLineInsideCamera(line engine.Line) bool {
 
 	return r.isRectInsideCamera(engine.Rect{
 		Min: line.A,
-		Max: line.B,
-	})
+		Max: line.B.Sub(line.A),
+	}.Screen())
 }
 
 func (r *Renderer) isRectInsideCamera(rect engine.Rect) bool {

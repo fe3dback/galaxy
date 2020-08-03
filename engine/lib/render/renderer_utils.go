@@ -14,15 +14,15 @@ func (r *Renderer) FillRect(rect engine.Rect) {
 func (r *Renderer) Clear(color engine.Color) {
 	r.SetDrawColor(color)
 
-	err := r.ref.SetClipRect(&sdl.Rect{
-		X: 0,
-		Y: 0,
-		W: int32(r.camera.width),
-		H: int32(r.camera.height),
-	})
-	utils.Check("set clip rect", err)
+	//err := r.ref.SetClipRect(&sdl.Rect{
+	//	X: 0,
+	//	Y: 0,
+	//	W: int32(r.camera.width),
+	//	H: int32(r.camera.height),
+	//})
+	//utils.Check("set clip rect", err)
 
-	err = r.ref.Clear()
+	err := r.ref.Clear()
 	utils.Check("clear", err)
 }
 

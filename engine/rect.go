@@ -10,6 +10,8 @@ type Rect struct {
 	Max Vec
 }
 
+type RectScreenX Rect
+
 func RectScreen(x, y, w, h int) Rect {
 	return Rect{
 		Min: Vec{
@@ -37,6 +39,30 @@ func (r Rect) Normalize() Rect {
 			X: math.Max(r.Min.X, r.Max.X),
 			Y: math.Max(r.Min.Y, r.Max.Y),
 		},
+	}
+}
+
+func (r Rect) Screen() Rect {
+	// todo: RectScreenX
+	if r.Max.X < 0 {
+		width := math.Abs(r.Max.X)
+
+		// reset width
+		r.Min.X -= width
+		r.Max.X = width
+	}
+
+	if r.Max.Y < 0 {
+		height := math.Abs(r.Max.Y)
+
+		// reset width
+		r.Min.Y -= height
+		r.Max.Y = height
+	}
+
+	return Rect{
+		Min: r.Min,
+		Max: r.Max,
 	}
 }
 
