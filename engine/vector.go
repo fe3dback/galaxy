@@ -111,7 +111,7 @@ func (v Vector2D) Dot(to Vector2D) float64 {
 }
 
 func (v Vector2D) Direction() Angle {
-	return Anglef(Degrees(math.Atan2(v.Y, v.X)))
+	return Anglef(Degrees(math.Atan2(-v.Y, v.X)))
 }
 
 func (v Vector2D) AngleBetween(to Vector2D) Angle {
@@ -129,7 +129,7 @@ func (v Vector2D) Rotate(angle Angle) Vector2D {
 
 	return Vector2D{
 		X: floatPrecision(v.X*cos - v.Y*sin),
-		Y: floatPrecision(v.X*sin + v.Y*cos),
+		Y: -floatPrecision(v.X*sin + v.Y*cos),
 	}
 }
 
@@ -145,7 +145,7 @@ func (v Vector2D) RotateAround(orig Vector2D, angle Angle) Vector2D {
 	yy := v.X*sin - v.Y*cos
 
 	v.X = floatPrecision(xx + orig.X)
-	v.Y = floatPrecision(yy + orig.Y)
+	v.Y = -floatPrecision(yy + orig.Y)
 
 	return v
 }
@@ -155,7 +155,7 @@ func (v Vector2D) PolarOffset(distance float64, angle Angle) Vector2D {
 
 	return Vector2D{
 		X: v.X + floatPrecision(distance*math.Cos(rad)),
-		Y: v.Y + floatPrecision(distance*math.Sin(rad)),
+		Y: v.Y - floatPrecision(distance*math.Sin(rad)),
 	}
 }
 

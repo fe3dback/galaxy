@@ -62,6 +62,10 @@ func main() {
 			panic(fmt.Sprintf("not expected resource file `%s` in root resources dir", rs.Name()))
 		}
 
+		if rs.Name() == ".git" {
+			continue
+		}
+
 		// iterate files
 		resources := make([]Resource, 0)
 

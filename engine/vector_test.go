@@ -254,12 +254,20 @@ func TestVector2D_Direction(t *testing.T) {
 		want   Angle
 	}{
 		{
+			name: "7.5h",
+			fields: fields{
+				X: -1,
+				Y: 1,
+			},
+			want: 225,
+		},
+		{
 			name: "1.5h",
 			fields: fields{
 				X: 1,
 				Y: -1,
 			},
-			want: 315,
+			want: 45,
 		},
 		{
 			name: "left",
