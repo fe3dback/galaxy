@@ -78,21 +78,39 @@ func (r *Renderer) DrawSquareEx(color engine.Color, angle engine.Angle, rect eng
 		return
 	}
 
-	hw := rect.Width() / 2
-	hh := rect.Height() / 2
-	pos := rect.Min
+	center := engine.Vec{
+		X: rect.Min.X + rect.Max.X/2,
+		Y: rect.Min.Y + rect.Max.Y/2,
+	}
 
-	tl := engine.Vec{X: pos.X - hw, Y: pos.Y - hh}
-	tr := engine.Vec{X: pos.X - hw + rect.Width(), Y: pos.Y - hh}
-	br := engine.Vec{X: pos.X - hw + rect.Width(), Y: pos.Y - hh + rect.Height()}
-	bl := engine.Vec{X: pos.X - hw, Y: pos.Y - hh + rect.Height()}
+	vertices := [4]engine.Vec{
+		engine.Vec{
+			X: rect.Min.X,
+			Y: rect.Min.Y,
+		}.RotateAround(center, angle),
+
+		engine.Vec{
+			X: rect.Min.X + rect.Max.X,
+			Y: rect.Min.Y,
+		}.RotateAround(center, angle),
+
+		engine.Vec{
+			X: rect.Min.X + rect.Max.X,
+			Y: rect.Min.Y + rect.Max.Y,
+		}.RotateAround(center, angle),
+
+		engine.Vec{
+			X: rect.Min.X,
+			Y: rect.Min.Y + rect.Max.Y,
+		}.RotateAround(center, angle),
+	}
 
 	r.internalDrawLines(color, []sdl.Point{
-		r.transPoint(tl.RotateAround(pos, angle)),
-		r.transPoint(tr.RotateAround(pos, angle)),
-		r.transPoint(br.RotateAround(pos, angle)),
-		r.transPoint(bl.RotateAround(pos, angle)),
-		r.transPoint(tl.RotateAround(pos, angle)),
+		r.transPoint(vertices[0]),
+		r.transPoint(vertices[1]),
+		r.transPoint(vertices[2]),
+		r.transPoint(vertices[3]),
+		r.transPoint(vertices[0]),
 	})
 }
 

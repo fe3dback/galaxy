@@ -118,10 +118,9 @@ func (phys *Physics) assembleSpecEngineGears(yaml yamlSpec) []specGear {
 func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {
 	wheels := make([]specWheel, 0)
 
-	carWidth := yaml.Size.Width
-	offsetX := carWidth / 2
+	offsetY := yaml.Wheels.Offset
 
-	for id, offsetY := range yaml.Wheels.Axis {
+	for id, offsetX := range yaml.Wheels.Axis {
 		wheels = append(wheels, specWheel{
 			size: specSize{
 				width:  yaml.Wheels.Size.Width,
@@ -129,12 +128,12 @@ func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {
 			},
 			axis: axis(id),
 			posRelative: specPos{
-				x: -offsetX + (yaml.Wheels.Size.Width / 2),
-				y: int(offsetY),
+				x: int(offsetX),
+				y: -offsetY,
 			},
 			posAbsolute: specPos{
-				x: yaml.Center.X - offsetX + (yaml.Wheels.Size.Width / 2),
-				y: yaml.Center.Y + int(offsetY),
+				x: yaml.Center.X + int(offsetX),
+				y: yaml.Center.Y - offsetY,
 			},
 		})
 		wheels = append(wheels, specWheel{
@@ -144,12 +143,12 @@ func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {
 			},
 			axis: axis(id),
 			posRelative: specPos{
-				x: offsetX - (yaml.Wheels.Size.Width / 2),
-				y: int(offsetY),
+				x: int(offsetX),
+				y: offsetY,
 			},
 			posAbsolute: specPos{
-				x: yaml.Center.X + offsetX - (yaml.Wheels.Size.Width / 2),
-				y: yaml.Center.Y + int(offsetY),
+				x: yaml.Center.X + int(offsetX),
+				y: yaml.Center.Y + offsetY,
 			},
 		})
 	}

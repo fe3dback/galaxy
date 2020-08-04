@@ -58,25 +58,32 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 
 func (mv *movements) draw(r engine.Renderer) {
 	for id, wheel := range mv.wheels {
+		if !r.Gizmos().Secondary() {
+			continue
+		}
+
 		pos := mv.position.Add(Vec{
 			X: float64(wheel.spec.posRelative.x),
 			Y: float64(wheel.spec.posRelative.y),
-		}).RotateAround(mv.position, mv.direction+engine.NewAngle(90))
-
-		r.DrawText(
-			generated.ResourcesFontsJetBrainsMonoRegular,
-			engine.ColorPink,
-			fmt.Sprintf("#%d %s", id, wheel.spec.axis),
-			pos,
-		)
+		}).RotateAround(mv.position, mv.direction)
 
 		// draw bounding box
-		r.DrawSquareEx(engine.ColorOrange, mv.direction+engine.NewAngle(90)+wheel.angle, engine.RectScreen(
-			pos.RoundX(),
-			pos.RoundY(),
+		r.DrawPoint(engine.ColorPink, pos)
+		r.DrawSquareEx(engine.ColorOrange, mv.direction+wheel.angle, engine.RectScreen(
+			pos.RoundX()-wheel.spec.size.width/2,
+			pos.RoundY()-wheel.spec.size.height/2,
 			wheel.spec.size.width,
 			wheel.spec.size.height,
 		))
+
+		if r.Gizmos().Debug() {
+			r.DrawText(
+				generated.ResourcesFontsJetBrainsMonoRegular,
+				engine.ColorPink,
+				fmt.Sprintf("#%d %s", id, wheel.spec.axis),
+				pos,
+			)
+		}
 	}
 
 	// draw velocity
@@ -89,7 +96,7 @@ func (mv *movements) updateWheels(s engine.State) {
 			continue
 		}
 
-		wheel.angle = engine.NewAngle(float64(25) * s.Movement().Vector().X)
+		wheel.angle = engine.NewAngle(float64(-25) * s.Movement().Vector().X)
 	}
 }
 

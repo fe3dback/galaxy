@@ -5,11 +5,14 @@ import (
 )
 
 func (phys *Physics) OnDraw(r engine.Renderer) error {
-	// debug bounding box, vectors
-	phys.debugDrawBoundingBox(r)
+	if r.Gizmos().Secondary() {
+		phys.debugDrawBoundingBox(r)
+	}
 
 	// debug weights
-	// phys.debugDrawWeights(r)
+	if r.Gizmos().Debug() {
+		phys.debugDrawWeights(r)
+	}
 
 	// draw wheels (movement component)
 	phys.movements.draw(r)
@@ -30,13 +33,12 @@ func (phys *Physics) OnUpdate(s engine.State) error {
 func (phys *Physics) debugDrawBoundingBox(r engine.Renderer) {
 	carSize := phys.spec.model.size
 	carPos := phys.entity.Position()
-	carAngle := phys.entity.Rotation()
 
 	// draw bounding box
 	// 90 spin because car width is not image width, is car width (and car angle direct to right)
-	r.DrawSquareEx(engine.ColorSelection, carAngle-90, engine.RectScreen(
-		int(carPos.X),
-		int(carPos.Y),
+	r.DrawSquareEx(engine.ColorSelection, phys.entity.Rotation(), engine.RectScreen(
+		int(carPos.X)-carSize.width/2,
+		int(carPos.Y)-carSize.height/2,
 		carSize.width,
 		carSize.height,
 	))

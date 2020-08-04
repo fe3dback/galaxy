@@ -35,8 +35,9 @@ type (
 	yamlAxisId      string
 	yamlAxisOffsetY int
 	yamlWheels      struct {
-		Size yamlSize                       `yaml:"size"`
-		Axis map[yamlAxisId]yamlAxisOffsetY `yaml:"axis"`
+		Size   yamlSize                       `yaml:"size"`
+		Offset int                            `yaml:"offset"`
+		Axis   map[yamlAxisId]yamlAxisOffsetY `yaml:"axis"`
 	}
 
 	yamlWeightLine struct {
