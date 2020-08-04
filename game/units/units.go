@@ -6,6 +6,9 @@ type Meters = float64
 // in m/s
 type SpeedMpS = float64
 
+// in km/h
+type SpeedKmH = float64
+
 // map pixels to meters
 const PixelsPerMeter = 128.0
 
@@ -18,3 +21,9 @@ const (
 
 // world
 const Gravity = 9.8
+
+func TransformSpeed(mps SpeedMpS) SpeedKmH {
+	metersPerHour := mps * 3600
+
+	return metersPerHour / 1000
+}
