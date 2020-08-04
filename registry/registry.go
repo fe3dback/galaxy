@@ -80,6 +80,7 @@ func makeRegistry(flags Flags) *Registry {
 	dispatcher := reg.registerDispatcher(
 		reg.eventQuit(frames),
 	)
+	renderGizmos := reg.registerRenderGizmos(dispatcher, options.Debug.System)
 	renderer := reg.registerRenderer(
 		sdlWindow,
 		sdlRenderer,
@@ -87,6 +88,7 @@ func makeRegistry(flags Flags) *Registry {
 		textureManager,
 		camera,
 		dispatcher,
+		renderGizmos,
 	)
 
 	// game
@@ -190,6 +192,10 @@ func (r registerFactory) registerMovement(dispatcher *event.Dispatcher) *control
 	return control.NewMovement(dispatcher)
 }
 
+func (r registerFactory) registerRenderGizmos(dispatcher *event.Dispatcher, debugMode bool) engine.Gizmos {
+	return engine.NewDrawGizmos(dispatcher, debugMode)
+}
+
 func (r registerFactory) registerRenderer(
 	sdlWindow *sdl.Window,
 	sdlRenderer *sdl.Renderer,
@@ -197,8 +203,9 @@ func (r registerFactory) registerRenderer(
 	textureManager *render.TextureManager,
 	camera *render.Camera,
 	dispatcher *event.Dispatcher,
+	gizmos engine.Gizmos,
 ) *render.Renderer {
-	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera, dispatcher)
+	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera, dispatcher, gizmos)
 }
 
 // ----------------------------------------
@@ -209,7 +216,8 @@ func (r registerFactory) registerGameOptions(flags Flags) *system.GameOptions {
 	return &system.GameOptions{
 		Debug: system.DebugOpt{
 			InProfiling: flags.IsProfiling,
-			System:      false,
+			System:      true,
+			Memory:      false,
 			Frames:      false,
 			World:       false,
 		},

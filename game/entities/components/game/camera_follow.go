@@ -17,11 +17,15 @@ func NewCameraFollower(entity *entity.Entity) *CameraFollower {
 }
 
 func (r *CameraFollower) OnDraw(d engine.Renderer) error {
+	if !d.Gizmos().Debug() {
+		return nil
+	}
+
 	d.DrawSquare(engine.ColorPink, engine.Rect{
 		Min: r.cam.Position(),
 		Max: engine.Vec{
-			X: float64(r.cam.Width()),
-			Y: float64(r.cam.Height()),
+			X: float64(r.cam.Width() - 1),
+			Y: float64(r.cam.Height() - 1),
 		},
 	})
 
@@ -30,8 +34,7 @@ func (r *CameraFollower) OnDraw(d engine.Renderer) error {
 
 func (r *CameraFollower) OnUpdate(s engine.State) error {
 	r.cam = s.Camera()
-	// s.Camera().CenterOn(r.entity.Position()) // todo
-	s.Camera().CenterOn(s.Mouse().MouseCoords())
+	s.Camera().CenterOn(r.entity.Position())
 
 	return nil
 }

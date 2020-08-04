@@ -74,6 +74,11 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 		if err != nil {
 			return fmt.Errorf("can`t draw entity `%T` component `%s`: %v", e, component, err)
 		}
+
+		if r.Gizmos().Primary() {
+			r.DrawPoint(engine.ColorForeground, e.position)
+			r.DrawVector(engine.ColorForeground, 20, e.position, e.rotation)
+		}
 	}
 
 	return nil

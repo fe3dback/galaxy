@@ -127,36 +127,45 @@ func (l *LayerFPS) OnUpdate(s engine.State) error {
 }
 
 func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
-	r.DrawText(
-		generated.ResourcesFontsJetBrainsMonoRegular,
-		engine.ColorGreen,
-		fmt.Sprintf("fps: %d / %s",
-			l.moment.FPS(),
-			l.moment.FrameDuration().String(),
-		),
-		engine.Vec{
-			X: uiInfoFpsX,
-			Y: uiInfoFpsY,
-		},
-	)
-	r.DrawText(
-		generated.ResourcesFontsJetBrainsMonoRegular,
-		engine.ColorGreen,
-		fmt.Sprintf("cam: %.2f, %.2f",
-			r.Camera().Position().X,
-			r.Camera().Position().Y,
-		),
-		engine.Vec{
-			X: uiInfoCamX,
-			Y: uiInfoCamY,
-		},
-	)
+	if r.Gizmos().System() {
+		r.DrawText(
+			generated.ResourcesFontsJetBrainsMonoRegular,
+			engine.ColorGreen,
+			fmt.Sprintf("fps: %d / %s",
+				l.moment.FPS(),
+				l.moment.FrameDuration().String(),
+			),
+			engine.Vec{
+				X: uiInfoFpsX,
+				Y: uiInfoFpsY,
+			},
+		)
+	}
 
-	l.drawGraph(r, l.graphs[graphIdFps])
-	l.drawGraph(r, l.graphs[graphIdDelta])
+	if r.Gizmos().Primary() {
+		r.DrawText(
+			generated.ResourcesFontsJetBrainsMonoRegular,
+			engine.ColorGreen,
+			fmt.Sprintf("cam: %.2f, %.2f",
+				r.Camera().Position().X,
+				r.Camera().Position().Y,
+			),
+			engine.Vec{
+				X: uiInfoCamX,
+				Y: uiInfoCamY,
+			},
+		)
+	}
 
-	// draw mouse
-	r.DrawCrossLines(engine.ColorOrange, 3, l.mousePos)
+	if r.Gizmos().System() {
+		l.drawGraph(r, l.graphs[graphIdFps])
+		l.drawGraph(r, l.graphs[graphIdDelta])
+	}
+
+	if r.Gizmos().Primary() {
+		// draw mouse
+		r.DrawCrossLines(engine.ColorOrange, 3, l.mousePos)
+	}
 
 	return nil
 }

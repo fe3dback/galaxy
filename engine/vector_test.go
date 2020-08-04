@@ -1062,7 +1062,7 @@ func TestVector2D_RotateAround(t *testing.T) {
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.RotateAround(tt.args.orig, tt.args.angle); !reflect.DeepEqual(got, tt.want) {
+			if got := v.RotateAround(tt.args.orig, tt.args.angle); !reflect.DeepEqual(testNormVec(got), testNormVec(tt.want)) {
 				t.Errorf("RotateAround() = %v, want %v", got, tt.want)
 			}
 		})

@@ -2,10 +2,11 @@ package engine
 
 import "math"
 
-const circleFull = 360.0
-const circleHalf = 180.0
-const convDeg2Rad = math.Pi / circleHalf
-const convRad2Deg = circleHalf / math.Pi
+const circleFullDeg = 360.0
+const circleHalfDeg = 180.0
+const circleFullRad = math.Pi * 2
+const convDeg2Rad = math.Pi / circleHalfDeg
+const convRad2Deg = circleHalfDeg / math.Pi
 const floatRoundPow = 10000
 
 type Angle float64
@@ -14,6 +15,10 @@ func NewAngle(deg float64) Angle {
 	return Angle(deg2rad(
 		clampDeg(deg),
 	))
+}
+
+func (a Angle) Flip() Angle {
+	return circleFullRad - a
 }
 
 func (a Angle) Degrees() float64 {
@@ -31,7 +36,7 @@ func (a Angle) Add(t Angle) Angle {
 }
 
 func clampDeg(deg float64) float64 {
-	return math.Mod(circleFull+math.Mod(deg, circleFull), circleFull)
+	return math.Mod(circleFullDeg+math.Mod(deg, circleFullDeg), circleFullDeg)
 }
 
 func deg2rad(deg float64) float64 {

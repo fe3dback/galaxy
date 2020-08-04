@@ -16,19 +16,17 @@ func (anim *Animator) OnDraw(r engine.Renderer) error {
 	frame := seq.frames[seq.currentFrame]
 	entityPos := anim.entity.Position()
 
-	dest := engine.Rect{
-		Min: engine.Vec{
-			X: float64(entityPos.RoundX() + seq.offsetX - (frame.w / 2)),
-			Y: float64(entityPos.RoundY() + seq.offsetY - (frame.h / 2)),
-		},
-		Max: engine.Vec{
-			X: float64(frame.w),
-			Y: float64(frame.h),
-		},
-	}
+	imageRect := engine.RectScreen(
+		entityPos.RoundX()+seq.offsetX-(frame.w/2),
+		entityPos.RoundY()+seq.offsetY-(frame.h/2),
+		frame.w,
+		frame.h,
+	)
+	r.DrawSpriteEx(res, frame.TextureRect(), imageRect, anim.entity.Rotation())
 
-	r.DrawSpriteEx(res, frame.TextureRect(), dest, anim.entity.Rotation())
-	r.DrawSquare(engine.ColorGreen, dest)
+	if r.Gizmos().Debug() {
+		r.DrawSquare(engine.ColorGreen, imageRect)
+	}
 
 	return nil
 }
@@ -39,6 +37,8 @@ func (anim *Animator) OnUpdate(s engine.State) error {
 	}
 
 	seq := anim.activeSequence
+
+	anim.entity.AddRotation(engine.NewAngle(1))
 
 	// if one time sequence
 	if seq.finished {

@@ -4,22 +4,13 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 const avgTextWidthOptRender = 150
 const avgTextHeightOptRender = 20
 
-func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, text string, vec engine.Vec) {
-	if !r.isRectInsideCamera(engine.Rect{
-		Min: vec,
-		Max: engine.Vec{
-			X: avgTextWidthOptRender,
-			Y: avgTextHeightOptRender,
-		},
-	}) {
-		return
-	}
-
+func (r *Renderer) internalDrawText(fontId generated.ResourcePath, color engine.Color, text string, pos sdl.Point) {
 	r.SetDrawColor(color)
 
 	font := r.fontManager.Get(fontId)
@@ -43,8 +34,8 @@ func (r *Renderer) DrawText(fontId generated.ResourcePath, color engine.Color, t
 	}
 
 	dest := Rect{
-		X: int32(r.screenX(vec.X)),
-		Y: int32(r.screenY(vec.Y)),
+		X: pos.X,
+		Y: pos.Y,
 		W: surface.W,
 		H: surface.H,
 	}

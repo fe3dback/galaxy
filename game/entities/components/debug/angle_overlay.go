@@ -21,9 +21,12 @@ func NewAngleOverlay(entity *entity.Entity) *AngleOverlay {
 }
 
 func (td *AngleOverlay) OnDraw(r engine.Renderer) error {
-
 	// center
 	r.DrawCrossLines(engine.ColorOrange, 10, td.entity.Position())
+	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorOrange, td.entity.Position().String(), td.entity.Position().Add(engine.Vec{
+		X: 0,
+		Y: -20,
+	}))
 
 	// helper
 	r.DrawSprite(generated.ResourcesSystemAngles, td.entity.Position())
@@ -38,10 +41,15 @@ func (td *AngleOverlay) OnDraw(r engine.Renderer) error {
 	// test vectors
 	// rotate around
 	rotateAround := td.entity.Position().Add(engine.Vec{
-		X: 500,
+		X: 100,
 		Y: 0,
 	}).RotateAround(td.entity.Position(), td.entity.Rotation())
 	r.DrawCrossLines(engine.ColorGreen, 10, rotateAround)
+	rotateAroundText := fmt.Sprintf("ra (%s)", rotateAround)
+	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorOrange, rotateAroundText, td.entity.Position().Add(engine.Vec{
+		X: 0,
+		Y: 20,
+	}))
 
 	// polar offset
 	polarOffset := td.entity.Position().PolarOffset(550, td.entity.Rotation())
@@ -57,7 +65,7 @@ func (td *AngleOverlay) OnDraw(r engine.Renderer) error {
 	rotateDir := fmt.Sprintf("S+90 (%.2f)", vec.Direction())
 	r.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorOrange, rotateDir, td.entity.Position().Add(engine.Vec{
 		X: -20,
-		Y: 20,
+		Y: 40,
 	}))
 
 	return nil

@@ -171,8 +171,8 @@ func (v Vec) Rotate(angle Angle) Vec {
 	cos := math.Cos(angle.Radians())
 
 	return Vec{
-		X: floatPrecision(v.X*cos - v.Y*sin),
-		Y: -floatPrecision(v.X*sin + v.Y*cos),
+		X: v.X*cos - v.Y*sin,
+		Y: -(v.X*sin + v.Y*cos),
 	}
 }
 
@@ -184,18 +184,18 @@ func (v Vec) RotateAround(orig Vec, angle Angle) Vec {
 	v.Y -= orig.Y
 
 	xx := v.X*cos + v.Y*sin
-	yy := v.X*sin - v.Y*cos
+	yy := -(v.X*sin - v.Y*cos)
 
-	v.X = floatPrecision(xx + orig.X)
-	v.Y = -floatPrecision(yy + orig.Y)
+	v.X = xx + orig.X
+	v.Y = yy + orig.Y
 
 	return v
 }
 
 func (v Vec) PolarOffset(distance float64, angle Angle) Vec {
 	return Vec{
-		X: v.X + floatPrecision(distance*math.Cos(angle.Radians())),
-		Y: v.Y - floatPrecision(distance*math.Sin(angle.Radians())),
+		X: v.X + distance*math.Cos(angle.Radians()),
+		Y: v.Y - distance*math.Sin(angle.Radians()),
 	}
 }
 

@@ -23,6 +23,10 @@ func NewMovement(entity *entity.Entity) *Movement {
 }
 
 func (r *Movement) OnDraw(d engine.Renderer) error {
+	if !d.Gizmos().Debug() {
+		return nil
+	}
+
 	text := fmt.Sprintf("%.4f, %.4f", r.vec.X, r.vec.Y)
 	d.DrawText(generated.ResourcesFontsJetBrainsMonoRegular, engine.ColorCyan, text, r.entity.Position().Plus(50))
 

@@ -23,6 +23,10 @@ func NewGridDrawer(entity *entity.Entity) *GridDrawer {
 }
 
 func (td *GridDrawer) OnDraw(r engine.Renderer) error {
+	if !r.Gizmos().Secondary() {
+		return nil
+	}
+
 	px := td.entity.Position().X
 	py := td.entity.Position().Y
 

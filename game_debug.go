@@ -14,8 +14,8 @@ import (
 func debug(provider *registry.Provider) {
 	debug := provider.Registry.Game.Options.Debug
 
-	if debug.System {
-		debugSystem()
+	if debug.Memory {
+		debugMemory()
 	}
 
 	if debug.Frames {
@@ -27,7 +27,7 @@ func debug(provider *registry.Provider) {
 	}
 }
 
-func debugSystem() {
+func debugMemory() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 

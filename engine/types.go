@@ -27,6 +27,14 @@ type (
 
 	RenderMode = uint8
 
+	Gizmos interface {
+		System() bool
+		Primary() bool
+		Secondary() bool
+		Debug() bool
+		Spam() bool
+	}
+
 	Renderer interface {
 		// base
 		SetDrawColor(Color)
@@ -50,6 +58,7 @@ type (
 		DrawText(fontId generated.ResourcePath, color Color, text string, vec Vec)
 
 		// system
+		Gizmos() Gizmos
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
 		Clear(Color)
