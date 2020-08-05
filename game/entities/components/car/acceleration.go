@@ -16,21 +16,33 @@ type Calculator struct {
 // C A R  F O R C E S
 // ========================================================================
 
-// When the car is in motion, an aerodynamic drag will develop that will resist
+// The engine generates torque, which when applied to the wheels causes them
+// to rotate.
+//
+// F traction = T wheel / R wheel
+//
+// Friction between the tires and the ground resists this motion,
+// resulting in a force applied to the tires in the direction opposite to the
+// rotation of the tires.
+func (c Calculator) traction(wheelTorque float64, wheelRadius float64) float64 {
+	return wheelTorque / wheelRadius
+}
+
+// When the car is in motion, an aerodynamic dragResistance will develop that will resist
 // the motion of the car. Drag force is proportional to the square of the velocity
 // and the formula to calculate the force is as follows.
 //
-// drag = -cDrag * V * |V|
+// dragResistance = -cDrag * V * |V|
 //
-// Where V is the velocity vector and C-drag is a constant, which is proportional to
+// Where V is the velocity vector and C-dragResistance is a constant, which is proportional to
 // the frontal area of the car.
-func (c Calculator) drag(velocity Vec, cDrag float64) Vec {
+func (c Calculator) dragResistance(velocity Vec, cDrag Vec) Vec {
 	abs := Vec{
 		X: math.Abs(velocity.X),
 		Y: math.Abs(velocity.Y),
 	}
 
-	return velocity.Scale(-cDrag).Mul(abs)
+	return velocity.Mul(cDrag.Scale(-1)).Mul(abs)
 }
 
 // Rolling resistance is caused by friction between the rubber and road surfaces
@@ -39,7 +51,7 @@ func (c Calculator) drag(velocity Vec, cDrag float64) Vec {
 // rollingResistance = -roadSurface * V
 //
 // roadSurface = 0 .. 1
-func (c Calculator) rollingResistance(roadSurface float64, velocity Vec) Vec {
+func (c Calculator) rollingResistance(velocity Vec, roadSurface float64) Vec {
 	return velocity.Scale(-roadSurface)
 }
 
@@ -56,52 +68,6 @@ func (c Calculator) gravityForce(mass float64, slopeAngle float64) Vec {
 	)
 }
 
-// The engine generates torque, which when applied to the wheels causes them
-// to rotate.
-//
-// F traction = T wheel / R wheel
-//
-// Friction between the tires and the ground resists this motion,
-// resulting in a force applied to the tires in the direction opposite to the
-// rotation of the tires.
-func (c Calculator) traction(wheelTorque float64, wheelRadius float64) Vec {
-	return engine.VectorForward(
-		wheelTorque / wheelRadius,
-	)
-}
-
-// To determine the position of the car first we must find the net force on the
-// car. The total longitudinal force is the vector sum of these four forces.
-//
-// F long = F traction + F drag + F rr + Fg
-//
-// When braking, a braking force replaces the traction force, which is oriented
-// in the opposite direction. A simple model of braking is as follows.
-//
-// F braking = - u * C braking
-//
-// Where u is a unit vector in the direction of the car’s heading and C braking is a
-// constant.
-func (c Calculator) netForce(
-	traction Vec,
-	drag Vec,
-	rollingResistance Vec,
-	gravityForce Vec,
-	direction Vec,
-	isBraking bool,
-	breakingFactor float64,
-) Vec {
-	var wheelForce Vec
-
-	if isBraking {
-		wheelForce = direction.Scale(-breakingFactor)
-	} else {
-		wheelForce = traction
-	}
-
-	return engine.VectorSum(wheelForce, drag, rollingResistance, gravityForce)
-}
-
 // The acceleration of the car is determined by the net force on the car and the
 // car’s mass via Newton’s second law.
 //
@@ -110,38 +76,6 @@ func (c Calculator) netForce(
 func (c Calculator) acceleration(netForce Vec, mass float64) Vec {
 	return netForce.Decrease(mass)
 }
-
-// The car’s velocity is determined by integrating the acceleration over time
-// using the numerical method for numerical integration
-//
-// V new = V + dt * a
-//
-// Where dt is the time increment in seconds between subsequent calls on the
-// physics engine.
-func (c Calculator) velocity(velocity Vec, acceleration Vec, dt float64) Vec {
-	return velocity.Add(
-		acceleration.Scale(dt),
-	)
-}
-
-// The car’s position is in turn determined by integrating the velocity over time.
-//
-// P new = P + dt * v
-//
-// With these forces, we can simulate car acceleration fairly accurately.
-// Together they also determined the top speed of the car since as the velocity of
-// the car increases the resistance forces also increases. At some point the
-// resistance forces and the engine force cancel each other out and the car has
-// reached its top speed.
-func (c Calculator) nextPosition(position Vec, velocity Vec, dt float64) Vec {
-	return position.Add(
-		velocity.Scale(dt),
-	)
-}
-
-// ========================================================================
-// W H E E L S
-// ========================================================================
 
 // The angular velocity of the engine in rad/s is obtained by multiplying
 // the engine turnover rate by 2π and dividing by 60.
@@ -157,14 +91,6 @@ func (c Calculator) nextPosition(position Vec, velocity Vec, dt float64) Vec {
 // RPM
 func (c Calculator) engineAngularVelocity(turnoverRate float64) float64 {
 	return math.Pi * 2 * turnoverRate / 60
-}
-
-// The relationship between the engine turnover rate and the wheel angular
-// velocity is as follows.
-// ωw = 2π Ωe / (60*gk*G)
-//
-func (c Calculator) wheelsAngularVelocity(turnoverRate float64, gearRatio float64, driveRatio float64) float64 {
-	return math.Pi * 2 * turnoverRate / (60 * gearRatio * driveRatio)
 }
 
 // The torque applied to the wheels is not the same as the engine torque
@@ -185,62 +111,99 @@ func (c Calculator) wheelsTorque(engineTorque float64, gearRatio float64, driveR
 	return engineTorque * gearRatio * driveRatio
 }
 
+// ========================================================================
+// C O M P U T E
+// ========================================================================
+
+type computeResults struct {
+	// primary (only this should by used by physics):
+	acceleration        Vec
+	angularAcceleration float64
+
+	// for debug/info purpose only
+	infoWheelsSlipFront    float64
+	infoWheelsSlipRear     float64
+	infoForceLatFront      float64
+	infoForceLatRear       float64
+	infoEngineTurnoverRate float64
+	infoEngineRPM          float64
+	infoEngineTorque       float64
+	infoWheelsTorque       float64
+	infoTraction           float64
+	infoRollingResistance  Vec
+	infoResistance         Vec
+	infoDragResistance     Vec
+	infoForce              Vec
+	infoBodyTorque         float64
+}
+
 func (c Calculator) compute(
-	lateralVelocity float64,
-	forwardVelocity float64,
+	// from prev step:
+	velocity Vec,
 	angularSpeed float64,
+
+	// input:
 	steeringAngle engine.Angle,
-	distanceToAxle float64,
-	corneringStiffness float64,
 	gearRatio float64,
-	driveRation float64,
-) {
+	isBreaking bool,
+
+	// env:
+	roadSurface float64,
+
+	// const:
+	mass float64,
+	distanceToFrontAxle float64,
+	distanceToRearAxle float64,
+	corneringStiffness float64,
+	driveRatio float64,
+	wheelsRadius float64,
+	airResistance Vec,
+) computeResults {
+
 	// 2. Compute the slip angles for front and rear wheels (equation 5.2)
 	wheelsSlipFront := c.wheelsSlipAngle(
-		lateralVelocity,
-		forwardVelocity,
+		velocity,
 		angularSpeed,
 		steeringAngle,
-		distanceToAxle,
+		distanceToFrontAxle,
 		true,
 	)
 
 	wheelsSlipRear := c.wheelsSlipAngle(
-		lateralVelocity,
-		forwardVelocity,
+		velocity,
 		angularSpeed,
 		steeringAngle,
-		distanceToAxle,
+		distanceToRearAxle,
 		false,
 	)
 
 	// 3. Compute Flat = Ca * slip angle (do for both rear and front wheels)
-	flatFront := corneringStiffness * wheelsSlipFront
-	flatRear := corneringStiffness * wheelsSlipRear
+	forceLatFront := corneringStiffness * wheelsSlipFront
+	forceLatRear := corneringStiffness * wheelsSlipRear
 
 	// 4. Cap Flat to maximum normalized frictional force (do for both rear and
 	// front wheels)
-	const flat = 1.0 // todo?
+	const forceLat = 1.0 // todo?
 
-	if flatFront > flat {
-		flatFront = flat
+	if forceLatFront > forceLat {
+		forceLatFront = forceLat
 	}
-	if flatRear > flat {
-		flatRear = flat
+	if forceLatRear > forceLat {
+		forceLatRear = forceLat
 	}
 
 	//5. Multiply Flat by the load (do for both rear and front wheels) to obtain
 	//the cornering forces.
 	const load = 1.0 // todo?
 
-	flatFront *= load
-	flatRear *= load
+	forceLatFront *= load
+	forceLatRear *= load
 
 	//6. Compute the engine turn over rate Ωe = Vx 60*gk*G / (2π * rw)
 	engineTurnoverRate := c.engineTurnoverRate(
-		forwardVelocity,
+		velocity.Y,
 		gearRatio,
-		driveRation,
+		driveRatio,
 		1.0, // todo?
 	)
 
@@ -261,51 +224,118 @@ func (c Calculator) compute(
 	//9. Compute the constant that define the torque curve line from the
 	//engine turn over rate
 
+	engineRPM := c.engineAngularVelocity(
+		engineTurnoverRate,
+	)
+
+	rpmMin := 500.0   // todo
+	rpmPeek := 4200.0 // todo
+	rpmMax := 6500.0  // todo
+
 	//10. From 9, compute the maximum engine torque, Te
+	var engineTorque float64
+
+	if engineRPM <= rpmMin {
+		engineTorque = rpmMin
+	} else if engineRPM <= rpmPeek {
+		// torque up min .. max
+		engineTorque = engine.Lerp(rpmMin, rpmPeek, (engineRPM-rpmMin)/(rpmPeek-rpmMin))
+	} else if engineRPM < rpmMax {
+		// torque down max .. min, after some max torque
+		engineTorque = engine.Lerp(rpmPeek, rpmMax, (engineRPM-rpmPeek)/(rpmMax-rpmPeek))
+	}
 
 	//11. Compute the maximum torque applied to the wheel Tw = Te * gk * G
 
+	wheelsTorque := c.wheelsTorque(
+		engineTorque,
+		gearRatio,
+		driveRatio,
+	)
+
 	//12. Multiply the maximum torque with the fraction of the throttle
-	//position to get the actual torque applied to the wheel (Ftraction - The
+	//position to get the actual torque applied to the wheel (F traction - The
 	//traction force)
-	//Development of a car physics engine for games 20
+
+	traction := c.traction(
+		wheelsTorque,
+		wheelsRadius,
+	)
 
 	//13. If the player is braking replace the traction force from 12 to a defined
 	//braking force
 
+	if isBreaking {
+		// todo (zero vector for zero traction)
+		traction = 0.0
+	}
+
 	//14. If the car is in reverse gear replace the traction force from 12 to a
 	//defined reverse force
 
-	//15. Compute rolling resistance Frr, x = - Crr * Vx and Frr,z = - Crr * Vz
+	// todo
 
-	//16. Compute drag resistance Fdrag, x = - Cdrag * Vx * |Vx| and Fdrag, z = -
-	//	Cdrag * Vz * |Vz|
+	//15. Compute rolling resistance Frr,
+	// Frr,x = - Crr * Vx
+	// Frr,z = - Crr * Vz
+	rollingResistance := c.rollingResistance(velocity, roadSurface)
 
-	//17. Compute total resistance (Fresistance) = rolling resistance + drag
-	//resistance
+	//16. Compute drag resistance
+	//  Fdrag, x = - Cdrag * Vx * |Vx|
+	//  Fdrag, z = - Cdrag * Vz * |Vz|
+	dragResistance := c.dragResistance(velocity, airResistance)
+
+	//17. Compute total resistance (Fresistance) = rolling resistance + dragResistance resistance
+	resistance := engine.VectorSum(rollingResistance, dragResistance)
 
 	//18. Sum the force on the car body
-	//Fx = Ftraction + Flat, front * sin (σ) * Fresistance, x
-	//Fz = Flat, rear + Flat, front * cos (σ) * Fresistance, z
+	//F(x) =  F(traction) + F(lat, front) * sin (σ) * F(resistance, x)
+	//F(z) = F(lat, rear) + F(lat, front) * cos (σ) * F(resistance, z)
+	force := Vec{
+		Y: traction + forceLatFront*math.Sin(steeringAngle.Radians())*resistance.Y,
+		X: forceLatRear + forceLatFront*math.Cos(steeringAngle.Radians())*resistance.X,
+	}
 
 	//19. Compute the torque on the car body
-	//Torque = cos (σ) * Flat, front * b – Flat, rear * c
+	//Torque = cos (σ) * F(lat, front) * b – F(lat, rear) * c
+
+	a := math.Cos(steeringAngle.Radians())
+	fLat := forceLatFront * distanceToFrontAxle
+	fRear := forceLatRear * distanceToRearAxle
+
+	bodyTorque := a*fLat - fRear
 
 	//20. Compute the acceleration
 	//a = F / M
 
+	acceleration := c.acceleration(force, mass)
+
 	//21. Compute the angular acceleration
 	//α = Torque/Inertia
 
-	//22. Transform the acceleration from car reference frame to world
-	//reference frame
+	inertia := 1.0 // todo
+	angularAcceleration := bodyTorque / inertia
 
-	//23. Integrate the acceleration to get the velocity (in world reference
-	//frame)
-	//Vwc += dt * a
+	return computeResults{
+		acceleration:        acceleration,
+		angularAcceleration: angularAcceleration,
 
-	//24. Integrate the velocity to get the new position in world coordinate
-	//Pwc += dt * Vwc
+		// info data
+		infoWheelsSlipFront:    wheelsSlipFront,
+		infoWheelsSlipRear:     wheelsSlipRear,
+		infoForceLatFront:      forceLatFront,
+		infoForceLatRear:       forceLatRear,
+		infoEngineTurnoverRate: engineTurnoverRate,
+		infoEngineRPM:          engineRPM,
+		infoEngineTorque:       engineTorque,
+		infoWheelsTorque:       wheelsTorque,
+		infoTraction:           traction,
+		infoRollingResistance:  rollingResistance,
+		infoDragResistance:     dragResistance,
+		infoResistance:         resistance,
+		infoForce:              force,
+		infoBodyTorque:         bodyTorque,
+	}
 }
 
 // The slip angles for the front wheels and rear wheels are given by the
@@ -320,22 +350,21 @@ func (c Calculator) compute(
 // CG to the rear axle, and c is the sign function that extracts the sign of a real
 // number.
 func (c Calculator) wheelsSlipAngle(
-	lateralVelocity float64,
-	forwardVelocity float64,
+	velocity Vec,
 	angularSpeed float64,
 	steeringAngle engine.Angle,
 	distanceToAxle float64,
 	isFrontAxle bool,
 ) float64 {
-	lateral := lateralVelocity + angularSpeed*distanceToAxle
-	wheels := math.Atan(lateral / forwardVelocity)
+	lateral := velocity.X + angularSpeed*distanceToAxle
+	wheels := math.Atan(lateral / velocity.Y)
 
 	if !isFrontAxle {
 		return wheels
 	}
 
 	// todo:  sign function that extracts the sign of a real number.
-	frontWheelsSteering := steeringAngle.Radians() * math.Abs(forwardVelocity)
+	frontWheelsSteering := steeringAngle.Radians() * math.Abs(velocity.Y)
 	return wheels - frontWheelsSteering
 }
 

@@ -36,7 +36,7 @@ func (phys *Physics) debugDrawBoundingBox(r engine.Renderer) {
 
 	// draw bounding box
 	// 90 spin because car width is not image width, is car width (and car angle direct to right)
-	r.DrawSquareEx(engine.ColorSelection, phys.entity.Rotation(), engine.RectScreen(
+	r.DrawSquareEx(engine.ColorYellow, phys.entity.Rotation(), engine.RectScreen(
 		int(carPos.X)-carSize.width/2,
 		int(carPos.Y)-carSize.height/2,
 		carSize.width,

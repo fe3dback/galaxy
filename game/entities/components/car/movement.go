@@ -2,6 +2,8 @@ package car
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/fe3dback/galaxy/game/units"
 
@@ -12,12 +14,16 @@ import (
 const wheelAxisTop = "top"
 
 type movements struct {
-	calc      Calculator
-	position  engine.Vec
-	velocity  engine.Vec
-	direction engine.Angle
-	wheels    []*wheel
-	spec      spec
+	calc          Calculator
+	position      engine.Vec
+	rotation      engine.Angle
+	velocity      engine.Vec
+	angularSpeed  float64
+	steeringAngle engine.Angle
+
+	// todo: remove
+	wheels []*wheel
+	spec   spec
 
 	// todo: remove/refactor
 	engineTurnoverRate    float64
@@ -50,7 +56,7 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 		calc:               Calculator{},
 		position:           position,
 		velocity:           engine.VectorTowards(angle),
-		direction:          angle,
+		rotation:           angle,
 		wheels:             wheels,
 		spec:               spec,
 		engineTurnoverRate: 4000,
@@ -60,7 +66,7 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 	}
 }
 
-// return new position and direction
+// return new position and rotation
 func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	mv.updateWheels(s)
 	mv.updateDirection()
@@ -107,11 +113,11 @@ func (mv *movements) draw(r engine.Renderer) {
 		pos := mv.position.Add(Vec{
 			X: float64(wheel.spec.posRelative.x),
 			Y: float64(wheel.spec.posRelative.y),
-		}).RotateAround(mv.position, mv.direction)
+		}).RotateAround(mv.position, mv.rotation)
 
 		// draw bounding box
 		r.DrawPoint(engine.ColorPink, pos)
-		r.DrawSquareEx(engine.ColorOrange, mv.direction+wheel.angle, engine.RectScreen(
+		r.DrawSquareEx(engine.ColorOrange, mv.rotation+wheel.angle, engine.RectScreen(
 			pos.RoundX()-wheel.spec.size.width/2,
 			pos.RoundY()-wheel.spec.size.height/2,
 			wheel.spec.size.width,
@@ -133,39 +139,48 @@ func (mv *movements) draw(r engine.Renderer) {
 }
 
 func (mv *movements) updateWheels(s engine.State) {
+	if s.Movement().Vector().X > 0.1 {
+		mv.steeringAngle -= engine.Angle1
+	}
+
+	if s.Movement().Vector().X < -0.1 {
+		mv.steeringAngle += engine.Angle1
+	}
+
+	mv.steeringAngle = engine.Angle(
+		engine.Clamp(mv.steeringAngle.Radians(), -engine.Angle25, engine.Angle25),
+	)
+
 	for _, wheel := range mv.wheels {
 		if wheel.spec.axis != wheelAxisTop {
 			continue
 		}
 
-		wheel.angle = engine.NewAngle(float64(-25) * s.Movement().Vector().X)
-	}
-
-	mv.engineTurnoverRate += s.Movement().Vector().X * 100
-	if mv.engineTurnoverRate < 0 {
-		mv.engineTurnoverRate = 0
-	}
-
-	if mv.engineTurnoverRate > 6500 {
-		mv.engineTurnoverRate = 6500 // todo: car max engine limit
+		wheel.angle = mv.steeringAngle
 	}
 }
 
 func (mv *movements) updateDirection() {
-	mv.direction = mv.velocity.Direction()
+	mv.rotation = mv.velocity.Direction()
 }
 
 func (mv *movements) updateVelocity(s engine.State) (engine.Vec, engine.Angle) {
 	c := mv.calc
 
-	// todo: move to wheels
-	mv.engineTorque = mv.calc.engineAngularVelocity(mv.engineTurnoverRate)
-	mv.wheelsTorque = mv.calc.wheelsTorque(mv.engineTorque, 1, 1)
+	gearRatio := 1.0  // todo mul
+	driveRatio := 1.0 // todo mul
+	distanceToFrontAxle := 1.0
+	distanceToRearAxle := 1.2
+	corneringStiffness := 0.5
 
-	mv.wheelDirection += engine.Angle(mv.wheelsTorque * s.Moment().DeltaTime())
-	// todo ^ end
-
-	wheelTorque := mv.wheelsTorque
+	//brakingFactor := 0.5 // todo 0 .. 1 // scale rotation down
+	wheelsRadius := 0.18 // todo 0 .. 1 // speed = (wheelTorque / wheelRadius)
+	dragResistance := Vec{
+		X: 0.5, // todo 0 .. 1 // air resistance (will slow car)
+		Y: 0.1, // todo 0 .. 1 // air resistance (will slow car)
+	}
+	roadSurface := 0.5 // todo 0 .. 1 // ground resistance (will slow car)
+	//slopeAngle := 0.0    // todo
 
 	isBraking := false // todo
 
@@ -174,84 +189,93 @@ func (mv *movements) updateVelocity(s engine.State) (engine.Vec, engine.Angle) {
 		isBraking = true
 	}
 
-	brakingFactor := 0.5 // todo 0 .. 1 // scale direction down
-	wheelRadius := 0.18  // todo 0 .. 1 // speed = (wheelTorque / wheelRadius)
-	frontalDrag := 0.1   // todo 0 .. 1 // air resistance (will slow car)
-	roadSurface := 0.5   // todo 0 .. 1 // ground resistance (will slow car)
-	slopeAngle := 0.0    // todo
-
 	// calculate current velocity
-	currentVelocity := mv.velocity
 
-	// calculate traction
-	traction := c.traction(wheelTorque, wheelRadius)
+	// -----------------------------------
 
-	// calculate drag
-	drag := c.drag(
-		currentVelocity,
-		frontalDrag,
-	)
+	computed := c.compute(
+		mv.velocity,
+		mv.angularSpeed,
 
-	// calculate rollingResistance
-	rollingResistance := c.rollingResistance(
-		roadSurface,
-		currentVelocity,
-	)
-
-	// calculate gravity
-	gravity := c.gravityForce(
-		float64(mv.spec.mass.mass),
-		slopeAngle,
-	)
-
-	// calculate direction
-	direction := engine.VectorTowards(mv.direction)
-
-	// calculate net force
-	netForce := c.netForce(
-		traction,
-		drag,
-		rollingResistance,
-		gravity,
-		direction,
+		// input:
+		mv.steeringAngle,
+		gearRatio,
 		isBraking,
-		brakingFactor,
-	)
 
-	// calculate acceleration
-	acceleration := c.acceleration(
-		netForce,
+		// env:
+		roadSurface,
+
+		// const:
 		float64(mv.spec.mass.mass),
+		distanceToFrontAxle,
+		distanceToRearAxle,
+		corneringStiffness,
+		driveRatio,
+		wheelsRadius,
+		dragResistance,
 	)
 
-	// calculate next velocity
-	mv.velocity = c.velocity(
-		currentVelocity,
-		acceleration,
-		s.Moment().DeltaTime(),
-	)
+	//22. Transform the acceleration from car reference frame to world
+	//reference frame
+
+	//23. Integrate the acceleration to get the velocity (in world reference
+	//frame)
+	//Vwc += dt * a
+
+	mv.velocity = mv.velocity.Add(computed.acceleration.Scale(s.Moment().DeltaTime()))
+	mv.angularSpeed = mv.angularSpeed + computed.angularAcceleration*s.Moment().DeltaTime()
+
+	//24. Integrate the velocity to get the new position in world coordinate
+	//Pwc += dt * Vwc
+
+	// swap velocity vectors, because -Y in compute is car forward axle
+	// in engine car forward default in right (0 deg), +X
+
+	nextVelocityInv := Vec{
+		X: mv.velocity.Y,
+		Y: mv.velocity.X,
+	}
+
+	nextPos := mv.position.Add(nextVelocityInv.Scale(s.Moment().DeltaTime()))
+	nextRot := mv.rotation.Add(engine.Angle(mv.angularSpeed * s.Moment().DeltaTime()))
+	mv.distanceFromLastFrame = nextPos.Sub(mv.position).Magnitude()
+
+	mv.position = nextPos
+	mv.rotation = nextRot
 
 	// ---------------------------------------
 	// calculate next position
 	// ---------------------------------------
 
+	comm := exec.Command("clear")
+	comm.Stdout = os.Stdout
+	_ = comm.Run()
+
+	fmt.Printf("steering deg: %v\n", mv.steeringAngle.Degrees())
+	fmt.Printf("    velocity: %v\n", nextVelocityInv)
 	fmt.Printf("----------------\n")
-	fmt.Printf("    traction: %v\n", traction)
-	fmt.Printf("        drag: %v\n", drag)
-	fmt.Printf("roll. resist: %v\n", rollingResistance)
-	fmt.Printf("     gravity: %v\n", gravity)
-	fmt.Printf("   direction: %v\n", direction)
-	fmt.Printf("           --\n")
-	fmt.Printf("   net force: %v\n", netForce)
-	fmt.Printf("acceleration: %v\n", acceleration)
+	fmt.Printf("acceleration: %v\n", computed.acceleration)
+	fmt.Printf("     angular: %v\n", computed.angularAcceleration)
+	fmt.Printf("----------------\n")
+	fmt.Printf("    traction: %v\n", computed.infoTraction)
+	fmt.Printf("d.resistance: %v\n", computed.infoDragResistance)
+	fmt.Printf("r.resistance: %v\n", computed.infoRollingResistance)
+	fmt.Printf("  resistance: %v\n", computed.infoResistance)
+	fmt.Printf("     en. rpm: %v\n", computed.infoEngineRPM)
+	fmt.Printf("en. turnover: %v\n", computed.infoEngineTurnoverRate)
+	fmt.Printf("  en. torque: %v\n", computed.infoEngineTorque)
+	fmt.Printf("wheel torque: %v\n", computed.infoWheelsTorque)
+	fmt.Printf(" body torque: %v\n", computed.infoBodyTorque)
+	fmt.Printf("       force: %v\n", computed.infoForce)
+	fmt.Printf(" force front: %v\n", computed.infoForceLatFront)
+	fmt.Printf("  force rear: %v\n", computed.infoForceLatRear)
+	fmt.Printf("  slip front: %v\n", computed.infoWheelsSlipFront)
+	fmt.Printf("   slip rear: %v\n", computed.infoWheelsSlipRear)
 
-	nextPos := c.nextPosition(
-		mv.position,
-		mv.velocity,
-		s.Moment().DeltaTime(),
-	)
-	mv.distanceFromLastFrame = nextPos.Sub(mv.position).Magnitude()
-	mv.position = nextPos
+	// debug, todo: remove
+	mv.engineTorque = computed.infoEngineTorque
+	mv.engineTurnoverRate = computed.infoEngineTurnoverRate
+	mv.wheelsTorque = computed.infoWheelsTorque
 
-	return mv.position, mv.direction
+	return mv.position, mv.rotation
 }

@@ -3,8 +3,6 @@ package entities
 import (
 	"time"
 
-	"github.com/fe3dback/galaxy/game/entities/components/sprite/sprite2d"
-
 	"github.com/fe3dback/galaxy/game/entities/components/car"
 
 	"github.com/fe3dback/galaxy/engine"
@@ -29,7 +27,7 @@ func NewCar(texture, physics generated.ResourcePath) *Car {
 		}
 	}()
 
-	e.AddComponent(sprite2d.NewSprite2D(e, texture))
+	//e.AddComponent(sprite2d.NewSprite2D(e, texture))
 	e.AddComponent(car.NewPhysics(e, physics))
 	e.AddComponent(game.NewCameraFollower(e))
 	e.AddComponent(debug.NewGridDrawer(e))
