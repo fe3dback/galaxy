@@ -194,7 +194,7 @@ func (c Calculator) compute(
 
 	//5. Multiply Flat by the load (do for both rear and front wheels) to obtain
 	//the cornering forces.
-	const load = 1.0 // todo?
+	const load = 0.01 // todo?
 
 	forceLatFront *= load
 	forceLatRear *= load
@@ -300,10 +300,7 @@ func (c Calculator) compute(
 	//Torque = cos (σ) * F(lat, front) * b – F(lat, rear) * c
 
 	a := math.Cos(steeringAngle.Radians())
-	fLat := forceLatFront * distanceToFrontAxle
-	fRear := forceLatRear * distanceToRearAxle
-
-	bodyTorque := a*fLat - fRear
+	bodyTorque := a*forceLatFront*distanceToFrontAxle - forceLatRear*distanceToRearAxle
 
 	//20. Compute the acceleration
 	//a = F / M
@@ -313,7 +310,7 @@ func (c Calculator) compute(
 	//21. Compute the angular acceleration
 	//α = Torque/Inertia
 
-	inertia := 1.0 // todo
+	inertia := 10.0 // todo
 	angularAcceleration := bodyTorque / inertia
 
 	return computeResults{

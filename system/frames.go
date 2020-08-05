@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const gameSpeedMultiplier = 50
+const gameSpeedMultiplier = 1
 
 type Frames struct {
 	limitFps      int
