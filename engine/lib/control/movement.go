@@ -13,6 +13,7 @@ type Movement struct {
 	pressedLeft   bool
 	pressedRight  bool
 	pressedShift  bool
+	pressedSpace  bool
 }
 
 func NewMovement(dispatcher *event.Dispatcher) *Movement {
@@ -23,6 +24,7 @@ func NewMovement(dispatcher *event.Dispatcher) *Movement {
 		pressedLeft:   false,
 		pressedRight:  false,
 		pressedShift:  false,
+		pressedSpace:  false,
 	}
 	m.subscribeToKeyboard(dispatcher)
 
@@ -35,6 +37,10 @@ func (m *Movement) Vector() engine.Vec {
 
 func (m *Movement) Shift() bool {
 	return m.pressedShift
+}
+
+func (m *Movement) Space() bool {
+	return m.pressedSpace
 }
 
 func (m *Movement) subscribeToKeyboard(dispatcher *event.Dispatcher) {
@@ -62,6 +68,9 @@ func (m *Movement) subscribeToKeyboard(dispatcher *event.Dispatcher) {
 		}
 		if keyboard.Key == event.KeyLshift {
 			m.pressedShift = pressed
+		}
+		if keyboard.Key == event.KeySpace || keyboard.Key == event.KeyKpSpace {
+			m.pressedSpace = pressed
 		}
 
 		m.update()

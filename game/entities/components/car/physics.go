@@ -7,6 +7,7 @@ import (
 )
 
 type Vec = engine.Vec
+type Angle = engine.Angle
 
 type Physics struct {
 	entity    *entity.Entity

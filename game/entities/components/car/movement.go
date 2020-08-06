@@ -56,13 +56,13 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 		position:        position,
 		rotation:        angle,
 		velocity:        Vec{},
-		angularVelocity: engine.Angle15,
+		angularVelocity: engine.Angle0,
 
 		spec:          spec,
 		steeringAngle: engine.Angle0,
 
 		// car
-		motor:  newMotor(),
+		motor:  newMotor(float64(spec.mass.mass)),
 		wheels: wheels,
 	}
 }
@@ -74,16 +74,16 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	mv.results.speed = mv.updateSpeed(s)
 
 	// update velocities
-	mv.velocity = mv.velocity.Scale(s.Moment().DeltaTime())
-	mv.angularVelocity = mv.angularVelocity * engine.Angle(s.Moment().DeltaTime())
+	mv.velocity = mv.velocity.Add(mv.results.motor.acceleration.Scale(s.Moment().DeltaTime()))
+	//mv.angularVelocity = mv.angularVelocity * engine.Angle(s.Moment().DeltaTime())
 
 	fmt.Printf("            dt: %.2f\n", s.Moment().DeltaTime())
 	fmt.Printf("      velocity: %s\n", mv.velocity)
 	fmt.Printf(" ang. velocity: %.2f\n", mv.angularVelocity)
 
 	mv.clcPreviousPosition = mv.position
-	mv.position = mv.position.Add(mv.velocity.Rotate(mv.rotation.Add(engine.Angle90)))
-	mv.rotation = mv.rotation.Add(mv.angularVelocity)
+	mv.position = mv.position.Add(mv.velocity.Scale(s.Moment().DeltaTime()))
+	//mv.rotation = mv.rotation.Add(mv.angularVelocity)
 
 	return mv.position, mv.rotation
 }
@@ -101,19 +101,18 @@ func (mv *movements) updateSpeed(s engine.State) units.SpeedKmH {
 
 func (mv *movements) updateMotor(s engine.State) motorResult {
 	if s.Movement().Vector().Y < -0.1 {
-		mv.motor.IncreasePower(1000 * s.Moment().DeltaTime())
+		mv.motor.IncreaseForce(10000 * s.Moment().DeltaTime())
 	}
 
 	if s.Movement().Vector().Y > 0.1 {
-		mv.motor.IncreasePower(-1000 * s.Moment().DeltaTime())
+		mv.motor.IncreaseForce(-10000 * s.Moment().DeltaTime())
 	}
 
-	if s.Movement().Vector().Y < -0.1 {
-		todoAcceleration := mv.results.motor.torque * s.Moment().DeltaTime() // todo calc in wheels
-		mv.velocity = mv.velocity.Plus(todoAcceleration)
+	if s.Movement().Space() {
+		mv.motor.Brake()
 	}
 
-	return mv.motor.UpdateMotor()
+	return mv.motor.UpdateMotor(mv.velocity, mv.rotation)
 }
 
 func (mv *movements) updateWheels(s engine.State) {
@@ -194,25 +193,23 @@ func (mv *movements) drawMotor(r engine.Renderer) {
 		r.DrawText(
 			generated.ResourcesFontsJetBrainsMonoRegular,
 			engine.ColorPink,
-			fmt.Sprintf("engine torque: %.2f", mv.results.motor.torque),
+			fmt.Sprintf("engine acceleration: %.2f", mv.results.motor.acceleration),
 			motorPos.Add(Vec{Y: 20}),
 		)
 		r.DrawText(
 			generated.ResourcesFontsJetBrainsMonoRegular,
 			engine.ColorPink,
-			fmt.Sprintf("power: %.2f (%d)", mv.results.motor.infoPower, mv.results.motor.infoGear),
+			fmt.Sprintf("force: %.2f (%.2f)", mv.results.motor.infoEngineForce, mv.results.motor.infoForceLongitudinal),
 			motorPos.Add(Vec{Y: 40}),
 		)
-		r.DrawText(
-			generated.ResourcesFontsJetBrainsMonoRegular,
-			engine.ColorPink,
-			fmt.Sprintf(
-				"rpm: %.1f, trn.ovr: %.1f, ger.rto: %.1f",
-				mv.results.motor.infoRPM,
-				mv.results.motor.infoTurnoverRate,
-				mv.results.motor.infoGearRatio,
-			),
-			motorPos.Add(Vec{Y: 60}),
-		)
+		//r.DrawText(
+		//	generated.ResourcesFontsJetBrainsMonoRegular,
+		//	engine.ColorPink,
+		//	fmt.Sprintf(
+		//		"acc: %.1f",
+		//		mv.results.motor.infoAcceleration,
+		//	),
+		//	motorPos.Add(Vec{Y: 60}),
+		//)
 	}
 }

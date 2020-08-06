@@ -87,6 +87,7 @@ type (
 	Movement interface {
 		Vector() Vec
 		Shift() bool
+		Space() bool
 	}
 
 	// Game State

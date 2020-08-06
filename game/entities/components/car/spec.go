@@ -32,7 +32,6 @@ type (
 	}
 
 	specEngine struct {
-		gears []specGear
 	}
 
 	specWheel struct {
@@ -46,10 +45,6 @@ type (
 		weight      weight
 		posRelative specPos
 		posAbsolute specPos
-	}
-
-	specGear struct {
-		maxSpeed KMpS
 	}
 
 	specPos struct {
@@ -93,26 +88,8 @@ func (phys *Physics) assembleSpecModel(yaml yamlSpec) specModel {
 	}
 }
 
-func (phys *Physics) assembleSpecEngine(yaml yamlSpec) specEngine {
-	return specEngine{
-		gears: phys.assembleSpecEngineGears(yaml),
-	}
-}
-
-func (phys *Physics) assembleSpecEngineGears(yaml yamlSpec) []specGear {
-	// todo: gear speed calculation based on params, rpm, horse power, mass..
-	return []specGear{
-		{
-			maxSpeed: KMpS(float32(yaml.Params.MaxSpeed) * 0.5),
-		},
-		{
-			maxSpeed: KMpS(float32(yaml.Params.MaxSpeed) * 0.75),
-		},
-		{
-			maxSpeed: KMpS(float32(yaml.Params.MaxSpeed) * 1),
-		},
-	}
-
+func (phys *Physics) assembleSpecEngine(_ yamlSpec) specEngine {
+	return specEngine{}
 }
 
 func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {

@@ -7,133 +7,106 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 )
 
-const turnoverRateMin = 5.0
-const turnoverRateMax = 36000.0
-
-const rpmMin = 250.0
-const rpmPeek = 3600.0
-const rpmMax = 4200.0
-
-const powerMax = 100000.0
-const powerMin = 0.0
-
 const (
-	motorGearReverse gearId = -1
-	motorGearNeutral gearId = 0
-	motorGearFirst   gearId = 1
-	motorGearSecond  gearId = 2
-	motorGearThird   gearId = 3
+	// Air density (rho) is 1.29 kg/m3 (0.0801 lb-mass/ft3),
+	// frontal area is approx. 2.2 m2 (20 sq. feet),
+	// Cd depends on the shape of the car and determined via wind tunnel tests.
+	// Approximate value for a Corvette: 0.30. This gives us a value for Cdrag:
+	// Cdrag = 0.5 * 0.30 * 2.2 * 1.29
+	//       = 0.4257
+	cDrag = 0.4257
+
+	// We've already found that Crr should be approx. 30 times Cdrag.
+	cAirResistance = cDrag * 30
+
+	cBraking = 1000
 )
 
 type (
 	motor struct {
-		engineOn bool
-		power    float64
-		gear     gearId
+		mass        float64
+		engineForce float64
+		isBraking   bool
 	}
 
 	motorResult struct {
-		torque float64
+		acceleration Vec
 
-		infoEngineOn bool
-		infoPower    float64
-		infoGear     int8
-
-		infoGearRatio    float64
-		infoTurnoverRate float64
-		infoRPM          float64
+		infoForceLongitudinal Vec
+		infoEngineForce       float64
 	}
-
-	gearId int8
 )
 
-func newMotor() *motor {
-	return &motor{ // todo not defaults
-		engineOn: true,
-		power:    0,
-		gear:     motorGearFirst,
+func newMotor(mass float64) *motor {
+	return &motor{
+		mass:        mass,
+		engineForce: 0,
 	}
 }
 
-func (m *motor) UpdateMotor() motorResult {
-	gearRatio := m.gearRatio()
-	turnoverRate := m.turnoverRate(gearRatio)
-	rpm := m.angularVelocityRPM(turnoverRate)
-	torque := m.torque(rpm)
+func (m *motor) IncreaseForce(force float64) {
+	m.engineForce += force
+}
+
+func (m *motor) Brake() {
+	m.isBraking = true
+}
+
+func (m *motor) UpdateMotor(velocity Vec, direction Angle) motorResult {
+	longitudinalForces := m.calculateLongForce(velocity, direction)
+
+	acceleration := longitudinalForces.Decrease(m.mass)
+
+	// return back braking model
+	m.isBraking = false
 
 	return motorResult{
-		torque: torque,
+		acceleration: acceleration,
 
-		infoEngineOn:     m.engineOn,
-		infoPower:        m.power,
-		infoGear:         int8(m.gear),
-		infoGearRatio:    gearRatio,
-		infoTurnoverRate: turnoverRate,
-		infoRPM:          rpm,
+		infoForceLongitudinal: longitudinalForces,
+		infoEngineForce:       m.engineForce,
 	}
 }
 
-func (m *motor) Start() {
-	m.engineOn = true
-}
+func (m *motor) calculateLongForce(velocity Vec, direction Angle) engine.Vec {
+	fmt.Println("--")
+	directionUnit := Vec{
+		X: math.Cos(direction.Radians()),
+		Y: math.Sin(direction.Radians()),
+	}
+	fmt.Println(directionUnit)
 
-func (m *motor) Stop() {
-	m.engineOn = true
-}
+	tractionForce := directionUnit.Scale(m.engineForce)
+	fmt.Println(tractionForce)
 
-func (m *motor) SwitchGear(id gearId) {
-	m.gear = id
-}
+	speed := velocity.Magnitude()
+	fmt.Println(speed)
+	dragForce := Vec{
+		X: -cDrag * velocity.X * speed,
+		Y: -cDrag * velocity.Y * speed,
+	}
+	fmt.Println(dragForce)
 
-func (m *motor) IncreasePower(forward float64) {
-	m.power += forward
-	m.power = engine.Clamp(m.power, powerMin, powerMax)
-}
+	rollingResistanceForce := Vec{
+		X: -cAirResistance * velocity.X,
+		Y: -cAirResistance * velocity.Y,
+	}
+	fmt.Println(rollingResistanceForce)
 
-func (m *motor) torque(rpm float64) float64 {
-	if rpm <= rpmMin {
-		return rpmMin
+	if m.isBraking && speed > 0 {
+		brakingForce := directionUnit.Scale(-cBraking)
+		fmt.Println(brakingForce)
+
+		return engine.VectorSum(
+			brakingForce,
+			dragForce,
+			rollingResistanceForce,
+		)
 	}
 
-	if rpm <= rpmPeek {
-		return engine.Lerp(rpmMin, rpmPeek, (rpm-rpmMin)/(rpmPeek-rpmMin))
-	}
-
-	if rpm < rpmMax {
-		return engine.Lerp(rpmPeek, rpmMax, (rpm-rpmPeek)/(rpmMax-rpmPeek))
-	}
-
-	return rpmMax
-}
-
-func (m *motor) angularVelocityRPM(turnoverRate float64) float64 {
-	return math.Pi * 2 * turnoverRate / 60
-}
-
-func (m *motor) turnoverRate(gearRatio float64) float64 {
-	if !m.engineOn {
-		return 0.0
-	}
-
-	rate := m.power * gearRatio
-	rate = engine.Clamp(rate, turnoverRateMin, turnoverRateMax)
-
-	return rate
-}
-
-func (m *motor) gearRatio() float64 {
-	switch m.gear {
-	case motorGearReverse:
-		return -0.5
-	case motorGearNeutral:
-		return 0
-	case motorGearFirst:
-		return 0.5
-	case motorGearSecond:
-		return 1
-	case motorGearThird:
-		return 1.5
-	default:
-		panic(fmt.Sprintf("unknown gear %d", m.gear))
-	}
+	return engine.VectorSum(
+		tractionForce,
+		dragForce,
+		rollingResistanceForce,
+	)
 }

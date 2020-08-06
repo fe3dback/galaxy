@@ -18,8 +18,7 @@ type (
 	}
 
 	yamlParams struct {
-		Mass     int `yaml:"mass"`
-		MaxSpeed int `yaml:"maxSpeed"`
+		Mass int `yaml:"mass"`
 	}
 
 	yamlCenter struct {
