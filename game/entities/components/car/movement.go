@@ -17,6 +17,7 @@ type movements struct {
 	steeringAngle   engine.Angle
 	velocity        engine.Vec
 	angularVelocity engine.Angle
+	speed           units.SpeedKmH
 
 	// calculated
 	clcPreviousPosition engine.Vec
@@ -28,7 +29,6 @@ type movements struct {
 
 	// results
 	results struct {
-		speed units.SpeedKmH
 		motor motorResult
 	}
 }
@@ -42,12 +42,13 @@ type wheel struct {
 
 func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements {
 	wheels := make([]*wheel, 0)
+	wheelsRadius := 0.34 // todo to spec, in meters
 
 	for _, specWheel := range spec.wheels {
 		wheels = append(wheels, &wheel{
 			angle:  engine.NewAngle(0),
-			torque: 0,
-			radius: 30, // todo
+			torque: 0, // todo?
+			radius: wheelsRadius,
 			spec:   specWheel,
 		})
 	}
@@ -62,7 +63,11 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 		steeringAngle: engine.Angle0,
 
 		// car
-		motor:  newMotor(float64(spec.mass.mass)),
+		motor: newMotor(
+			float64(spec.mass.mass),
+			0.7, // todo to spec,
+			wheelsRadius,
+		),
 		wheels: wheels,
 	}
 }
@@ -71,7 +76,7 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	mv.results.motor = mv.updateMotor(s)
 	mv.updateWheels(s)
-	mv.results.speed = mv.updateSpeed(s)
+	mv.speed = mv.updateSpeed(s)
 
 	// update velocities
 	mv.velocity = mv.velocity.Add(mv.results.motor.acceleration.Scale(s.Moment().DeltaTime()))
@@ -82,7 +87,11 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	fmt.Printf(" ang. velocity: %.2f\n", mv.angularVelocity)
 
 	mv.clcPreviousPosition = mv.position
-	mv.position = mv.position.Add(mv.velocity.Scale(s.Moment().DeltaTime()))
+	mv.position = mv.position.Add(
+		mv.velocity.
+			Scale(units.PixelsPerMeter).
+			Scale(s.Moment().DeltaTime()),
+	)
 	//mv.rotation = mv.rotation.Add(mv.angularVelocity)
 
 	return mv.position, mv.rotation
@@ -100,19 +109,13 @@ func (mv *movements) updateSpeed(s engine.State) units.SpeedKmH {
 // =======================================================================
 
 func (mv *movements) updateMotor(s engine.State) motorResult {
-	if s.Movement().Vector().Y < -0.1 {
-		mv.motor.IncreaseForce(10000 * s.Moment().DeltaTime())
-	}
-
-	if s.Movement().Vector().Y > 0.1 {
-		mv.motor.IncreaseForce(-10000 * s.Moment().DeltaTime())
-	}
+	mv.motor.GasPedalPushPercent(-s.Movement().Vector().Y)
 
 	if s.Movement().Space() {
 		mv.motor.Brake()
 	}
 
-	return mv.motor.UpdateMotor(mv.velocity, mv.rotation)
+	return mv.motor.UpdateMotor(mv.speed, mv.velocity, mv.rotation)
 }
 
 func (mv *movements) updateWheels(s engine.State) {
@@ -144,23 +147,24 @@ func (mv *movements) draw(r engine.Renderer) {
 }
 
 func (mv *movements) drawBoundingBox(r engine.Renderer) {
-	r.DrawVector(engine.ColorRed, 30, mv.position.Add(Vec{X: 20}), mv.steeringAngle)
+	r.DrawVector(engine.ColorRed, 30, mv.position.Add(Vec{X: -20}), mv.steeringAngle)
 	r.DrawText(
 		generated.ResourcesFontsJetBrainsMonoRegular,
 		engine.ColorOrange,
-		fmt.Sprintf("Speed: %.2f km/h", mv.results.speed),
+		fmt.Sprintf("Speed: %.2f km/h", mv.speed),
 		mv.position.Add(Vec{Y: 75}),
 	)
 
 	r.DrawVector(engine.ColorCyan, 40, mv.position, mv.velocity.Direction())
+	r.DrawVector(engine.ColorCyan, 30*mv.results.motor.infoGasPedal, mv.position.Add(Vec{X: -50}), mv.velocity.Direction())
 }
 
 func (mv *movements) drawWheels(r engine.Renderer) {
-	for id, wheel := range mv.wheels {
-		if !r.Gizmos().Secondary() {
-			continue
-		}
+	if !r.Gizmos().Secondary() {
+		return
+	}
 
+	for id, wheel := range mv.wheels {
 		pos := mv.position.Add(Vec{
 			X: float64(wheel.spec.posRelative.x),
 			Y: float64(wheel.spec.posRelative.y),
@@ -187,29 +191,58 @@ func (mv *movements) drawWheels(r engine.Renderer) {
 }
 
 func (mv *movements) drawMotor(r engine.Renderer) {
-	motorPos := mv.position.Add(Vec{X: 100, Y: -30})
-
-	if r.Gizmos().Secondary() {
-		r.DrawText(
-			generated.ResourcesFontsJetBrainsMonoRegular,
-			engine.ColorPink,
-			fmt.Sprintf("engine acceleration: %.2f", mv.results.motor.acceleration),
-			motorPos.Add(Vec{Y: 20}),
-		)
-		r.DrawText(
-			generated.ResourcesFontsJetBrainsMonoRegular,
-			engine.ColorPink,
-			fmt.Sprintf("force: %.2f (%.2f)", mv.results.motor.infoEngineForce, mv.results.motor.infoForceLongitudinal),
-			motorPos.Add(Vec{Y: 40}),
-		)
-		//r.DrawText(
-		//	generated.ResourcesFontsJetBrainsMonoRegular,
-		//	engine.ColorPink,
-		//	fmt.Sprintf(
-		//		"acc: %.1f",
-		//		mv.results.motor.infoAcceleration,
-		//	),
-		//	motorPos.Add(Vec{Y: 60}),
-		//)
+	if !r.Gizmos().Secondary() {
+		return
 	}
+
+	motorPos := mv.position.Add(Vec{X: 150, Y: -100})
+
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("engine acceleration: %.2f", mv.results.motor.acceleration),
+		motorPos.Add(Vec{Y: 20}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("force: %s", mv.results.motor.infoForce.longitudinalForce),
+		motorPos.Add(Vec{Y: 40}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("trac: %s, drag: %s, roll.rt: %s",
+			mv.results.motor.infoForce.infoTraction,
+			mv.results.motor.infoForce.infoDrag,
+			mv.results.motor.infoForce.infoRollingResistance,
+		),
+		motorPos.Add(Vec{Y: 60}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf(
+			"rpm: %.1f (tq.max: %.1f, tq: %.1f)",
+			mv.results.motor.infoDrive.infoRPM,
+			mv.results.motor.infoDrive.infoMaxTorque,
+			mv.results.motor.infoDrive.infoEngineTorque,
+		),
+		motorPos.Add(Vec{Y: 80}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("drv.force: %s", mv.results.motor.infoDrive.driveForce),
+		motorPos.Add(Vec{Y: 100}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("gear: %d (%.1f)",
+			mv.results.motor.infoDrive.infoGear,
+			mv.results.motor.infoDrive.infoGearRatio,
+		),
+		motorPos.Add(Vec{Y: 120}),
+	)
 }

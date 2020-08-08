@@ -143,6 +143,13 @@ func (v Vec) Normalize() Vec {
 	}
 }
 
+func (v Vec) Round() Vec {
+	return Vec{
+		X: math.Round(v.X),
+		Y: math.Round(v.Y),
+	}
+}
+
 // =============================================
 // Trigonometry
 // =============================================
