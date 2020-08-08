@@ -68,7 +68,8 @@ type (
 	}
 
 	motorResult struct {
-		acceleration Vec
+		acceleration        Vec
+		angularAcceleration Angle
 
 		infoForce    forceResult
 		infoDrive    driveResult
@@ -117,7 +118,13 @@ func (m *motor) GasPedalPushPercent(throttlePosition float64) {
 	m.throttlePosition = throttlePosition
 }
 
-func (m *motor) UpdateMotor(speed units.SpeedKmH, velocity Vec, direction Angle) motorResult {
+func (m *motor) UpdateMotor(
+	speed units.SpeedKmH,
+	velocity Vec,
+	direction Angle,
+	steeringAngle Angle,
+	angularVelocity Angle,
+) motorResult {
 	directionUnit := Vec{
 		X: math.Cos(direction.Radians()),
 		Y: math.Sin(direction.Radians()),
@@ -129,11 +136,19 @@ func (m *motor) UpdateMotor(speed units.SpeedKmH, velocity Vec, direction Angle)
 
 	acceleration := force.longitudinalForce.Decrease(m.mass)
 
+	angularAcceleration := calculateAngularAcceleration(
+		velocity,
+		force.infoTraction,
+		steeringAngle,
+		angularVelocity,
+	)
+
 	// return back braking model
 	m.isBraking = false
 
 	return motorResult{
-		acceleration: acceleration,
+		acceleration:        acceleration,
+		angularAcceleration: angularAcceleration,
 
 		infoForce:    force,
 		infoDrive:    driveResult,
@@ -163,6 +178,33 @@ func (m *motor) calculateDriveForce(speed units.SpeedKmH, directionUnit Vec) dri
 		infoMaxTorque:    maxTorque,
 		infoEngineTorque: engineTorque,
 	}
+}
+
+func calculateAngularAcceleration(velocity Vec, traction Vec, steeringAngle Angle, angularVelocity Angle) Angle {
+	return engine.Angle0
+	const frontAxleToCG = 1.4
+	const rearAxleToCG = 1.4
+	const inertia = 1500
+
+	yawSpeedFront := frontAxleToCG * angularVelocity.Radians()
+	yawSpeedRear := -rearAxleToCG * angularVelocity.Radians()
+
+	var steeringVelocity float64
+	if velocity.X < 0 {
+		steeringVelocity = -1 * steeringAngle.Radians()
+	} else {
+		steeringVelocity = steeringAngle.Radians()
+	}
+
+	var slipAngleFront = math.Atan2(velocity.Y+yawSpeedFront, math.Abs(velocity.X)) - steeringVelocity
+	var slipAngleRear = math.Atan2(velocity.Y+yawSpeedRear, math.Abs(velocity.X))
+
+	const maxGrip = 2
+	frictionForceYFront := math.Min(maxGrip, math.Max(-maxGrip, -5.0*slipAngleFront))
+	frictionForceYRear := math.Min(maxGrip, math.Max(-maxGrip, -5.2*slipAngleRear))
+
+	angularTorque := (frictionForceYFront + traction.Y) - frictionForceYRear
+	return Angle(angularTorque / inertia)
 }
 
 func calculateLongForce(velocity Vec, driveForce Vec, directionUnit Vec, isBraking bool) forceResult {

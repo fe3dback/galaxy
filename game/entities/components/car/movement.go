@@ -79,8 +79,12 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	mv.speed = mv.updateSpeed(s)
 
 	// update velocities
-	mv.velocity = mv.velocity.Add(mv.results.motor.acceleration.Scale(s.Moment().DeltaTime()))
-	//mv.angularVelocity = mv.angularVelocity * engine.Angle(s.Moment().DeltaTime())
+	mv.velocity = mv.velocity.Add(
+		mv.results.motor.acceleration.Scale(s.Moment().DeltaTime()),
+	)
+	mv.angularVelocity = mv.angularVelocity.Add(
+		mv.results.motor.angularAcceleration * Angle(s.Moment().DeltaTime()),
+	)
 
 	fmt.Printf("            dt: %.2f\n", s.Moment().DeltaTime())
 	fmt.Printf("      velocity: %s\n", mv.velocity)
@@ -92,7 +96,9 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 			Scale(units.PixelsPerMeter).
 			Scale(s.Moment().DeltaTime()),
 	)
-	//mv.rotation = mv.rotation.Add(mv.angularVelocity)
+	mv.rotation = mv.rotation.Add(
+		mv.angularVelocity * Angle(s.Moment().DeltaTime()),
+	)
 
 	return mv.position, mv.rotation
 }
@@ -115,16 +121,18 @@ func (mv *movements) updateMotor(s engine.State) motorResult {
 		mv.motor.Brake()
 	}
 
-	return mv.motor.UpdateMotor(mv.speed, mv.velocity, mv.rotation)
+	return mv.motor.UpdateMotor(mv.speed, mv.velocity, mv.rotation, mv.steeringAngle, mv.angularVelocity)
 }
 
 func (mv *movements) updateWheels(s engine.State) {
 	if s.Movement().Vector().X > 0.1 {
 		mv.steeringAngle -= engine.Angle1
+		mv.rotation -= engine.Angle1 // todo: rem
 	}
 
 	if s.Movement().Vector().X < -0.1 {
 		mv.steeringAngle += engine.Angle1
+		mv.rotation += engine.Angle1 // todo: rem
 	}
 
 	mv.steeringAngle = engine.Angle(

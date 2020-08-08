@@ -17,7 +17,7 @@ type Car = entity.Entity
 func NewCar(texture, physics generated.ResourcePath) *Car {
 	e := entity.NewEntity(
 		engine.Vec{X: 300, Y: 250},
-		engine.NewAngle(0),
+		engine.NewAngle(80),
 	)
 
 	go func() {
