@@ -77,7 +77,7 @@ type (
 	}
 
 	driveResult struct {
-		driveForce Vec
+		driveForce float64
 
 		infoGear         int8
 		infoGearRatio    float64
@@ -121,20 +121,18 @@ func (m *motor) GasPedalPushPercent(throttlePosition float64) {
 func (m *motor) UpdateMotor(
 	speed units.SpeedKmH,
 	velocity Vec,
-	direction Angle,
 	steeringAngle Angle,
 	angularVelocity Angle,
 ) motorResult {
 	driveResult := m.calculateDriveForce(speed)
 
-	force := calculateLongForce(velocity, driveResult.driveForce, m.isBraking)
+	force := calculateLongForce(velocity, steeringAngle, driveResult.driveForce, m.isBraking)
 
 	acceleration := force.longitudinalForce.Decrease(m.mass)
 
 	angularAcceleration := calculateAngularAcceleration(
 		m.mass,
-		velocity.Rotate(-direction),
-		force.infoTraction,
+		velocity,
 		steeringAngle,
 		angularVelocity,
 	)
@@ -158,12 +156,7 @@ func (m *motor) calculateDriveForce(speed units.SpeedKmH) driveResult {
 	maxTorque := engineTorque(rpm)
 	engineTorque := maxTorque * m.throttlePosition
 
-	driveForce := Vec{X: 1, Y: 0}.
-		Scale(engineTorque).
-		Scale(gearRatio).
-		Scale(cDifferentialRatio).
-		Scale(m.transmissionEfficiency).
-		Decrease(m.wheelsRadius)
+	driveForce := 1.0 * engineTorque * gearRatio * cDifferentialRatio * m.transmissionEfficiency / m.wheelsRadius
 
 	return driveResult{
 		driveForce: driveForce,
@@ -176,43 +169,47 @@ func (m *motor) calculateDriveForce(speed units.SpeedKmH) driveResult {
 	}
 }
 
-func calculateAngularAcceleration(mass float64, velocity Vec, traction Vec, steeringAngle Angle, angularVelocity Angle) Angle {
+func calculateAngularAcceleration(mass float64, velocity Vec, steeringAngle Angle, angularVelocity Angle) Angle {
 	const frontAxleToCG = 1.4
 	const rearAxleToCG = 1.4
-	const inertia = 1500
-	const caFront = 5.0
-	const caRear = 5.2
+	const caFront = -5.0
+	const caRear = -5.2
 	const maxGrip = 2
 
-	//wheelBase := frontAxleToCG + rearAxleToCG
-	//totalWeight := mass * units.Gravity
-	//weightFront := (rearAxleToCG / wheelBase) * totalWeight
-	//weightRear := (frontAxleToCG / wheelBase) * totalWeight
+	wheelBase := frontAxleToCG + rearAxleToCG
+	totalWeight := mass * units.Gravity
+	weightFront := (rearAxleToCG / wheelBase) * totalWeight
+	weightRear := (frontAxleToCG / wheelBase) * totalWeight
 
 	// --
 
 	var slipAngleFront, slipAngleRear float64
 
-	//if velocity.X == 0 {
-	//	slipAngleFront = 0
-	//	slipAngleRear = 0
-	//} else {
+	if velocity.X == 0 {
+		slipAngleFront = 0
+		slipAngleRear = 0
+	} else {
+		var steering float64
 
-	slipAngleFront = math.Atan2(velocity.X+angularVelocity.Radians(), velocity.Y) + steeringAngle.Radians()*100
-	slipAngleRear = math.Atan2(velocity.X-angularVelocity.Radians(), velocity.Y)
-	//}
+		if velocity.X < 0 {
+			steering = steeringAngle.Radians() * -1
+		} else {
+			steering = steeringAngle.Radians() * +1
+		}
 
-	lateralFront := math.Max(-maxGrip, math.Min(maxGrip, caFront*slipAngleFront))
-	lateralRear := math.Max(-maxGrip, math.Min(maxGrip, caRear*slipAngleRear))
+		absVLong := math.Abs(velocity.X)
+		slipAngleFront = math.Atan2(velocity.Y+angularVelocity.Radians()*frontAxleToCG, absVLong) + steering
+		slipAngleRear = math.Atan2(velocity.Y-angularVelocity.Radians()*rearAxleToCG, absVLong)
+	}
 
-	angularTorque := -lateralRear*rearAxleToCG + lateralFront*frontAxleToCG
-	return Angle(angularTorque / inertia)
+	lateralFront := math.Max(-maxGrip, math.Min(maxGrip, caFront*slipAngleFront)) * weightFront
+	lateralRear := math.Max(-maxGrip, math.Min(maxGrip, caRear*slipAngleRear)) * weightRear
+
+	torque := -lateralRear*rearAxleToCG + lateralFront*frontAxleToCG
+	return Angle(torque / mass)
 }
 
-func calculateLongForce(velocity Vec, driveForce Vec, isBraking bool) forceResult {
-	directionUnit := Vec{X: 1, Y: 0}
-	tractionForce := directionUnit.Mul(driveForce)
-
+func calculateLongForce(velocity Vec, steeringAngle Angle, driveForce float64, isBraking bool) forceResult {
 	speed := velocity.Magnitude()
 	dragForce := Vec{
 		X: -cDrag * velocity.X * speed,
@@ -225,17 +222,16 @@ func calculateLongForce(velocity Vec, driveForce Vec, isBraking bool) forceResul
 	}
 
 	if isBraking {
-		isForward := directionUnit.Dot(velocity) > 0
+		driveForce = -driveForce
+	}
 
-		if isForward {
-			tractionForce = directionUnit.Scale(-cBraking)
-		} else {
-			tractionForce = directionUnit.Scale(cBraking)
-		}
+	tractionForce := Vec{
+		X: driveForce,
+		Y: 0,
 	}
 
 	longForce := engine.VectorSum(
-		tractionForce,
+		tractionForce.Rotate(-steeringAngle),
 		dragForce,
 		rollingResistanceForce,
 	)
