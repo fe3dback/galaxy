@@ -23,7 +23,7 @@ func debug(provider *registry.Provider) {
 	}
 
 	if debug.World {
-		debugPrintWorld(provider.Registry.Game.World)
+		debugPrintWorld(provider.Registry.Game.WorldManager.CurrentWorld())
 	}
 }
 

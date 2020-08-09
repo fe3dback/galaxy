@@ -29,6 +29,7 @@ func NewDrawGizmos(dispatcher *event.Dispatcher, debugMode bool) *DrawGizmos {
 	// default settings
 	gz.system = true
 	gz.primary = true
+	gz.secondary = true
 
 	// subscribe to keyboard
 	dispatcher.OnKeyBoard(func(keyboard event.EvKeyboard) error {

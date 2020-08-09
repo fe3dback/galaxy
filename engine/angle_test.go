@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -184,6 +185,62 @@ func TestFromDegrees(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewAngle(tt.args.f); got != tt.want {
 				t.Errorf("NewAngle() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAngle_Unit(t *testing.T) {
+	tests := []struct {
+		name string
+		a    Angle
+		want Vec
+	}{
+		{
+			name: "right",
+			a:    Angle0,
+			want: Vec{
+				X: 1,
+				Y: 0,
+			},
+		},
+		{
+			name: "top",
+			a:    Angle90,
+			want: Vec{
+				X: 0,
+				Y: -1,
+			},
+		},
+		{
+			name: "right",
+			a:    Angle180,
+			want: Vec{
+				X: -1,
+				Y: 0,
+			},
+		},
+		{
+			name: "bottom",
+			a:    Angle270,
+			want: Vec{
+				X: 0,
+				Y: 1,
+			},
+		},
+		{
+			name: "45",
+			a:    Angle45,
+			want: Vec{
+				X: 0.7071,
+				Y: -0.7071,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.a.Unit(); !reflect.DeepEqual(testNormVec(got), testNormVec(tt.want)) {
+				t.Errorf("Unit() = %v, want %v", got, tt.want)
 			}
 		})
 	}

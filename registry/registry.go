@@ -40,11 +40,11 @@ type (
 	}
 
 	GameRegistry struct {
-		State   engine.State
-		Options *system.GameOptions
-		Frames  *system.Frames
-		World   *game.World
-		Ui      *ui.UI
+		State        engine.State
+		Options      *system.GameOptions
+		Frames       *system.Frames
+		WorldManager *game.WorldManager
+		Ui           *ui.UI
 	}
 )
 
@@ -92,7 +92,7 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// game
-	world := reg.registerWorld()
+	worldManager := reg.registerWorldManager(dispatcher)
 
 	// ui
 	layerFPS := reg.registerUILayerFPS()
@@ -121,11 +121,11 @@ func makeRegistry(flags Flags) *Registry {
 			Window: sdlWindow,
 		},
 		Game: &GameRegistry{
-			State:   gameState,
-			Options: options,
-			Frames:  frames,
-			World:   world,
-			Ui:      gameUI,
+			State:        gameState,
+			Options:      options,
+			Frames:       frames,
+			WorldManager: worldManager,
+			Ui:           gameUI,
 		},
 	}
 }
@@ -231,8 +231,8 @@ func (r registerFactory) registerFrames(targetFps int) *system.Frames {
 	return system.NewFrames(targetFps)
 }
 
-func (r registerFactory) registerWorld() *game.World {
-	return game.NewLevel01()
+func (r registerFactory) registerWorldManager(dispatcher *event.Dispatcher) *game.WorldManager {
+	return game.NewWorldManager(game.NewLevel01(), dispatcher)
 }
 
 func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {

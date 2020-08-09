@@ -11,7 +11,7 @@ func gameLoop(provider *registry.Provider) error {
 	var err error
 
 	frames := provider.Registry.Game.Frames
-	world := provider.Registry.Game.World
+	worldManager := provider.Registry.Game.WorldManager
 	gameUI := provider.Registry.Game.Ui
 	renderer := provider.Registry.Engine.Renderer
 	dispatcher := provider.Registry.Engine.Dispatcher
@@ -27,7 +27,9 @@ func gameLoop(provider *registry.Provider) error {
 		frames.Begin()
 
 		// update
-		err = world.OnUpdate(gameState)
+		worldManager.OnFrameStart()
+
+		err = worldManager.CurrentWorld().OnUpdate(gameState)
 		if err != nil {
 			return fmt.Errorf("can`t update world: %v", err)
 		}
@@ -41,7 +43,7 @@ func gameLoop(provider *registry.Provider) error {
 		renderer.Clear(engine.ColorBackground)
 
 		renderer.SetRenderMode(engine.RenderModeWorld)
-		err = world.OnDraw(renderer)
+		err = worldManager.CurrentWorld().OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}

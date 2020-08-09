@@ -77,7 +77,7 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 
 		if r.Gizmos().Primary() {
 			r.DrawPoint(engine.ColorForeground, e.position)
-			r.DrawVector(engine.ColorForeground, 20, e.position, e.rotation)
+			r.DrawVector(engine.ColorForeground, 10, e.position, e.rotation)
 		}
 	}
 

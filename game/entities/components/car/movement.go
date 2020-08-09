@@ -80,7 +80,7 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 
 	// update velocities
 	mv.velocity = mv.velocity.Add(
-		mv.results.motor.acceleration.Scale(s.Moment().DeltaTime()),
+		mv.results.motor.acceleration.Rotate(mv.rotation).Scale(s.Moment().DeltaTime()),
 	)
 	mv.angularVelocity = mv.angularVelocity.Add(
 		mv.results.motor.angularAcceleration * Angle(s.Moment().DeltaTime()),
@@ -97,7 +97,7 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 			Scale(s.Moment().DeltaTime()),
 	)
 	mv.rotation = mv.rotation.Add(
-		mv.angularVelocity * Angle(s.Moment().DeltaTime()),
+		mv.angularVelocity * units.PixelsPerMeter * Angle(s.Moment().DeltaTime()),
 	)
 
 	return mv.position, mv.rotation
@@ -127,12 +127,12 @@ func (mv *movements) updateMotor(s engine.State) motorResult {
 func (mv *movements) updateWheels(s engine.State) {
 	if s.Movement().Vector().X > 0.1 {
 		mv.steeringAngle -= engine.Angle1
-		mv.rotation -= engine.Angle1 // todo: rem
+		//mv.rotation -= engine.Angle1 // todo: rem
 	}
 
 	if s.Movement().Vector().X < -0.1 {
 		mv.steeringAngle += engine.Angle1
-		mv.rotation += engine.Angle1 // todo: rem
+		//mv.rotation += engine.Angle1 // todo: rem
 	}
 
 	mv.steeringAngle = engine.Angle(
@@ -155,7 +155,11 @@ func (mv *movements) draw(r engine.Renderer) {
 }
 
 func (mv *movements) drawBoundingBox(r engine.Renderer) {
-	r.DrawVector(engine.ColorRed, 30, mv.position.Add(Vec{X: -20}), mv.steeringAngle)
+	if !r.Gizmos().Secondary() {
+		return
+	}
+
+	r.DrawVector(engine.ColorRed, 30, mv.position, mv.rotation+mv.steeringAngle)
 	r.DrawText(
 		generated.ResourcesFontsJetBrainsMonoRegular,
 		engine.ColorOrange,
@@ -164,7 +168,12 @@ func (mv *movements) drawBoundingBox(r engine.Renderer) {
 	)
 
 	r.DrawVector(engine.ColorCyan, 40, mv.position, mv.velocity.Direction())
-	r.DrawVector(engine.ColorCyan, 30*mv.results.motor.infoGasPedal, mv.position.Add(Vec{X: -50}), mv.velocity.Direction())
+	r.DrawVector(
+		engine.ColorOrange,
+		30*mv.results.motor.infoGasPedal,
+		mv.position.PolarOffset(50, mv.rotation),
+		mv.rotation,
+	)
 }
 
 func (mv *movements) drawWheels(r engine.Renderer) {
