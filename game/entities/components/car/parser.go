@@ -36,6 +36,7 @@ type (
 	yamlWheels      struct {
 		Size   yamlSize                       `yaml:"size"`
 		Offset int                            `yaml:"offset"`
+		Radius float64                        `yaml:"radius"`
 		Axis   map[yamlAxisId]yamlAxisOffsetY `yaml:"axis"`
 	}
 

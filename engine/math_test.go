@@ -289,3 +289,268 @@ func TestClamp(t *testing.T) {
 		})
 	}
 }
+
+func TestLerpf(t *testing.T) {
+	type args struct {
+		originA float64
+		originB float64
+		targetA float64
+		targetB float64
+		origin  float64
+	}
+	tests := []struct {
+		name string
+		args args
+		want float64
+	}{
+		{
+			name: "min",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: 5,
+				targetB: 10,
+				origin:  0,
+			},
+			want: 5,
+		},
+		{
+			name: "max",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: 5,
+				targetB: 10,
+				origin:  1,
+			},
+			want: 10,
+		},
+		{
+			name: "n min",
+			args: args{
+				originA: 5,
+				originB: 10,
+				targetA: 0,
+				targetB: 1,
+				origin:  5,
+			},
+			want: 0,
+		},
+		{
+			name: "n max",
+			args: args{
+				originA: 5,
+				originB: 10,
+				targetA: 0,
+				targetB: 1,
+				origin:  10,
+			},
+			want: 1,
+		},
+		{
+			name: "resize",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: 0,
+				targetB: 1024,
+				origin:  0.5,
+			},
+			want: 512,
+		},
+		{
+			name: "resize back",
+			args: args{
+				originA: 0,
+				originB: 1024,
+				targetA: 0,
+				targetB: 1,
+				origin:  512,
+			},
+			want: 0.5,
+		},
+		{
+			name: "negative resize back",
+			args: args{
+				originA: 0,
+				originB: -1024,
+				targetA: 0,
+				targetB: 1,
+				origin:  -512,
+			},
+			want: 0.5,
+		},
+		{
+			name: "negative resize back full",
+			args: args{
+				originA: 0,
+				originB: -1024,
+				targetA: 0,
+				targetB: 1,
+				origin:  -1024,
+			},
+			want: 1,
+		},
+		{
+			name: "same",
+			args: args{
+				originA: 1,
+				originB: 1,
+				targetA: 1,
+				targetB: 1,
+				origin:  1,
+			},
+			want: 1,
+		},
+		{
+			name: "denormalize A",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: -1,
+				targetB: 1,
+				origin:  0.5,
+			},
+			want: 0,
+		},
+		{
+			name: "denormalize min",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: -1,
+				targetB: 1,
+				origin:  0,
+			},
+			want: -1,
+		},
+		{
+			name: "denormalize max",
+			args: args{
+				originA: 0,
+				originB: 1,
+				targetA: -1,
+				targetB: 1,
+				origin:  1,
+			},
+			want: 1,
+		},
+		{
+			name: "reversed x min",
+			args: args{
+				originA: -1,
+				originB: 1,
+				targetA: 1,
+				targetB: 0,
+				origin:  1,
+			},
+			want: 0,
+		},
+		{
+			name: "reversed x max",
+			args: args{
+				originA: -1,
+				originB: 1,
+				targetA: 1,
+				targetB: 0,
+				origin:  -1,
+			},
+			want: 1,
+		},
+		{
+			name: "reversed x center",
+			args: args{
+				originA: -1,
+				originB: 1,
+				targetA: 1,
+				targetB: 0,
+				origin:  0,
+			},
+			want: 0.5,
+		},
+		{
+			name: "reversed x bigger",
+			args: args{
+				originA: -1,
+				originB: 1,
+				targetA: 1,
+				targetB: 0,
+				origin:  0.5,
+			},
+			want: 0.25,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Lerpf(tt.args.originA, tt.args.originB, tt.args.targetA, tt.args.targetB, tt.args.origin); got != tt.want {
+				t.Errorf("Lerpf() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLerpInverse(t *testing.T) {
+	type args struct {
+		a float64
+		b float64
+		t float64
+	}
+	tests := []struct {
+		name string
+		args args
+		want float64
+	}{
+		{
+			name: "simple",
+			args: args{
+				a: 0,
+				b: 2,
+				t: 1,
+			},
+			want: 0.5,
+		},
+		{
+			name: "simple negative",
+			args: args{
+				a: -1,
+				b: 1,
+				t: 0,
+			},
+			want: 0.5,
+		},
+		{
+			name: "scaled 1",
+			args: args{
+				a: 0,
+				b: 1024,
+				t: 768,
+			},
+			want: 0.75,
+		},
+		{
+			name: "scaled 2",
+			args: args{
+				a: 0,
+				b: 1024,
+				t: 256,
+			},
+			want: 0.25,
+		},
+		{
+			name: "scaled negative",
+			args: args{
+				a: -1024,
+				b: 1024,
+				t: 512,
+			},
+			want: 0.75,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := LerpInverse(tt.args.a, tt.args.b, tt.args.t); got != tt.want {
+				t.Errorf("LerpInverse() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

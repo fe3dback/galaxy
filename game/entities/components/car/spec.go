@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fe3dback/galaxy/game/units"
+
 	"github.com/fe3dback/galaxy/utils"
 )
 
@@ -18,7 +20,7 @@ type (
 		mass    specMass
 		model   specModel
 		engine  specEngine
-		wheels  []specWheel
+		wheels  specWheels
 		weights []specWeight
 	}
 
@@ -32,6 +34,11 @@ type (
 	}
 
 	specEngine struct {
+	}
+
+	specWheels struct {
+		radius units.Meters
+		wheels []specWheel
 	}
 
 	specWheel struct {
@@ -92,7 +99,7 @@ func (phys *Physics) assembleSpecEngine(_ yamlSpec) specEngine {
 	return specEngine{}
 }
 
-func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {
+func (phys *Physics) assembleSpecWheels(yaml yamlSpec) specWheels {
 	wheels := make([]specWheel, 0)
 
 	offsetY := yaml.Wheels.Offset
@@ -130,7 +137,10 @@ func (phys *Physics) assembleSpecWheels(yaml yamlSpec) []specWheel {
 		})
 	}
 
-	return wheels
+	return specWheels{
+		radius: yaml.Wheels.Radius,
+		wheels: wheels,
+	}
 }
 
 func (phys *Physics) assembleSpecWeights(yaml yamlSpec) []specWeight {
