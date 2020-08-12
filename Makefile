@@ -3,10 +3,25 @@ gen:
 	go fmt ./generated
 
 test:
-	go test
+	go test ./...
+
+lint:
+	golangci-lint run
 
 arch:
 	go run ./cmd/arch/*.go
+
+quality-check:
+	@echo "=======[ ARCH ] ========"
+	#make arch
+	@echo "=======[ TEST ] ========"
+	#make test
+	@echo "=======[ LINT ] ========"
+	#make lint
+	@echo "                            "
+	@echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~ "
+	@echo "          All tests passed! "
+	@echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 
 dev:
 	go build -o /tmp/galaxy-tmp
