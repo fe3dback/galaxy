@@ -11,6 +11,9 @@ import (
 )
 
 const wheelAxisTop = "top"
+const gearShiftMinWaitTimeSec = 3
+const defaultRoadFriction = 0.02
+const wheelAxisDistance = 15.0
 
 type movements struct {
 	// spec
@@ -48,21 +51,32 @@ func newMovements(position engine.Vec, angle engine.Angle, spec spec) *movements
 	for _, specWheel := range spec.wheels.wheels {
 		wheels = append(wheels, &wheel{
 			angle:  engine.NewAngle(0),
-			torque: 0, // todo?
+			torque: 0,
 			spec:   specWheel,
 		})
 	}
 
 	return &movements{
+		// spec
+		spec: spec,
+
+		// primary
 		position:        position,
 		rotation:        angle,
 		velocity:        Vec{},
 		angularVelocity: engine.Angle0,
+		steeringAngle:   engine.Angle0,
 
-		spec:          spec,
-		steeringAngle: engine.Angle0,
+		// motor
+		motorGearInd: 1,
 
-		// car
+		// calculated
+		clcEngineTorque:     0,
+		clcPreviousPosition: position,
+		clcSpeed:            0,
+		clcGasPedal:         0,
+
+		// components
 		wheels: wheels,
 	}
 }
@@ -88,12 +102,14 @@ func (mv *movements) updateSpeed(s engine.State) units.SpeedKmH {
 // =======================================================================
 
 func (mv *movements) updateMotor(s engine.State) {
-	mv.clcEngineTorque = engineTorque(
-		mv.motorGearInd,
-		mv.spec.wheels.radius,
-		mv.clcSpeed,
-		mv.clcGasPedal,
-	)
+	rpm := engineRpm(mv.motorGearInd, mv.spec.wheels.radius, mv.clcSpeed)
+
+	if s.Moment().FrameId()%(s.Moment().TargetFPS()*gearShiftMinWaitTimeSec) == 0 {
+		// allow change gear only one time per 3 seconds
+		mv.motorGearInd = automaticTransmission(mv.motorGearInd, rpm)
+	}
+
+	mv.clcEngineTorque = engineTorque(rpm)
 
 	// calculate wheels torque
 	wheelsCount := float64(len(mv.wheels))
@@ -101,8 +117,8 @@ func (mv *movements) updateMotor(s engine.State) {
 
 	// car forward force
 	acceleration := Vec{}
-	friction := 0.0001
-	const frictionRoad = 0.25
+	friction := 0.00001
+	angularAcceleration := engine.Angle0
 
 	// calculate acceleration (wheels force)
 	for _, wheel := range mv.wheels {
@@ -111,22 +127,47 @@ func (mv *movements) updateMotor(s engine.State) {
 		wheelUnit := wheelDirection.Unit()
 		forwardFactor := math.Abs(wheelUnit.Dot(carUnit))
 
-		wheel.torque = (mv.clcEngineTorque / wheelsCount) * forwardFactor
+		maxTorque := (mv.clcEngineTorque / wheelsCount) * forwardFactor
+		wheel.torque = maxTorque * mv.clcGasPedal
 
 		// sum all wheels acceleration
 		acceleration = acceleration.Add(wheelUnit.Scale(wheel.torque * s.Moment().DeltaTime()))
 
 		// subtract friction
-		wheelFriction := frictionRoad*2 - (frictionRoad * forwardFactor)
+		wheelFriction := defaultRoadFriction*2 - (defaultRoadFriction * forwardFactor)
 		friction += wheelFriction
+
+		// calculate angular velocity
+		angularAcceleration += engine.Lerpf(-engine.Angle360, engine.Angle360, -1, 1, wheel.angle.Radians())
 	}
 
-	// subtract friction for each wheel
+	// apply wheelbase friction
+	forwardFactor := math.Abs(mv.rotation.Unit().Dot(mv.velocity.Direction().Unit()))
+	friction += 1 - engine.Clamp(forwardFactor, 0, 1)
 
-	mv.velocity = mv.velocity.Add(acceleration.Scale(s.Moment().DeltaTime()))
-	//mv.velocity = mv.velocity.Decrease(friction * s.Moment().DeltaTime()) // todo
+	// subtract friction for each wheel
+	friction = engine.Clamp(friction, 0, 1)
+
+	if s.Movement().Space() {
+		// break
+		friction = 1
+	}
+
+	// free acceleration
+	fmt.Println(friction)
+
+	// update velocity
+	mv.velocity = mv.velocity.
+		Add(acceleration.Scale(s.Moment().DeltaTime())).
+		Scale(1 - (friction * s.Moment().DeltaTime()))
+
+	speed := math.Abs(mv.velocity.Magnitude())
+	mv.angularVelocity = Angle(speed / (wheelAxisDistance / math.Sin(mv.steeringAngle.Radians())))
+
+	// update position
 	mv.clcPreviousPosition = mv.position
 	mv.position = mv.position.Add(mv.velocity)
+	mv.rotation = mv.rotation.Add(mv.angularVelocity * Angle(s.Moment().DeltaTime()))
 }
 
 func (mv *movements) updateWheels(s engine.State) {
@@ -136,6 +177,11 @@ func (mv *movements) updateWheels(s engine.State) {
 
 	if s.Movement().Vector().X < -0.1 {
 		mv.steeringAngle += Angle(engine.Angle45 * s.Moment().DeltaTime())
+	}
+
+	if s.Movement().Vector().X == 0 {
+		// reset steering back
+		mv.steeringAngle *= Angle(1 - (2 * s.Moment().DeltaTime()))
 	}
 
 	mv.steeringAngle = engine.Angle(
@@ -245,5 +291,21 @@ func (mv *movements) drawMotor(r engine.Renderer) {
 			mv.motorGearInd,
 		),
 		motorPos.Add(Vec{Y: 40}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("velocity: %s",
+			mv.velocity,
+		),
+		motorPos.Add(Vec{Y: 60}),
+	)
+	r.DrawText(
+		generated.ResourcesFontsJetBrainsMonoRegular,
+		engine.ColorPink,
+		fmt.Sprintf("angular: %.2f",
+			mv.angularVelocity,
+		),
+		motorPos.Add(Vec{Y: 80}),
 	)
 }

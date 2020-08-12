@@ -2,6 +2,7 @@ package system
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
 	"runtime"
@@ -14,6 +15,7 @@ type Frames struct {
 	limitFps      int
 	limitDuration time.Duration
 
+	total         int
 	count         int
 	fps           int
 	gameStart     time.Time
@@ -28,6 +30,7 @@ func NewFrames(targetFps int) *Frames {
 	f := &Frames{
 		limitFps:      targetFps,
 		limitDuration: time.Second / time.Duration(targetFps),
+		total:         0,
 		count:         0,
 		fps:           0,
 		gameStart:     time.Now(),
@@ -70,6 +73,12 @@ func (f *Frames) Begin() {
 }
 
 func (f *Frames) End() {
+	if f.total == math.MaxInt16 {
+		f.total = 0
+	} else {
+		f.total++
+	}
+
 	f.count++
 	f.frameDuration = time.Since(f.frameStart)
 
@@ -92,6 +101,10 @@ func (f *Frames) FPS() int {
 
 func (f *Frames) TargetFPS() int {
 	return f.limitFps
+}
+
+func (f *Frames) FrameId() int {
+	return f.total
 }
 
 func (f *Frames) FrameDuration() time.Duration {

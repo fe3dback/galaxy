@@ -41,20 +41,24 @@ func (td *GridDrawer) OnDraw(r engine.Renderer) error {
 	for x := startX; x < endX; x += units.DistanceMeter {
 		for y := startY; y < endY; y += units.DistanceMeter {
 
-			r.DrawPoint(engine.ColorYellow, engine.Vec{
-				X: x,
-				Y: y,
-			})
+			r.DrawSquare(engine.ColorSelection, engine.RectScreen(
+				int(x),
+				int(y),
+				int(units.DistanceMeter),
+				int(units.DistanceMeter),
+			))
 
-			r.DrawText(
-				generated.ResourcesFontsJetBrainsMonoRegular,
-				engine.ColorSelection,
-				fmt.Sprintf("%.0f, %.0f", x/units.DistanceMeter, y/units.DistanceMeter),
-				engine.Vec{
-					X: x + 3,
-					Y: y + 3,
-				},
-			)
+			if r.Gizmos().Debug() {
+				r.DrawText(
+					generated.ResourcesFontsJetBrainsMonoRegular,
+					engine.ColorSelection,
+					fmt.Sprintf("%.0f, %.0f", x/units.DistanceMeter, y/units.DistanceMeter),
+					engine.Vec{
+						X: x + 3,
+						Y: y + 3,
+					},
+				)
+			}
 		}
 	}
 

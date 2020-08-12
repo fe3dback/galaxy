@@ -36,19 +36,51 @@ const (
 	gear4       gearInd = 4
 	gear5       gearInd = 5
 	gear6       gearInd = 6
+	gearsCount          = 6
 )
 
 type (
 	gearInd int8
 )
 
-func engineTorque(gearInd gearInd, wheelsRadius float64, speed units.SpeedKmH, gasPedal float64) float64 {
-	rpm := clcEngineRpm(gearInd, wheelsRadius, speed)
-	maxTorque := clcEngineTorque(rpm)
-	return maxTorque * gasPedal
+func automaticTransmission(currentGear gearInd, rpm float64) gearInd {
+	shift := automaticTransmissionShift(rpm)
+
+	if shift > currentGear {
+		return currentGear + 1
+	} else {
+		return currentGear - 1
+	}
 }
 
-func clcEngineRpm(gearIndex gearInd, wheelsRadius float64, speed units.SpeedKmH) float64 {
+func automaticTransmissionShift(rpm float64) gearInd {
+	if rpm < 0 {
+		return gearReverse
+	}
+
+	if rpm <= rpmMin {
+		return gearNeutral
+	}
+
+	torqueZ := (float64(rpmMax) - float64(rpmMin)) / gearsCount
+
+	var shift gearInd = 1
+	for tt := rpmMin + torqueZ; tt <= rpmMax; tt += torqueZ {
+		if tt > rpm {
+			return shift
+		}
+
+		shift++
+	}
+
+	if shift > gearsCount {
+		return gearsCount
+	}
+
+	return shift
+}
+
+func engineRpm(gearIndex gearInd, wheelsRadius float64, speed units.SpeedKmH) float64 {
 	// - 20 km/h = 20,000 m / 3600 s = 5.6 m/s.
 	speedMetersPerSecond := speed * 1000 / 3600
 	wheelRotationRate := speedMetersPerSecond / wheelsRadius
@@ -67,7 +99,7 @@ func clcEngineRpm(gearIndex gearInd, wheelsRadius float64, speed units.SpeedKmH)
 	return rpm
 }
 
-func clcEngineTorque(rpm float64) float64 {
+func engineTorque(rpm float64) float64 {
 	if rpm < rpmMin {
 		return torqueMin
 	}

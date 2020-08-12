@@ -72,6 +72,7 @@ type (
 	Moment interface {
 		FPS() int
 		TargetFPS() int
+		FrameId() int
 		FrameDuration() time.Duration
 		LimitDuration() time.Duration
 		DeltaTime() float64
