@@ -11,17 +11,27 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go-version: [1.13.x, 1.14.x]
-        os: [ubuntu-latest, macos-latest]
+        go-version: [1.14.x]
+        os: [ubuntu-latest]
     steps:
-      -
-        name: checkout
-        uses: actions/checkout@v2
-      -
-        name: install go
+      - name: install go
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go-version }}
-      -
-        name: test
-        run: go test ./...
+
+      - name: install sdl and linters
+        run:
+          - sudo apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev
+          - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.30.0
+
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: arch
+        run: make arch
+
+      - name: test
+        run: make test
+
+      - name: lint
+        run: make lint
