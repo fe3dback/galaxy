@@ -76,6 +76,8 @@ func checkPackages(dirRoot string, spec ParsedSpec, packages map[string]*ast.Pac
 				importType := getImportType(importPath, spec)
 
 				switch importType {
+				case ImportTypeStdLib:
+					continue
 				case ImportTypeVendor:
 					if !inList(importPath, module.AllowedVendors) {
 						warnings = append(warnings, fmt.Sprintf(
