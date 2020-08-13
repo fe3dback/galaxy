@@ -73,8 +73,9 @@ func checkPackages(dirRoot string, spec ParsedSpec, packages map[string]*ast.Pac
 
 			for _, goImport := range goFile.Imports {
 				importPath := strings.Trim(goImport.Path.Value, "\"")
+				importType := getImportType(importPath, spec)
 
-				switch getImportType(importPath, spec) {
+				switch importType {
 				case ImportTypeVendor:
 					if !inList(importPath, module.AllowedVendors) {
 						warnings = append(warnings, fmt.Sprintf(
@@ -100,7 +101,10 @@ func checkPackages(dirRoot string, spec ParsedSpec, packages map[string]*ast.Pac
 							depsWarnings,
 						))
 					}
+				default:
+					panic(fmt.Sprintf("unknown import type `%d`", importType))
 				}
+
 			}
 		}
 	}

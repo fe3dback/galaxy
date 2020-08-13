@@ -120,8 +120,7 @@ linters-settings:
     # See https://go-critic.github.io/overview#checks-overview
     # To check which checks are enabled run `GL_DEBUG=gocritic golangci-lint run`
     # By default list of stable checks is used.
-    enabled-checks:
-      - rangeValCopy
+    enabled-checks: []
 
     # Which checks should be disabled; can't be combined with 'enabled-checks'; default is empty
     disabled-checks:
@@ -417,7 +416,7 @@ issues:
   new: false
 
   # Show only new issues created after git revision `REV`
-  new-from-rev: REV
+  new-from-rev: ""
 
   # Show only new issues created in git patch with set file path.
   # new-from-patch: path/to/patch/file
