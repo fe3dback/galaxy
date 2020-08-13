@@ -1,4 +1,4 @@
-package engine
+package editor
 
 import "github.com/fe3dback/galaxy/engine/lib/event"
 

@@ -58,7 +58,7 @@ type (
 func parseSpec(path string) ParsedSpec {
 	spec := Spec{}
 
-	buffer, err := ioutil.ReadFile(path)
+	buffer, err := ioutil.ReadFile(filepath.Clean(path))
 	if err != nil {
 		panic(fmt.Sprintf("can`t open spec %s: %v", path, err))
 	}

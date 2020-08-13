@@ -79,6 +79,16 @@ type (
 		SinceStart() time.Duration
 	}
 
+	// Engine Assets
+
+	WorldCreator interface {
+		Loader() Loader
+	}
+
+	Loader interface {
+		LoadYaml(res generated.ResourcePath, data interface{})
+	}
+
 	// Controls
 
 	Mouse interface {

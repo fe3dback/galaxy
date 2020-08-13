@@ -4,22 +4,25 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/lib/event"
 )
 
 type (
-	WorldProviderFn func() *World
+	WorldProviderFn func(creator engine.WorldCreator) *World
 
 	WorldManager struct {
 		current       *World
+		worldCreator  engine.WorldCreator
 		createWorldFn WorldProviderFn
 		resetQueued   bool
 	}
 )
 
-func NewWorldManager(createWorldFn WorldProviderFn, dispatcher *event.Dispatcher) *WorldManager {
+func NewWorldManager(createWorldFn WorldProviderFn, gameWorldCreator engine.WorldCreator, dispatcher *event.Dispatcher) *WorldManager {
 	manager := &WorldManager{
-		current:       createWorldFn(),
+		current:       createWorldFn(gameWorldCreator),
+		worldCreator:  gameWorldCreator,
 		createWorldFn: createWorldFn,
 		resetQueued:   false,
 	}
@@ -55,7 +58,7 @@ func (w *WorldManager) Reset() {
 
 	w.current = nil
 	runtime.GC()
-	w.current = w.createWorldFn()
+	w.current = w.createWorldFn(w.worldCreator)
 }
 
 func (w *WorldManager) CurrentWorld() *World {

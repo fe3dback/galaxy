@@ -7,6 +7,8 @@ vendors:
     in: github.com/veandco/go-sdl2/ttf
   sdl-img:
     in: github.com/veandco/go-sdl2/img
+  loader-yaml:
+    in: gopkg.in/yaml.v2
 
 components:
   main:
@@ -28,6 +30,10 @@ components:
     in: engine/lib/control
   engine_entity:
     in: engine/entity
+  engine_editor:
+    in: engine/editor
+  engine_loader:
+    in: engine/loader
 
   game:
     in: game
@@ -83,6 +89,15 @@ deps:
   engine_entity:
     mayDependOn:
       - engine
+
+  engine_editor:
+    mayDependOn:
+      - engine
+      - engine_event
+
+  engine_loader:
+    canUse:
+      - loader-yaml
 
   game:
     mayDependOn:

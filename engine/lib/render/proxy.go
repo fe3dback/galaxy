@@ -33,11 +33,6 @@ func (r *Renderer) transPoint(point engine.Vec) sdl.Point {
 	}
 }
 
-func (r *Renderer) transPointPtr(point engine.Vec) *sdl.Point {
-	rPoint := r.transPoint(point)
-	return &rPoint
-}
-
 func (r *Renderer) transLine(line engine.Line) []sdl.Point {
 	return []sdl.Point{
 		r.transPoint(line.A),

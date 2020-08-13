@@ -24,7 +24,7 @@ type (
 func NewAnimator(entity *entity.Entity) *Animator {
 	return &Animator{
 		entity:           entity,
-		sequences:        make(Sequences, 0),
+		sequences:        make(Sequences),
 		activeSequence:   nil,
 		activeSequenceId: emptySequence,
 		paused:           false,

@@ -65,9 +65,8 @@ type (
 	}
 )
 
-func (phys *Physics) assembleSpec() {
-	yaml := phys.parse(phys.resource)
-	phys.spec = spec{
+func (phys *Physics) assembleSpec(yaml YamlSpec) spec {
+	return spec{
 		mass:    phys.assembleSpecMass(yaml),
 		model:   phys.assembleSpecModel(yaml),
 		engine:  phys.assembleSpecEngine(yaml),
@@ -76,13 +75,13 @@ func (phys *Physics) assembleSpec() {
 	}
 }
 
-func (phys *Physics) assembleSpecMass(yaml yamlSpec) specMass {
+func (phys *Physics) assembleSpecMass(yaml YamlSpec) specMass {
 	return specMass{
 		mass: yaml.Params.Mass,
 	}
 }
 
-func (phys *Physics) assembleSpecModel(yaml yamlSpec) specModel {
+func (phys *Physics) assembleSpecModel(yaml YamlSpec) specModel {
 	return specModel{
 		center: specPos{
 			x: yaml.Center.X,
@@ -95,11 +94,11 @@ func (phys *Physics) assembleSpecModel(yaml yamlSpec) specModel {
 	}
 }
 
-func (phys *Physics) assembleSpecEngine(_ yamlSpec) specEngine {
+func (phys *Physics) assembleSpecEngine(_ YamlSpec) specEngine {
 	return specEngine{}
 }
 
-func (phys *Physics) assembleSpecWheels(yaml yamlSpec) specWheels {
+func (phys *Physics) assembleSpecWheels(yaml YamlSpec) specWheels {
 	wheels := make([]specWheel, 0)
 
 	offsetY := yaml.Wheels.Offset
@@ -143,7 +142,7 @@ func (phys *Physics) assembleSpecWheels(yaml yamlSpec) specWheels {
 	}
 }
 
-func (phys *Physics) assembleSpecWeights(yaml yamlSpec) []specWeight {
+func (phys *Physics) assembleSpecWeights(yaml YamlSpec) []specWeight {
 	weights := make([]specWeight, 0)
 
 	for _, line := range yaml.Weights {
@@ -161,7 +160,7 @@ func (phys *Physics) assembleSpecWeights(yaml yamlSpec) []specWeight {
 	return weights
 }
 
-func (phys *Physics) assembleSpecWeightsPoints(yaml yamlSpec, points []string, x int) ([]specWeight, error) {
+func (phys *Physics) assembleSpecWeightsPoints(yaml YamlSpec, points []string, x int) ([]specWeight, error) {
 	xLeft := 0 - (yaml.Size.Width / 2)
 	xRight := 0 + (yaml.Size.Width / 2)
 
@@ -194,7 +193,7 @@ func (phys *Physics) assembleSpecWeightsPoints(yaml yamlSpec, points []string, x
 	return weights, nil
 }
 
-func (phys *Physics) assembleSpecWeight(yaml yamlSpec, raw string) (int, float32, error) {
+func (phys *Physics) assembleSpecWeight(yaml YamlSpec, raw string) (int, float32, error) {
 	parts := strings.Split(raw, ",")
 
 	rawY := strings.Trim(parts[0], " ")

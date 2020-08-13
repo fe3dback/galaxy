@@ -13,11 +13,11 @@ arch:
 
 quality-check:
 	@echo "=======[ ARCH ] ========"
-	#make arch
+	make arch
 	@echo "=======[ TEST ] ========"
-	#make test
+	make test
 	@echo "=======[ LINT ] ========"
-	#make lint
+	make lint
 	@echo "                            "
 	@echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~ "
 	@echo "          All tests passed! "

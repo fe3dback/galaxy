@@ -43,8 +43,8 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 	winHeight := defaultHeight
 
 	if fullscreen {
-		mode, err := sdl.GetCurrentDisplayMode(0)
-		utils.Check("get display mode", err)
+		mode, displayModeErr := sdl.GetCurrentDisplayMode(0)
+		utils.Check("get display mode", displayModeErr)
 
 		winFlags &= sdl.WINDOW_FULLSCREEN
 		winWidth = int(mode.W)

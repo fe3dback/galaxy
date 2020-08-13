@@ -3,14 +3,13 @@ package registry
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/engine/lib/control"
+	"github.com/fe3dback/galaxy/engine/loader"
 
 	"github.com/fe3dback/galaxy/engine"
-
-	"github.com/fe3dback/galaxy/engine/lib/event"
-
+	"github.com/fe3dback/galaxy/engine/editor"
 	"github.com/fe3dback/galaxy/engine/lib"
-
+	"github.com/fe3dback/galaxy/engine/lib/control"
+	"github.com/fe3dback/galaxy/engine/lib/event"
 	"github.com/fe3dback/galaxy/engine/lib/render"
 	"github.com/fe3dback/galaxy/game"
 	"github.com/fe3dback/galaxy/game/ui"
@@ -92,7 +91,9 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// game
-	worldManager := reg.registerWorldManager(dispatcher)
+	assetsLoader := reg.registerAssetsLoader()
+	worldCreator := reg.registerGameWorldCreator(assetsLoader)
+	worldManager := reg.registerWorldManager(worldCreator, dispatcher)
 
 	// ui
 	layerFPS := reg.registerUILayerFPS()
@@ -193,7 +194,7 @@ func (r registerFactory) registerMovement(dispatcher *event.Dispatcher) *control
 }
 
 func (r registerFactory) registerRenderGizmos(dispatcher *event.Dispatcher, debugMode bool) engine.Gizmos {
-	return engine.NewDrawGizmos(dispatcher, debugMode)
+	return editor.NewDrawGizmos(dispatcher, debugMode)
 }
 
 func (r registerFactory) registerRenderer(
@@ -231,8 +232,18 @@ func (r registerFactory) registerFrames(targetFps int) *system.Frames {
 	return system.NewFrames(targetFps)
 }
 
-func (r registerFactory) registerWorldManager(dispatcher *event.Dispatcher) *game.WorldManager {
-	return game.NewWorldManager(game.NewLevel01(), dispatcher)
+func (r registerFactory) registerAssetsLoader() *loader.AssetsLoader {
+	return loader.NewAssetsLoader()
+}
+
+func (r registerFactory) registerGameWorldCreator(assetsLoader engine.Loader) *engine.GameWorldCreator {
+	return engine.NewGameWorldCreator(
+		assetsLoader,
+	)
+}
+
+func (r registerFactory) registerWorldManager(worldCreator engine.WorldCreator, dispatcher *event.Dispatcher) *game.WorldManager {
+	return game.NewWorldManager(game.NewLevel01(), worldCreator, dispatcher)
 }
 
 func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {
