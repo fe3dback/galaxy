@@ -53,7 +53,7 @@ type (
 	}
 )
 
-func NewLayerFPS() *LayerFPS {
+func NewLayerSharedFPS() *LayerFPS {
 	return &LayerFPS{
 		graphs: createGraphs(),
 	}
@@ -128,10 +128,18 @@ func (l *LayerFPS) OnUpdate(s engine.State) error {
 
 func (l *LayerFPS) OnDraw(r engine.Renderer) (err error) {
 	if r.Gizmos().System() {
+		var mode string
+		if r.InEditorMode() {
+			mode = "edit"
+		} else {
+			mode = "game"
+		}
+
 		r.DrawText(
 			generated.ResourcesFontsJetBrainsMonoRegular,
 			engine.ColorGreen,
-			fmt.Sprintf("fps: %d / %s",
+			fmt.Sprintf("%s :: fps: %d / %s",
+				mode,
 				l.moment.FPS(),
 				l.moment.FrameDuration().String(),
 			),

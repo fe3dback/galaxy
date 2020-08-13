@@ -58,6 +58,7 @@ type (
 		DrawText(fontId generated.ResourcePath, color Color, text string, vec Vec)
 
 		// system
+		InEditorMode() bool
 		Gizmos() Gizmos
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
@@ -108,5 +109,6 @@ type (
 		Moment() Moment
 		Mouse() Mouse
 		Movement() Movement
+		InEditorMode() bool
 	}
 )

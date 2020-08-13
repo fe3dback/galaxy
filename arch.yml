@@ -35,6 +35,12 @@ components:
   engine_loader:
     in: engine/loader
 
+  shared_ui:
+    in: shared/ui
+
+  editor:
+    in: editor
+
   game:
     in: game
   game_entities:
@@ -44,8 +50,6 @@ components:
   game_component:
     in: game/entities/components
     depth: true
-  game_ui:
-    in: game/ui
 
   generated:
     in: generated
@@ -99,6 +103,10 @@ deps:
     canUse:
       - loader-yaml
 
+  editor:
+    mayDependOn:
+      - engine
+
   game:
     mayDependOn:
       - engine
@@ -119,7 +127,7 @@ deps:
       - game_component
       - game_units
 
-  game_ui:
+  shared_ui:
     mayDependOn:
       - engine
 

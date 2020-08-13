@@ -20,6 +20,7 @@ type Renderer struct {
 	camera         *Camera
 	renderMode     engine.RenderMode
 	gizmos         engine.Gizmos
+	appState       *engine.AppState
 }
 
 type Rect = sdl.Rect
@@ -33,6 +34,7 @@ func NewRenderer(
 	camera *Camera,
 	dispatcher *event.Dispatcher,
 	gizmos engine.Gizmos,
+	appState *engine.AppState,
 ) *Renderer {
 	renderer := &Renderer{
 		window:         sdlWindow,
@@ -41,6 +43,7 @@ func NewRenderer(
 		textureManager: textureManager,
 		camera:         camera,
 		gizmos:         gizmos,
+		appState:       appState,
 	}
 
 	dispatcher.OnWindow(func(window event.EvWindow) error {
@@ -65,6 +68,10 @@ func (r *Renderer) Camera() engine.Camera {
 
 func (r *Renderer) Gizmos() engine.Gizmos {
 	return r.gizmos
+}
+
+func (r *Renderer) InEditorMode() bool {
+	return r.appState.InEditorState()
 }
 
 func (r *Renderer) SetRenderMode(renderMode engine.RenderMode) {

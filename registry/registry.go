@@ -3,17 +3,18 @@ package registry
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/engine/loader"
+	"github.com/fe3dback/galaxy/editor"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/editor"
+	engineeditor "github.com/fe3dback/galaxy/engine/editor"
 	"github.com/fe3dback/galaxy/engine/lib"
 	"github.com/fe3dback/galaxy/engine/lib/control"
 	"github.com/fe3dback/galaxy/engine/lib/event"
 	"github.com/fe3dback/galaxy/engine/lib/render"
+	"github.com/fe3dback/galaxy/engine/loader"
 	"github.com/fe3dback/galaxy/game"
-	"github.com/fe3dback/galaxy/game/ui"
 	"github.com/fe3dback/galaxy/generated"
+	"github.com/fe3dback/galaxy/shared/ui"
 	"github.com/fe3dback/galaxy/system"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
@@ -26,6 +27,8 @@ type (
 		Sdl    *SdlRegistry
 		Engine *EngineRegistry
 		Game   *GameRegistry
+		Editor *EditorRegistry
+		State  engine.State
 	}
 
 	SdlRegistry struct {
@@ -36,14 +39,19 @@ type (
 		FontCollection *render.FontManager
 		Renderer       *render.Renderer
 		Dispatcher     *event.Dispatcher
+		AppState       *engine.AppState
 	}
 
 	GameRegistry struct {
-		State        engine.State
 		Options      *system.GameOptions
 		Frames       *system.Frames
 		WorldManager *game.WorldManager
 		Ui           *ui.UI
+	}
+
+	EditorRegistry struct {
+		Manager *editor.Manager
+		Ui      *ui.UI
 	}
 )
 
@@ -67,6 +75,7 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// engine
+	appState := reg.registerAppState()
 	camera := reg.registerCamera()
 	mouse := reg.registerMouse()
 	fontManager := reg.registerFontManager(
@@ -78,6 +87,7 @@ func makeRegistry(flags Flags) *Registry {
 	)
 	dispatcher := reg.registerDispatcher(
 		reg.eventQuit(frames),
+		reg.eventSwitchEditorState(appState),
 	)
 	renderGizmos := reg.registerRenderGizmos(dispatcher, options.Debug.System)
 	renderer := reg.registerRenderer(
@@ -88,6 +98,18 @@ func makeRegistry(flags Flags) *Registry {
 		camera,
 		dispatcher,
 		renderGizmos,
+		appState,
+	)
+
+	// shared ui
+	uiLayerSharedFPS := reg.registerUILayerSharedFPS()
+
+	// editor
+	editorManager := reg.registerEditorManager()
+
+	// editor ui
+	editorUI := reg.registerUI(
+		uiLayerSharedFPS,
 	)
 
 	// game
@@ -95,10 +117,9 @@ func makeRegistry(flags Flags) *Registry {
 	worldCreator := reg.registerGameWorldCreator(assetsLoader)
 	worldManager := reg.registerWorldManager(worldCreator, dispatcher)
 
-	// ui
-	layerFPS := reg.registerUILayerFPS()
+	// game ui
 	gameUI := reg.registerUI(
-		layerFPS,
+		uiLayerSharedFPS,
 	)
 
 	// game state
@@ -108,6 +129,7 @@ func makeRegistry(flags Flags) *Registry {
 		camera,
 		mouse,
 		movement,
+		appState,
 	)
 
 	// build
@@ -117,16 +139,21 @@ func makeRegistry(flags Flags) *Registry {
 			FontCollection: fontManager,
 			Renderer:       renderer,
 			Dispatcher:     dispatcher,
+			AppState:       appState,
 		},
 		Sdl: &SdlRegistry{
 			Window: sdlWindow,
 		},
+		State: gameState,
 		Game: &GameRegistry{
-			State:        gameState,
 			Options:      options,
 			Frames:       frames,
 			WorldManager: worldManager,
 			Ui:           gameUI,
+		},
+		Editor: &EditorRegistry{
+			Manager: editorManager,
+			Ui:      editorUI,
 		},
 	}
 }
@@ -194,7 +221,7 @@ func (r registerFactory) registerMovement(dispatcher *event.Dispatcher) *control
 }
 
 func (r registerFactory) registerRenderGizmos(dispatcher *event.Dispatcher, debugMode bool) engine.Gizmos {
-	return editor.NewDrawGizmos(dispatcher, debugMode)
+	return engineeditor.NewDrawGizmos(dispatcher, debugMode)
 }
 
 func (r registerFactory) registerRenderer(
@@ -205,8 +232,30 @@ func (r registerFactory) registerRenderer(
 	camera *render.Camera,
 	dispatcher *event.Dispatcher,
 	gizmos engine.Gizmos,
+	appState *engine.AppState,
 ) *render.Renderer {
-	return render.NewRenderer(sdlWindow, sdlRenderer, fontManager, textureManager, camera, dispatcher, gizmos)
+	return render.NewRenderer(
+		sdlWindow,
+		sdlRenderer,
+		fontManager,
+		textureManager,
+		camera,
+		dispatcher,
+		gizmos,
+		appState,
+	)
+}
+
+func (r registerFactory) registerAppState() *engine.AppState {
+	return engine.NewAppState()
+}
+
+// ----------------------------------------
+// Editor
+// ----------------------------------------
+
+func (r registerFactory) registerEditorManager() *editor.Manager {
+	return editor.NewManager()
 }
 
 // ----------------------------------------
@@ -250,8 +299,8 @@ func (r registerFactory) registerUI(layers ...ui.Layer) *ui.UI {
 	return ui.NewUI(layers...)
 }
 
-func (r registerFactory) registerUILayerFPS() *ui.LayerFPS {
-	return ui.NewLayerFPS()
+func (r registerFactory) registerUILayerSharedFPS() *ui.LayerFPS {
+	return ui.NewLayerSharedFPS()
 }
 
 func (r registerFactory) registerGameState(
@@ -259,6 +308,7 @@ func (r registerFactory) registerGameState(
 	camera engine.Camera,
 	mouse engine.Mouse,
 	movement engine.Movement,
+	appState *engine.AppState,
 ) *engine.GameState {
-	return engine.NewGameState(moment, camera, mouse, movement)
+	return engine.NewGameState(moment, camera, mouse, movement, appState)
 }
