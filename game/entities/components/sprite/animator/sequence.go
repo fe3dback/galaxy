@@ -111,12 +111,14 @@ func (seq *Sequence) setFrames(frames []*frame) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func WithFps(fps int) SequenceSetupFunc {
 	return func(seq *Sequence) {
 		seq.fps = fps
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func WithCustomPlayback(repeat bool, bounce bool, direction SequenceDirection) SequenceSetupFunc {
 	return func(seq *Sequence) {
 		seq.repeat = repeat
@@ -125,6 +127,7 @@ func WithCustomPlayback(repeat bool, bounce bool, direction SequenceDirection) S
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func WithOffset(x, y int) SequenceSetupFunc {
 	return func(seq *Sequence) {
 		seq.offsetX = x

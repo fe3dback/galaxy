@@ -103,7 +103,7 @@ linters-settings:
     # put imports beginning with prefix after 3rd-party packages;
     # only support one prefix
     # if not set, use goimports.local-prefixes
-    local-prefixes: github.com/org/project
+    local-prefixes: github.com/fe3dback/galaxy
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 10
@@ -185,7 +185,7 @@ linters-settings:
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
-    local-prefixes: github.com/org/project
+    local-prefixes: github.com/fe3dback/galaxy
   golint:
     # minimal confidence for issues, default is 0.8
     min-confidence: 0.8
@@ -234,10 +234,10 @@ linters-settings:
     list-type: blacklist
     include-go-root: false
     packages:
-      - github.com/sirupsen/logrus
+      # - github.com/sirupsen/logrus
     packages-with-error-message:
       # specify an error message to output when a blacklisted package is used
-      - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
+      # - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   lll:
     # max line length, lines longer will be reported. Default is 120.
     # '\t' is counted as 1 character by default, and can be changed with the tab-width option
@@ -324,15 +324,15 @@ linters-settings:
 
   # The custom section can be used to define linter plugins to be loaded at runtime. See README doc
   #  for more info.
-  custom:
-    # Each custom linter should have a unique name.
-    example:
-      # The path to the plugin *.so. Can be absolute or local. Required for each custom linter
-      path: /path/to/example.so
-      # The description of the linter. Optional, just for documentation purposes.
-      description: This is an example usage of a plugin linter.
-      # Intended to point to the repo location of the linter. Optional, just for documentation purposes.
-      original-url: github.com/golangci/example-linter
+  #  custom:
+  #    # Each custom linter should have a unique name.
+  #    example:
+  #      # The path to the plugin *.so. Can be absolute or local. Required for each custom linter
+  #      path: /path/to/example.so
+  #      # The description of the linter. Optional, just for documentation purposes.
+  #      description: This is an example usage of a plugin linter.
+  #      # Intended to point to the repo location of the linter. Optional, just for documentation purposes.
+  #      original-url: github.com/golangci/example-linter
 
 linters:
   enable:
@@ -341,6 +341,7 @@ linters:
   disable:
     - maligned
     - prealloc
+    - scopelint # todo: enable after excluding tests (because of "Using the variable on range scope")
   disable-all: false
   presets:
     - bugs

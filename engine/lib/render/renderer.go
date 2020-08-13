@@ -3,10 +3,9 @@ package render
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/generated"
-
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/lib/event"
+	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )

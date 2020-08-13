@@ -6,17 +6,18 @@ import (
 
 type Color uint32
 
+//goland:noinspection GoUnusedConst
 const (
-	ColorBackground = 0x282A36FF
-	ColorForeground = 0xF8F8F2FF
-	ColorSelection  = 0x44475AFF
-	ColorRed        = 0xFF5555FF
-	ColorGreen      = 0x50FA7BFF
-	ColorCyan       = 0x8BE9FDFF
-	ColorOrange     = 0xFFB86CFF
-	ColorPink       = 0xFF79C6FF
-	ColorPurple     = 0xBD93F9FF
-	ColorYellow     = 0xF1FA8CFF
+	ColorBackground Color = 0x282A36FF
+	ColorForeground Color = 0xF8F8F2FF
+	ColorSelection  Color = 0x44475AFF
+	ColorRed        Color = 0xFF5555FF
+	ColorGreen      Color = 0x50FA7BFF
+	ColorCyan       Color = 0x8BE9FDFF
+	ColorOrange     Color = 0xFFB86CFF
+	ColorPink       Color = 0xFF79C6FF
+	ColorPurple     Color = 0xBD93F9FF
+	ColorYellow     Color = 0xF1FA8CFF
 )
 
 func NewColor(r, g, b, a uint8) Color {

@@ -27,7 +27,7 @@ func NewDrawGizmos(dispatcher *event.Dispatcher, debugMode bool) *DrawGizmos {
 	}
 
 	// default settings
-	gz.system = true
+	gz.system = true // todo move init settings to env
 	gz.primary = true
 	gz.secondary = true
 

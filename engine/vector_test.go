@@ -845,7 +845,11 @@ func TestVector2D_PolarOffset(t *testing.T) {
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.PolarOffset(tt.args.distance, tt.args.angle); !reflect.DeepEqual(got, tt.want) {
+			got := v.PolarOffset(tt.args.distance, tt.args.angle)
+			got.X = roundTo(got.X)
+			got.Y = roundTo(got.Y)
+
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PolarOffset() = %v, want %v", got, tt.want)
 			}
 		})
@@ -943,7 +947,14 @@ func TestVector2D_Rotate(t *testing.T) {
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.Rotate(tt.args.angle); !reflect.DeepEqual(got, tt.want) {
+
+			got := v.Rotate(tt.args.angle)
+			got.X = roundTo(got.X)
+			got.Y = roundTo(got.Y)
+			tt.want.X = roundTo(tt.want.X)
+			tt.want.Y = roundTo(tt.want.Y)
+
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Rotate() = %v, want %v", got, tt.want)
 			}
 		})

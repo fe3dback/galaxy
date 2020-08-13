@@ -6,5 +6,3 @@ type Component interface {
 	engine.Drawer
 	engine.Updater
 }
-
-// todo: codegen for Component getter with typecast
