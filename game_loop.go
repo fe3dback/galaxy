@@ -43,7 +43,6 @@ func gameLoop(provider *registry.Provider) error {
 		// -----------------------------------
 		// handle events
 		// -----------------------------------
-		dispatcher.PullSDLEvents()
 		dispatcher.Dispatch()
 
 		// -----------------------------------

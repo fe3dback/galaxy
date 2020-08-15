@@ -98,7 +98,7 @@ func (c *Camera) center() engine.Vec {
 func (c *Camera) dispatchUpdate() {
 	c.dispatcher.PublishEventCameraUpdate(event.CameraUpdateEvent{
 		Width:  c.Width(),
-		Height: c.height,
+		Height: c.Height(),
 		Zoom:   c.Zoom(),
 	})
 }

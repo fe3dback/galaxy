@@ -56,7 +56,7 @@ func NewRenderer(
 		renderer.onCameraUpdate(
 			int32(cameraUpdateEvent.Width),
 			int32(cameraUpdateEvent.Height),
-			cameraUpdateEvent.Zoom,
+			float32(cameraUpdateEvent.Zoom),
 		)
 
 		return nil
@@ -104,7 +104,7 @@ func (r *Renderer) onWindowResize() {
 	r.Camera().Resize(int(width), int(height))
 }
 
-func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float64) {
+func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float32) {
 	flags := r.window.GetFlags()
 	fullScreen := flags&sdl.WINDOW_FULLSCREEN != 0
 
@@ -134,6 +134,6 @@ func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float64) {
 	})
 	utils.Check("set clip rect", err)
 
-	err = r.ref.SetScale(float32(r.camera.zoom), float32(r.camera.zoom))
+	err = r.ref.SetScale(zoom, zoom)
 	utils.Check("scale (zoom) rect", err)
 }

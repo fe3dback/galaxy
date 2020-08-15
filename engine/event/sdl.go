@@ -5,7 +5,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func (d *Dispatcher) PullSDLEvents() {
+func (d *Dispatcher) pullSDLEvents() {
 	defer utils.CheckPanic("handle events")
 
 	for {

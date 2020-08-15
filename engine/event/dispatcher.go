@@ -29,6 +29,10 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch() {
+	// convert sdl events to local events
+	d.pullSDLEvents()
+
+	// dispatch all events in queue
 	for d.queue.Len() > 0 {
 		elm := d.queue.Front()
 		meta := elm.Value.(meta)
