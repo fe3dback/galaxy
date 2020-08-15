@@ -13,7 +13,7 @@ func TestBasicAngle(t *testing.T) {
 		// 0.1999 -> 0.2
 		// but in real life we want more precision
 		// lib will round float numbers to pow(5)
-		wantCorrected := roundTo(want)
+		wantCorrected := RoundTo(want)
 
 		if got != wantCorrected {
 			t.Errorf("Circle conv, got `%v` want `%v (%v)`", got, wantCorrected, want)

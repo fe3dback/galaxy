@@ -1,11 +1,6 @@
 package event
 
-import (
-	"fmt"
-	"reflect"
-
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/veandco/go-sdl2/sdl"
 
 //goland:noinspection GoUnusedConst
 const (
@@ -240,38 +235,8 @@ type (
 	KeyboardPressType = uint8
 	KeyboardKey       = sdl.Keycode
 
-	EvKeyboard struct {
+	KeyBoardEvent struct {
 		PressType KeyboardPressType
 		Key       KeyboardKey
 	}
-
-	// todo: codegen
-	HandlerKeyboard func(keyboard EvKeyboard) error
 )
-
-// todo: codegen
-func (d *Dispatcher) OnKeyBoard(h HandlerKeyboard) {
-	d.registryHandler(typeKeyboard, func(e sdl.Event) error {
-		evKeyboard, ok := e.(*sdl.KeyboardEvent)
-		if !ok {
-			panic(fmt.Sprintf("can`t handle `OnKeyboard` unexpected event type `%s`", reflect.TypeOf(e)))
-		}
-
-		return h(d.assembleKeyboard(evKeyboard))
-	})
-}
-
-func (d *Dispatcher) assembleKeyboard(ev *sdl.KeyboardEvent) EvKeyboard {
-	var pressType KeyboardPressType
-
-	if ev.Type == sdl.KEYDOWN {
-		pressType = KeyboardPressTypePressed
-	} else {
-		pressType = KeyboardPressTypeReleased
-	}
-
-	return EvKeyboard{
-		PressType: pressType,
-		Key:       ev.Keysym.Sym,
-	}
-}

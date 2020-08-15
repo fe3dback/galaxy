@@ -20,20 +20,28 @@ components:
 
   engine:
     in: engine
+  engine_event:
+    in: engine/event
+  engine_control:
+    in: engine/control
   engine_lib:
     in: engine/lib
-  engine_render:
+  engine_lib_render:
     in: engine/lib/render
-  engine_event:
-    in: engine/lib/event
-  engine_control:
-    in: engine/lib/control
   engine_entity:
     in: engine/entity
   engine_editor:
     in: engine/editor
   engine_loader:
     in: engine/loader
+
+  shared_ui:
+    in: shared/ui
+
+  editor:
+    in: editor
+  editor_components:
+    in: editor/components
 
   game:
     in: game
@@ -44,8 +52,6 @@ components:
   game_component:
     in: game/entities/components
     depth: true
-  game_ui:
-    in: game/ui
 
   generated:
     in: generated
@@ -63,13 +69,7 @@ deps:
       - sdl-ttf
       - sdl-img
 
-  engine_event:
-    mayDependOn:
-      - engine
-    canUse:
-      - sdl
-
-  engine_render:
+  engine_lib_render:
     mayDependOn:
       - engine
       - engine_lib
@@ -78,6 +78,12 @@ deps:
       - sdl
       - sdl-ttf
       - sdl-img
+
+  engine_event:
+    mayDependOn:
+      - engine
+    canUse:
+      - sdl
 
   engine_control:
     mayDependOn:
@@ -99,6 +105,14 @@ deps:
     canUse:
       - loader-yaml
 
+  editor:
+    mayDependOn:
+      - engine
+
+  editor_components:
+    mayDependOn:
+      - engine
+
   game:
     mayDependOn:
       - engine
@@ -119,7 +133,7 @@ deps:
       - game_component
       - game_units
 
-  game_ui:
+  shared_ui:
     mayDependOn:
       - engine
 
@@ -129,6 +143,7 @@ deps:
       - registry
       - system
       - engine
+      - engine_event
       - game
 
 exclude:

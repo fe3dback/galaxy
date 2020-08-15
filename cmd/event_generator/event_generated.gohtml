@@ -1,0 +1,29 @@
+// This file generated at {{ .GeneratedAt }}
+// DO NOT MODIFY
+package event
+
+import (
+    "fmt"
+    "reflect"
+)
+
+type (
+    // {{.Name}} Event Handler
+    Handler{{.Name}} func({{.NameLC}}Event {{.Name}}Event) error
+)
+
+func (d *Dispatcher) PublishEvent{{.Name}}({{.NameLC}}Event {{.Name}}Event) {
+    d.publish(eventType{{.Name}}, {{.NameLC}}Event)
+}
+
+func (d *Dispatcher) On{{.Name}}(h Handler{{.Name}}) {
+    d.subscribe(eventType{{.Name}}, func(e interface{}) error {
+        ev{{.Name}}, ok := e.({{.Name}}Event)
+
+        if !ok {
+            panic(fmt.Sprintf("can`t handle `On{{.Name}}` unexpected event type `%s`", reflect.TypeOf(e)))
+        }
+
+        return h(ev{{.Name}})
+    })
+}

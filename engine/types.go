@@ -16,9 +16,11 @@ type (
 		Position() Vec
 		Width() int
 		Height() int
+		Zoom() float64
 		MoveTo(p Vec)
 		CenterOn(p Vec)
 		Resize(width, height int)
+		ZoomView(scale float64)
 	}
 
 	Drawer interface {
@@ -58,6 +60,7 @@ type (
 		DrawText(fontId generated.ResourcePath, color Color, text string, vec Vec)
 
 		// system
+		InEditorMode() bool
 		Gizmos() Gizmos
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
@@ -93,6 +96,8 @@ type (
 
 	Mouse interface {
 		MouseCoords() Vec
+		ScrollPosition() float64
+		ScrollLastOffset() float64
 	}
 
 	Movement interface {
@@ -108,5 +113,6 @@ type (
 		Moment() Moment
 		Mouse() Mouse
 		Movement() Movement
+		InEditorMode() bool
 	}
 )

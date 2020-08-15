@@ -22,7 +22,7 @@ func (a Angle) Flip() Angle {
 }
 
 func (a Angle) Degrees() float64 {
-	return roundTo(clampDeg(
+	return RoundTo(clampDeg(
 		rad2deg(float64(a)),
 	))
 }

@@ -1,0 +1,10 @@
+// This file generated at {{ .GeneratedAt }}
+// DO NOT MODIFY
+package event
+
+func (d *Dispatcher) init() {
+    d.handlers = make(map[eventType][]handlerFn)
+    {{ range .EventTypes }}
+    d.handlers[eventType{{.}}] = make([]handlerFn, 0)
+    {{ end }}
+}

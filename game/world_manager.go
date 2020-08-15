@@ -5,7 +5,7 @@ import (
 	"runtime"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/lib/event"
+	"github.com/fe3dback/galaxy/engine/event"
 )
 
 type (
@@ -31,7 +31,7 @@ func NewWorldManager(createWorldFn WorldProviderFn, gameWorldCreator engine.Worl
 	return manager
 }
 
-func (w *WorldManager) handleKeyboard(keyboard event.EvKeyboard) error {
+func (w *WorldManager) handleKeyboard(keyboard event.KeyBoardEvent) error {
 	if keyboard.PressType != event.KeyboardPressTypePressed {
 		return nil
 	}
