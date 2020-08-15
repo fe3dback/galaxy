@@ -37,7 +37,7 @@ type (
 	}
 
 	specWheels struct {
-		radius units.Meters
+		radius units.Meter
 		wheels []specWheel
 	}
 

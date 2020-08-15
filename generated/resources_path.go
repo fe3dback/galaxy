@@ -1,4 +1,4 @@
-// This file generated at 2020-08-03 06:28:35.114434555 +0000 UTC
+// This file generated at 2020-08-15 16:37:40.878243789 +0000 UTC
 // DO NOT MODIFY
 
 package generated
@@ -27,8 +27,9 @@ const (
 // ------------------------------
 
 const (
-	ResourcesImgGfxAnimTestScheet ResourcePath = "resources/img/gfx/animTestScheet.png" // located in "resources/img/gfx/animTestScheet.png"
-	ResourcesImgGfxAnimTestSheet2 ResourcePath = "resources/img/gfx/animTestSheet2.png" // located in "resources/img/gfx/animTestSheet2.png"
+	ResourcesImgCharDefaultCharSheet ResourcePath = "resources/img/char/defaultCharSheet.png" // located in "resources/img/char/defaultCharSheet.png"
+	ResourcesImgGfxAnimTestScheet    ResourcePath = "resources/img/gfx/animTestScheet.png"    // located in "resources/img/gfx/animTestScheet.png"
+	ResourcesImgGfxAnimTestSheet2    ResourcePath = "resources/img/gfx/animTestSheet2.png"    // located in "resources/img/gfx/animTestSheet2.png"
 )
 
 // ------------------------------
@@ -37,4 +38,12 @@ const (
 
 const (
 	ResourcesSystemAngles ResourcePath = "resources/system/angles.png" // located in "resources/system/angles.png"
+)
+
+// ------------------------------
+// Weapons
+// ------------------------------
+
+const (
+	ResourcesWeaponsRemi16 ResourcePath = "resources/weapons/remi16.yaml" // located in "resources/weapons/remi16.yaml"
 )

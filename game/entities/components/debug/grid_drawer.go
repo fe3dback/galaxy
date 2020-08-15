@@ -30,8 +30,8 @@ func (td *GridDrawer) OnDraw(r engine.Renderer) error {
 	px := td.entity.Position().X
 	py := td.entity.Position().Y
 
-	worldX := units.Meters(int(px/units.DistanceMeter) * int(units.DistanceMeter))
-	worldY := units.Meters(int(py/units.DistanceMeter) * int(units.DistanceMeter))
+	worldX := units.Meter(int(px/units.DistanceMeter) * int(units.DistanceMeter))
+	worldY := units.Meter(int(py/units.DistanceMeter) * int(units.DistanceMeter))
 
 	startX := worldX - units.DistanceMeter*5
 	startY := worldY - units.DistanceMeter*5

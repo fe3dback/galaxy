@@ -126,6 +126,10 @@ func (v Vec) RoundY() int {
 	return int(math.Floor(v.Y))
 }
 
+func (v Vec) Zero() bool {
+	return v.X == 0.0 && v.Y == 0.0
+}
+
 // =============================================
 // Transforms
 // =============================================
@@ -150,6 +154,13 @@ func (v Vec) Round() Vec {
 	}
 }
 
+func (v Vec) Clamp(min, max float64) Vec {
+	return Vec{
+		X: Clamp(v.X, min, max),
+		Y: Clamp(v.Y, min, max),
+	}
+}
+
 // =============================================
 // Trigonometry
 // =============================================
@@ -170,7 +181,7 @@ func (v Vec) AngleBetween(to Vec) Angle {
 }
 
 func (v Vec) AngleTo(to Vec) Angle {
-	return v.Add(to).Direction()
+	return Angle(math.Atan2(to.Y-v.Y, v.X-to.X) + math.Pi)
 }
 
 func (v Vec) Rotate(angle Angle) Vec {

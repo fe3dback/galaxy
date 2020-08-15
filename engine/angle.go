@@ -17,6 +17,14 @@ func NewAngle(deg float64) Angle {
 	))
 }
 
+func (a Angle) Normalize() Angle {
+	if a >= 0 {
+		return a
+	}
+
+	return a + circleFullRad
+}
+
 func (a Angle) Flip() Angle {
 	return circleFullRad - a
 }

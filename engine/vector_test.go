@@ -1497,6 +1497,62 @@ func TestVector2D_AngleTo(t *testing.T) {
 			},
 			want: NewAngle(225),
 		},
+		{
+			name: "relative x",
+			fields: fields{
+				X: 1,
+				Y: 0,
+			},
+			args: args{
+				to: Vec{
+					X: 2,
+					Y: 0,
+				},
+			},
+			want: NewAngle(0),
+		},
+		{
+			name: "relative x2",
+			fields: fields{
+				X: 1,
+				Y: 1,
+			},
+			args: args{
+				to: Vec{
+					X: -1,
+					Y: -1,
+				},
+			},
+			want: NewAngle(135),
+		},
+		{
+			name: "relative x3",
+			fields: fields{
+				X: 1,
+				Y: 1,
+			},
+			args: args{
+				to: Vec{
+					X: -1,
+					Y: 1,
+				},
+			},
+			want: NewAngle(180),
+		},
+		{
+			name: "relative x4",
+			fields: fields{
+				X: -5,
+				Y: 5,
+			},
+			args: args{
+				to: Vec{
+					X: 100,
+					Y: -100,
+				},
+			},
+			want: NewAngle(45),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

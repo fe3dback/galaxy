@@ -1,7 +1,19 @@
 package units
 
+// count of Something
+type Pixel = int32
+
+// count of Something
+type Count = int32
+
+// rate in X per second
+type Rate = float64
+
 // in meters
-type Meters = float64
+type Meter = float64
+
+// in seconds
+type Second = float64
 
 // in m/s
 type SpeedMpS = float64
@@ -14,9 +26,9 @@ const PixelsPerMeter = 128.0
 
 // calculate basic distances
 const (
-	DistanceMeter Meters = PixelsPerMeter
-	DistanceCm    Meters = DistanceMeter / 100
-	DistanceKm    Meters = DistanceMeter * 1000
+	DistanceMeter Meter = PixelsPerMeter
+	DistanceCm    Meter = DistanceMeter / 100
+	DistanceKm    Meter = DistanceMeter * 1000
 )
 
 // world
