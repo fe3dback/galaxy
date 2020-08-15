@@ -115,8 +115,8 @@ func Test_roundTo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := roundTo(tt.args.n); got != tt.want {
-				t.Errorf("roundTo() = %v, want %v", got, tt.want)
+			if got := RoundTo(tt.args.n); got != tt.want {
+				t.Errorf("RoundTo() = %v, want %v", got, tt.want)
 			}
 		})
 	}

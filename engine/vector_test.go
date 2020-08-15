@@ -6,13 +6,13 @@ import (
 )
 
 func testNormAngle(angle Angle) float64 {
-	return NewAngle(roundTo(clampDeg(angle.Degrees()))).Radians()
+	return NewAngle(RoundTo(clampDeg(angle.Degrees()))).Radians()
 }
 
 func testNormVec(vec Vec) Vec {
 	return Vec{
-		X: roundTo(vec.X),
-		Y: roundTo(vec.Y),
+		X: RoundTo(vec.X),
+		Y: RoundTo(vec.Y),
 	}
 }
 
@@ -205,7 +205,7 @@ func TestVector2D_AngleBetween(t *testing.T) {
 				X: tt.fields.X,
 				Y: tt.fields.Y,
 			}
-			if got := v.AngleBetween(tt.args.to); roundTo(float64(got)) != roundTo(float64(tt.want)) {
+			if got := v.AngleBetween(tt.args.to); RoundTo(float64(got)) != RoundTo(float64(tt.want)) {
 				t.Errorf("AngleBetween() = %v, want %v", got, tt.want)
 			}
 		})
@@ -846,8 +846,8 @@ func TestVector2D_PolarOffset(t *testing.T) {
 				Y: tt.fields.Y,
 			}
 			got := v.PolarOffset(tt.args.distance, tt.args.angle)
-			got.X = roundTo(got.X)
-			got.Y = roundTo(got.Y)
+			got.X = RoundTo(got.X)
+			got.Y = RoundTo(got.Y)
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PolarOffset() = %v, want %v", got, tt.want)
@@ -949,10 +949,10 @@ func TestVector2D_Rotate(t *testing.T) {
 			}
 
 			got := v.Rotate(tt.args.angle)
-			got.X = roundTo(got.X)
-			got.Y = roundTo(got.Y)
-			tt.want.X = roundTo(tt.want.X)
-			tt.want.Y = roundTo(tt.want.Y)
+			got.X = RoundTo(got.X)
+			got.Y = RoundTo(got.Y)
+			tt.want.X = RoundTo(tt.want.X)
+			tt.want.Y = RoundTo(tt.want.Y)
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Rotate() = %v, want %v", got, tt.want)

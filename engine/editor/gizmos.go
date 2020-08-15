@@ -1,6 +1,6 @@
 package editor
 
-import "github.com/fe3dback/galaxy/engine/lib/event"
+import "github.com/fe3dback/galaxy/engine/event"
 
 type DrawGizmos struct {
 	system    bool
@@ -32,7 +32,7 @@ func NewDrawGizmos(dispatcher *event.Dispatcher, debugMode bool) *DrawGizmos {
 	gz.secondary = true
 
 	// subscribe to keyboard
-	dispatcher.OnKeyBoard(func(keyboard event.EvKeyboard) error {
+	dispatcher.OnKeyBoard(func(keyboard event.KeyBoardEvent) error {
 		gz.HandleCtrlKey(keyboard)
 		gz.HandleKeyboard(keyboard)
 		return nil
@@ -61,7 +61,7 @@ func (d *DrawGizmos) Spam() bool {
 	return d.spam
 }
 
-func (d *DrawGizmos) HandleCtrlKey(ev event.EvKeyboard) {
+func (d *DrawGizmos) HandleCtrlKey(ev event.KeyBoardEvent) {
 	if ev.Key != event.KeyLctrl {
 		return
 	}
@@ -74,7 +74,7 @@ func (d *DrawGizmos) HandleCtrlKey(ev event.EvKeyboard) {
 	d.ctrlPressed = true
 }
 
-func (d *DrawGizmos) HandleKeyboard(ev event.EvKeyboard) {
+func (d *DrawGizmos) HandleKeyboard(ev event.KeyBoardEvent) {
 	if !d.ctrlPressed {
 		return
 	}

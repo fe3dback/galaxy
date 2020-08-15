@@ -194,10 +194,10 @@ func (r *Renderer) draw(res generated.ResourcePath, src, dest engine.Rect, angle
 	}
 
 	if src.Max.X == 0 {
-		src.Max.X = dest.Max.X
+		src.Max.X = float64(texture.Width)
 	}
 	if src.Max.Y == 0 {
-		src.Max.Y = dest.Max.Y
+		src.Max.Y = float64(texture.Height)
 	}
 
 	r.internalDrawTexture(

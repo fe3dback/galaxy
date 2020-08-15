@@ -15,7 +15,9 @@ type (
 )
 
 func NewAppState() *AppState {
-	return &AppState{}
+	return &AppState{
+		mode: modeGame,
+	}
 }
 
 func (e *AppState) SwitchState() {

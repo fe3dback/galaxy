@@ -18,10 +18,10 @@ func (r *Renderer) isRectInsideCamera(rect engine.Rect) bool {
 		return true
 	}
 
-	xB := rect.Min.X > r.camera.position.X+float64(r.camera.width)
+	xB := rect.Min.X > r.camera.position.X+(float64(r.camera.width)/r.camera.zoom)
 	xL := rect.Min.X+rect.Max.X < r.camera.position.X
 
-	yB := rect.Min.Y > r.camera.position.Y+float64(r.camera.height)
+	yB := rect.Min.Y > r.camera.position.Y+(float64(r.camera.height)/r.camera.zoom)
 	yL := rect.Min.Y+rect.Max.Y < r.camera.position.Y
 
 	return !(xB || xL || yB || yL)
@@ -34,6 +34,6 @@ func (r *Renderer) isPointInsideCamera(vec engine.Vec) bool {
 
 	return vec.X >= r.camera.position.X &&
 		vec.Y >= r.camera.position.Y &&
-		vec.X <= r.camera.position.X+float64(r.camera.width) &&
-		vec.Y <= r.camera.position.Y+float64(r.camera.height)
+		vec.X <= r.camera.position.X+(float64(r.camera.width)/r.camera.zoom) &&
+		vec.Y <= r.camera.position.Y+(float64(r.camera.height)/r.camera.zoom)
 }

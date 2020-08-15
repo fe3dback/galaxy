@@ -4,13 +4,11 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/lib/event"
+	"github.com/fe3dback/galaxy/engine/event"
 	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
-
-const fullScreenScaleFactor = 1
 
 type Renderer struct {
 	window         *sdl.Window
@@ -46,15 +44,25 @@ func NewRenderer(
 		appState:       appState,
 	}
 
-	dispatcher.OnWindow(func(window event.EvWindow) error {
+	dispatcher.OnWindow(func(window event.WindowEvent) error {
 		if window.EventType == event.WindowEventTypeSizeChanged {
-			renderer.resetView()
+			renderer.onWindowResize()
 		}
 
 		return nil
 	})
 
-	renderer.resetView()
+	dispatcher.OnCameraUpdate(func(cameraUpdateEvent event.CameraUpdateEvent) error {
+		renderer.onCameraUpdate(
+			int32(cameraUpdateEvent.Width),
+			int32(cameraUpdateEvent.Height),
+			cameraUpdateEvent.Zoom,
+		)
+
+		return nil
+	})
+
+	renderer.onWindowResize()
 	return renderer
 }
 
@@ -91,36 +99,41 @@ func (r *Renderer) TextureQuery(res generated.ResourcePath) engine.TextureInfo {
 	}
 }
 
-func (r *Renderer) resetView() {
+func (r *Renderer) onWindowResize() {
 	width, height := r.window.GetSize()
-	flags := r.window.GetFlags()
-	fullscreen := flags&sdl.WINDOW_FULLSCREEN != 0
-
-	if fullscreen {
-		err := r.ref.SetViewport(&sdl.Rect{
-			X: 0,
-			Y: 0,
-			W: width * fullScreenScaleFactor,
-			H: height * fullScreenScaleFactor,
-		})
-		utils.Check("set viewport", err)
-
-		err = r.ref.SetScale(fullScreenScaleFactor, fullScreenScaleFactor)
-		utils.Check("set scale", err)
-	}
-
-	fmt.Printf("Resize to %d, %d (fullscreen = %v, scale = %d)\n", width, height, fullscreen, fullScreenScaleFactor)
-
 	r.Camera().Resize(int(width), int(height))
-	r.resetClippingRect()
 }
 
-func (r *Renderer) resetClippingRect() {
-	err := r.ref.SetClipRect(&sdl.Rect{
+func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float64) {
+	flags := r.window.GetFlags()
+	fullScreen := flags&sdl.WINDOW_FULLSCREEN != 0
+
+	fmt.Printf("Resize to [%dx%d] (fullScreen = %v, zoom = %v)\n",
+		width,
+		height,
+		fullScreen,
+		zoom,
+	)
+
+	err := r.ref.SetLogicalSize(width, height)
+	utils.Check("set logical size", err)
+
+	err = r.ref.SetViewport(&sdl.Rect{
 		X: 0,
 		Y: 0,
-		W: int32(r.camera.width),
-		H: int32(r.camera.height),
+		W: width,
+		H: height,
+	})
+	utils.Check("set viewport", err)
+
+	err = r.ref.SetClipRect(&sdl.Rect{
+		X: 0,
+		Y: 0,
+		W: width,
+		H: height,
 	})
 	utils.Check("set clip rect", err)
+
+	err = r.ref.SetScale(float32(r.camera.zoom), float32(r.camera.zoom))
+	utils.Check("scale (zoom) rect", err)
 }

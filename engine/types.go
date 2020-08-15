@@ -16,9 +16,11 @@ type (
 		Position() Vec
 		Width() int
 		Height() int
+		Zoom() float64
 		MoveTo(p Vec)
 		CenterOn(p Vec)
 		Resize(width, height int)
+		ZoomView(scale float64)
 	}
 
 	Drawer interface {
@@ -94,6 +96,8 @@ type (
 
 	Mouse interface {
 		MouseCoords() Vec
+		ScrollPosition() float64
+		ScrollLastOffset() float64
 	}
 
 	Movement interface {

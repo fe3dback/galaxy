@@ -2,7 +2,7 @@ package control
 
 import (
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/lib/event"
+	"github.com/fe3dback/galaxy/engine/event"
 )
 
 type Movement struct {
@@ -44,7 +44,7 @@ func (m *Movement) Space() bool {
 }
 
 func (m *Movement) subscribeToKeyboard(dispatcher *event.Dispatcher) {
-	dispatcher.OnKeyBoard(func(keyboard event.EvKeyboard) error {
+	dispatcher.OnKeyBoard(func(keyboard event.KeyBoardEvent) error {
 		var pressed bool
 
 		if keyboard.PressType == event.KeyboardPressTypePressed {

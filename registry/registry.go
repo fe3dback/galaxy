@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/editor"
-
+	editorcomponents "github.com/fe3dback/galaxy/editor/components"
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/control"
 	engineeditor "github.com/fe3dback/galaxy/engine/editor"
+	"github.com/fe3dback/galaxy/engine/event"
 	"github.com/fe3dback/galaxy/engine/lib"
-	"github.com/fe3dback/galaxy/engine/lib/control"
-	"github.com/fe3dback/galaxy/engine/lib/event"
 	"github.com/fe3dback/galaxy/engine/lib/render"
 	"github.com/fe3dback/galaxy/engine/loader"
 	"github.com/fe3dback/galaxy/game"
@@ -76,8 +76,13 @@ func makeRegistry(flags Flags) *Registry {
 
 	// engine
 	appState := reg.registerAppState()
-	camera := reg.registerCamera()
-	mouse := reg.registerMouse()
+	dispatcher := reg.registerDispatcher(
+		reg.eventQuit(frames),
+		reg.eventSwitchEditorState(appState),
+	)
+	camera := reg.registerCamera(dispatcher)
+	mouse := reg.registerMouse(dispatcher)
+	renderGizmos := reg.registerRenderGizmos(dispatcher, options.Debug.System)
 	fontManager := reg.registerFontManager(
 		closer,
 	)
@@ -85,11 +90,6 @@ func makeRegistry(flags Flags) *Registry {
 		sdlRenderer,
 		closer,
 	)
-	dispatcher := reg.registerDispatcher(
-		reg.eventQuit(frames),
-		reg.eventSwitchEditorState(appState),
-	)
-	renderGizmos := reg.registerRenderGizmos(dispatcher, options.Debug.System)
 	renderer := reg.registerRenderer(
 		sdlWindow,
 		sdlRenderer,
@@ -208,12 +208,12 @@ func (r registerFactory) registerTextureManager(sdlRenderer *sdl.Renderer, close
 	return render.NewTextureManager(sdlRenderer, closer)
 }
 
-func (r registerFactory) registerCamera() *render.Camera {
-	return render.NewCamera()
+func (r registerFactory) registerCamera(dispatcher *event.Dispatcher) *render.Camera {
+	return render.NewCamera(dispatcher)
 }
 
-func (r registerFactory) registerMouse() *control.Mouse {
-	return control.NewMouse()
+func (r registerFactory) registerMouse(dispatcher *event.Dispatcher) *control.Mouse {
+	return control.NewMouse(dispatcher)
 }
 
 func (r registerFactory) registerMovement(dispatcher *event.Dispatcher) *control.Movement {
@@ -255,7 +255,13 @@ func (r registerFactory) registerAppState() *engine.AppState {
 // ----------------------------------------
 
 func (r registerFactory) registerEditorManager() *editor.Manager {
-	return editor.NewManager()
+	// todo auto register all editor components
+	components := make([]editor.Component, 0)
+
+	// register
+	components = append(components, editorcomponents.NewCamera())
+
+	return editor.NewManager(components)
 }
 
 // ----------------------------------------

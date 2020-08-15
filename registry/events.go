@@ -4,16 +4,15 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
-
-	"github.com/fe3dback/galaxy/engine/lib/event"
+	"github.com/fe3dback/galaxy/engine/event"
 	"github.com/fe3dback/galaxy/system"
 )
 
 func (r registerFactory) registerDispatcher(
 	onQuit event.HandlerQuit,
-	onEditorSwitch event.HandlerKeyboard,
+	onEditorSwitch event.HandlerKeyBoard,
 ) *event.Dispatcher {
-	dispatcher := event.NewEventDispatcher()
+	dispatcher := event.NewDispatcher()
 	dispatcher.OnQuit(onQuit)
 	dispatcher.OnKeyBoard(onEditorSwitch)
 
@@ -21,7 +20,7 @@ func (r registerFactory) registerDispatcher(
 }
 
 func (r registerFactory) eventQuit(frames *system.Frames) event.HandlerQuit {
-	return func(quit event.EvQuit) error {
+	return func(quit event.QuitEvent) error {
 		fmt.Printf("sdl quit event handled\n")
 		frames.Interrupt()
 
@@ -29,8 +28,8 @@ func (r registerFactory) eventQuit(frames *system.Frames) event.HandlerQuit {
 	}
 }
 
-func (r registerFactory) eventSwitchEditorState(ed *engine.AppState) event.HandlerKeyboard {
-	return func(keyboard event.EvKeyboard) error {
+func (r registerFactory) eventSwitchEditorState(ed *engine.AppState) event.HandlerKeyBoard {
+	return func(keyboard event.KeyBoardEvent) error {
 		if keyboard.PressType != event.KeyboardPressTypePressed {
 			return nil
 		}

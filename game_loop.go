@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine/event"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/registry"
 )
@@ -36,6 +38,13 @@ func gameLoop(provider *registry.Provider) error {
 		// start frame
 		// -----------------------------------
 		frames.Begin()
+		dispatcher.PublishEventFrameStart(event.FrameStartEvent{})
+
+		// -----------------------------------
+		// handle events
+		// -----------------------------------
+		dispatcher.PullSDLEvents()
+		dispatcher.Dispatch()
 
 		// -----------------------------------
 		// update
@@ -97,13 +106,9 @@ func gameLoop(provider *registry.Provider) error {
 		debug(provider)
 
 		// -----------------------------------
-		// handle events
-		// -----------------------------------
-		dispatcher.HandleQueue()
-
-		// -----------------------------------
 		// finalize frame
 		// -----------------------------------
+		dispatcher.PublishEventFrameEnd(event.FrameEndEvent{})
 		frames.End()
 	}
 
