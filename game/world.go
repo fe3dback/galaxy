@@ -10,17 +10,23 @@ import (
 type EntityList []*entity.Entity
 
 type World struct {
-	entities EntityList
+	entities   EntityList
+	spawnQueue EntityList
 }
 
 func NewWorld() *World {
 	return &World{
-		entities: make(EntityList, 0),
+		entities:   make(EntityList, 0),
+		spawnQueue: make(EntityList, 0),
 	}
 }
 
 func (w *World) AddEntity(e *entity.Entity) {
 	w.entities = append(w.entities, e)
+}
+
+func (w *World) SpawnInGameEntity(e *entity.Entity) {
+	w.spawnQueue = append(w.spawnQueue, e)
 }
 
 func (w *World) Entities() EntityList {
@@ -29,6 +35,13 @@ func (w *World) Entities() EntityList {
 
 func (w *World) OnUpdate(s engine.State) error {
 	needGc := false
+
+	if len(w.spawnQueue) > 0 {
+		for _, e := range w.spawnQueue {
+			w.AddEntity(e)
+		}
+		w.spawnQueue = w.spawnQueue[:0]
+	}
 
 	for _, e := range w.entities {
 		if e.IsDestroyed() {

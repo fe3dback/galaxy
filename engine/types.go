@@ -62,6 +62,7 @@ type (
 		// system
 		InEditorMode() bool
 		Gizmos() Gizmos
+		SetRenderTarget(id uint8)
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
 		Clear(Color)
@@ -86,10 +87,20 @@ type (
 
 	WorldCreator interface {
 		Loader() Loader
+		SoundMixer() SoundMixer
+	}
+
+	LoaderYaml interface {
+		LoadYaml(res generated.ResourcePath, data interface{})
+	}
+
+	LoaderSound interface {
+		LoadSound(res generated.ResourcePath)
 	}
 
 	Loader interface {
-		LoadYaml(res generated.ResourcePath, data interface{})
+		LoaderYaml
+		LoaderSound
 	}
 
 	// Controls
@@ -106,7 +117,18 @@ type (
 		Space() bool
 	}
 
+	Entity interface {
+		Id() int64
+	}
+
 	// Game State
+	EntitySpawner interface {
+		SpawnEntity(entity Entity)
+	}
+
+	SoundMixer interface {
+		Play(res generated.ResourcePath)
+	}
 
 	State interface {
 		Camera() Camera
@@ -114,5 +136,7 @@ type (
 		Mouse() Mouse
 		Movement() Movement
 		InEditorMode() bool
+		EntitySpawner() EntitySpawner
+		SoundMixer() SoundMixer
 	}
 )

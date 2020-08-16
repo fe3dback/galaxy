@@ -5,7 +5,7 @@ import (
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
-	"github.com/fe3dback/galaxy/game/units"
+	"github.com/fe3dback/galaxy/game/gm"
 )
 
 const accelerationMul = 4
@@ -16,17 +16,17 @@ const deAccelerationChangeDirectionMul = 0.45
 type Movement struct {
 	entity *entity.Entity
 
-	walkSpeed units.SpeedMpS
-	runSpeed  units.SpeedMpS
+	walkSpeed gm.SpeedMpS
+	runSpeed  gm.SpeedMpS
 
 	velocity engine.Vec
 }
 
-func NewMovement(entity *entity.Entity, walkSpeed units.SpeedMpS, runSpeed units.SpeedMpS) *Movement {
+func NewMovement(entity *entity.Entity, walkSpeed gm.SpeedMpS, runSpeed gm.SpeedMpS) *Movement {
 	return &Movement{
 		entity:    entity,
-		walkSpeed: walkSpeed * units.PixelsPerMeter,
-		runSpeed:  runSpeed * units.PixelsPerMeter,
+		walkSpeed: walkSpeed * gm.PixelsPerMeter,
+		runSpeed:  runSpeed * gm.PixelsPerMeter,
 	}
 }
 

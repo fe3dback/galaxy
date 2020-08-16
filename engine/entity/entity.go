@@ -7,22 +7,33 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 )
 
-type components []Component
+type (
+	components []Component
 
-type Entity struct {
-	position   engine.Vec
-	rotation   engine.Angle
-	components components
-	destroyed  bool
-}
+	Entity struct {
+		id         int64
+		position   engine.Vec
+		rotation   engine.Angle
+		components components
+		destroyed  bool
+	}
+)
+
+var lastId int64 = 0
 
 func NewEntity(pos engine.Vec, rot engine.Angle) *Entity {
+	lastId++
 	return &Entity{
+		id:         lastId,
 		position:   pos,
 		rotation:   rot,
 		components: make(components, 0),
 		destroyed:  false,
 	}
+}
+
+func (e *Entity) Id() int64 {
+	return e.id
 }
 
 func (e *Entity) Position() engine.Vec {

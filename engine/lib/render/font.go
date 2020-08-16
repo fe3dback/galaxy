@@ -19,7 +19,7 @@ func NewFont(resource FontId, params FontParams, closer *utils.Closer) *Font {
 
 	f, err := ttf.OpenFont(string(resource), params.size)
 	utils.Check("open", err)
-	closer.Enqueue(func() error {
+	closer.EnqueueClose(func() error {
 		f.Close()
 		return nil
 	})

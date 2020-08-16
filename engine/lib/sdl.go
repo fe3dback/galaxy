@@ -29,7 +29,7 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 	err = ttf.Init()
 	utils.Check("ttf init", err)
 
-	closer.Enqueue(func() error {
+	closer.EnqueueClose(func() error {
 		sdl.Quit()
 		return nil
 	})
@@ -60,7 +60,7 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 		winFlags,
 	)
 	utils.Check("create window", err)
-	closer.Enqueue(window.Destroy)
+	closer.EnqueueClose(window.Destroy)
 
 	surface, err := window.GetSurface()
 	utils.Check("window get surface", err)
@@ -73,7 +73,7 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	utils.Check("create renderer", err)
-	closer.Enqueue(renderer.Destroy)
+	closer.EnqueueClose(renderer.Destroy)
 
 	return &SDLLib{
 		window:   window,

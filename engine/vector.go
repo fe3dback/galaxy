@@ -24,9 +24,9 @@ func VectorForward(y float64) Vec {
 	}
 }
 
-func VectorLeft(x float64) Vec {
+func VectorRight(x float64) Vec {
 	return Vec{
-		X: -x,
+		X: x,
 		Y: 0,
 	}
 }
@@ -159,6 +159,25 @@ func (v Vec) Clamp(min, max float64) Vec {
 		X: Clamp(v.X, min, max),
 		Y: Clamp(v.Y, min, max),
 	}
+}
+
+func (v Vec) ClampAbs(to Vec) Vec {
+	absX := math.Abs(to.X)
+	absY := math.Abs(to.Y)
+
+	if v.X > absX {
+		v.X = absX
+	} else if v.X < -absX {
+		v.X = -absX
+	}
+
+	if v.Y > absY {
+		v.Y = absY
+	} else if v.Y < -absY {
+		v.Y = -absY
+	}
+
+	return v
 }
 
 // =============================================

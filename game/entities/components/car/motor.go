@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/fe3dback/galaxy/game/units"
+	"github.com/fe3dback/galaxy/game/gm"
 
 	"github.com/fe3dback/galaxy/engine"
 )
@@ -80,7 +80,7 @@ func automaticTransmissionShift(rpm float64) gearInd {
 	return shift
 }
 
-func engineRpm(gearIndex gearInd, wheelsRadius float64, speed units.SpeedKmH) float64 {
+func engineRpm(gearIndex gearInd, wheelsRadius float64, speed gm.SpeedKmH) float64 {
 	// - 20 km/h = 20,000 m / 3600 s = 5.6 m/s.
 	speedMetersPerSecond := speed * 1000 / 3600
 	wheelRotationRate := speedMetersPerSecond / wheelsRadius
