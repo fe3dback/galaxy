@@ -7,6 +7,7 @@ import (
 
 type Vec struct {
 	X, Y float64
+	y    int
 }
 
 func (v Vec) String() string {

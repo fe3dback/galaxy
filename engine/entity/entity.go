@@ -9,12 +9,14 @@ import (
 
 type (
 	components []Component
+	colliders  []Collider
 
 	Entity struct {
 		id         int64
 		position   engine.Vec
 		rotation   engine.Angle
 		components components
+		colliders  colliders
 		destroyed  bool
 	}
 )
@@ -28,6 +30,7 @@ func NewEntity(pos engine.Vec, rot engine.Angle) *Entity {
 		position:   pos,
 		rotation:   rot,
 		components: make(components, 0),
+		colliders:  make(colliders, 0),
 		destroyed:  false,
 	}
 }

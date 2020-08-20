@@ -332,15 +332,23 @@ func TestCollideBoxToBox(t *testing.T) {
 			aNorm := testNormalizeRect(tt.args.a)
 			bNorm := testNormalizeRect(tt.args.b)
 
-			if got := Rect2Rect(aNorm, bNorm); got != tt.want {
-				t.Errorf("Rect2Rect() = got '%v', want '%v'\nx,y,w,h\n%+v\n%+v\nmin [x,y], max [x,y]\n%+v\n%+v\n",
-					got,
-					tt.want,
-					aNorm,
-					bNorm,
-					tt.args.a,
-					tt.args.b,
-				)
+			variants := [][2]engine.Rect{
+				{aNorm, bNorm},
+				{bNorm, aNorm},
+			}
+
+			for varId, variant := range variants {
+				if got := Rect2Rect(variant[0], variant[1]); got != tt.want {
+					t.Errorf("Rect2Rect() = got '%v', want '%v'\nVariant: #%v\nx,y,w,h\n%+v\n%+v\nmin [x,y], max [x,y]\n%+v\n%+v\n",
+						got,
+						tt.want,
+						varId+1,
+						variant[0],
+						variant[1],
+						tt.args.a,
+						tt.args.b,
+					)
+				}
 			}
 		})
 	}
@@ -599,7 +607,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3",
 			args: args{
 				r: centeredBox2R,
-				c: engine.Circle{Pos: engine.Vec{X: 4, Y: 0}, Radius: 2},
+				c: engine.Circle{Pos: engine.Vec{X: 3, Y: 0}, Radius: 2},
 			},
 			want: true,
 		},
@@ -607,7 +615,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3+",
 			args: args{
 				r: centeredBox2R,
-				c: engine.Circle{Pos: engine.Vec{X: 4.0001, Y: 0}, Radius: 2},
+				c: engine.Circle{Pos: engine.Vec{X: 3.0001, Y: 0}, Radius: 2},
 			},
 			want: false,
 		},
@@ -615,7 +623,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3-",
 			args: args{
 				r: centeredBox2R,
-				c: engine.Circle{Pos: engine.Vec{X: 3.9999, Y: 0}, Radius: 2},
+				c: engine.Circle{Pos: engine.Vec{X: 2.9999, Y: 0}, Radius: 2},
 			},
 			want: true,
 		},

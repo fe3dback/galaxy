@@ -43,21 +43,23 @@ func Rect2Point(a engine.Rect, b engine.Vec) bool {
 }
 
 func Rect2Circle(r engine.Rect, c engine.Circle) bool {
-	// fast rough check
-	if !Rect2Rect(r, c.BoundingBox()) {
-		return false
+	test := c.Pos
+
+	if c.Pos.X < r.Min.X {
+		test.X = r.Min.X
+	} else if c.Pos.X > r.Max.X {
+		test.X = r.Max.X
 	}
 
-	// slow check circle inside rect..
-	if Rect2Point(r, c.Pos) {
+	if c.Pos.Y < r.Min.Y {
+		test.Y = r.Min.Y
+	} else if c.Pos.Y > r.Max.Y {
+		test.Y = r.Max.Y
+	}
+
+	distance := c.Pos.Sub(test).Magnitude()
+	if distance <= c.Radius {
 		return true
-	}
-
-	// or rect edges touch or overlap circle
-	for _, edge := range r.Edges() {
-		if Ray2Circle(edge, c) {
-			return true
-		}
 	}
 
 	return false
