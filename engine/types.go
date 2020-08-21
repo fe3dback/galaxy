@@ -69,6 +69,10 @@ type (
 		Present()
 	}
 
+	CollisionResolver interface {
+		OnCollide(target Entity, targetLayer uint8)
+	}
+
 	Updater interface {
 		OnUpdate(State) error
 	}

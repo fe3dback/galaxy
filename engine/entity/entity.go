@@ -9,7 +9,7 @@ import (
 
 type (
 	components []Component
-	colliders  []Collider
+	colliders  []*Collider
 
 	Entity struct {
 		id         int64
@@ -71,12 +71,36 @@ func (e *Entity) IsDestroyed() bool {
 	return e.destroyed
 }
 
+func (e *Entity) IsCollideWith(another *Entity) bool {
+	if e.id == another.id {
+		return false
+	}
+
+	// todo: quadratic complexity, rewrite to optimized
+	// two step checking
+
+	// todo: collision mask's
+	for _, myCollider := range e.colliders {
+		for _, anotherCollider := range another.colliders {
+			if myCollider.IsCollideWith(anotherCollider) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (e *Entity) OnUpdate(s engine.State) error {
 	for _, component := range e.components {
 		err := component.OnUpdate(s)
 		if err != nil {
 			return fmt.Errorf("can`t update entity `%T` component `%T`: %v", e, component, err)
 		}
+	}
+
+	for _, collider := range e.colliders {
+		collider.Update(e)
 	}
 
 	return nil
@@ -88,14 +112,37 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 		if err != nil {
 			return fmt.Errorf("can`t draw entity `%T` component `%s`: %v", e, component, err)
 		}
+	}
 
-		if r.Gizmos().Primary() {
-			r.DrawPoint(engine.ColorForeground, e.position)
-			r.DrawVector(engine.ColorForeground, 10, e.position, e.rotation)
+	if r.Gizmos().Primary() {
+		r.DrawPoint(engine.ColorForeground, e.position)
+		r.DrawVector(engine.ColorForeground, 10, e.position, e.rotation)
+	}
+
+	if r.Gizmos().Debug() {
+		for _, collider := range e.colliders {
+			collider.OnDraw(r)
 		}
 	}
 
 	return nil
+}
+
+func (e *Entity) OnCollide(target engine.Entity, _ uint8) {
+	// todo: collision masks (layers)
+	for _, component := range e.components {
+		if resolver, ok := component.(engine.CollisionResolver); ok {
+			resolver.OnCollide(target, 0)
+		}
+	}
+}
+
+func (e *Entity) AddCollider(c *Collider) {
+	e.colliders = append(e.colliders, c)
+}
+
+func (e *Entity) Colliders() []*Collider {
+	return e.colliders
 }
 
 func (e *Entity) AddComponent(c Component) {

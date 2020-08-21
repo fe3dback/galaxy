@@ -55,6 +55,23 @@ func (w *World) OnUpdate(s engine.State) error {
 		}
 	}
 
+	for _, eA := range w.entities {
+		if eA.IsDestroyed() {
+			continue
+		}
+
+		for _, eB := range w.entities {
+			if eB.IsDestroyed() {
+				continue
+			}
+
+			if eA.IsCollideWith(eB) {
+				// todo: collision masks
+				eA.OnCollide(eB, 0)
+			}
+		}
+	}
+
 	if needGc {
 		w.garbageCollect()
 	}

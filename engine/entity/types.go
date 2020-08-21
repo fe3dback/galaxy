@@ -1,7 +1,7 @@
 package entity
 
+import "github.com/fe3dback/galaxy/engine/collider"
+
 type (
-	Collider interface {
-		IsCollideWith(other Collider) bool
-	}
+	Collider = collider.Collider
 )

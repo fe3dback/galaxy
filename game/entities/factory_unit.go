@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/collider"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities/components/debug"
 	"github.com/fe3dback/galaxy/game/entities/components/game"
@@ -33,6 +34,12 @@ func NewUnitFactory(params UnitFactoryParams) entity.Factory {
 		e.AddComponent(game.NewCameraFollower(e))
 		e.AddComponent(player.NewMovement(e, 1.6, 4.2))
 		e.AddComponent(game.NewLookToMouse(e))
+
+		// collider
+		e.AddCollider(collider.NewRectCollider(engine.Rect{
+			Min: engine.Vec{X: -16, Y: -16},
+			Max: engine.Vec{X: 16, Y: 16},
+		}))
 
 		return e
 	}

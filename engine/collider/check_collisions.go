@@ -8,23 +8,19 @@ import (
 )
 
 func (c *Collider) IsCollideWith(other *Collider) bool {
-	if c.layer != other.layer {
-		return false
-	}
-
 	switch c.colliderType {
 	case TypePoint:
-		return other.IsCollideWithPoint(*c.point)
+		return other.isCollideWithPoint(*c.point)
 	case TypeRect:
-		return other.IsCollideWithRect(*c.rect)
+		return other.isCollideWithRect(*c.rect)
 	case TypeCircle:
-		return other.IsCollideWithCircle(*c.circle)
+		return other.isCollideWithCircle(*c.circle)
 	default:
 		panic(fmt.Sprintf("Unknown collider type %d, %T", c.colliderType, c.colliderType))
 	}
 }
 
-func (c *Collider) IsCollideWithPoint(p engine.Vec) bool {
+func (c *Collider) isCollideWithPoint(p engine.Vec) bool {
 	switch c.colliderType {
 	case TypePoint:
 		return c.point.X == p.X && c.point.Y == p.Y
@@ -37,7 +33,7 @@ func (c *Collider) IsCollideWithPoint(p engine.Vec) bool {
 	}
 }
 
-func (c *Collider) IsCollideWithRect(r engine.Rect) bool {
+func (c *Collider) isCollideWithRect(r engine.Rect) bool {
 	switch c.colliderType {
 	case TypePoint:
 		return collision.Rect2Point(r, *c.point)
@@ -50,7 +46,7 @@ func (c *Collider) IsCollideWithRect(r engine.Rect) bool {
 	}
 }
 
-func (c *Collider) IsCollideWithCircle(d engine.Circle) bool {
+func (c *Collider) isCollideWithCircle(d engine.Circle) bool {
 	switch c.colliderType {
 	case TypePoint:
 		return collision.Circle2Point(d, *c.point)

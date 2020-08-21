@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/fe3dback/galaxy/engine"
@@ -16,8 +17,10 @@ const deAccelerationChangeDirectionMul = 0.45
 type Movement struct {
 	entity *entity.Entity
 
-	walkSpeed gm.SpeedMpS
-	runSpeed  gm.SpeedMpS
+	previousPos   engine.Vec
+	previousAngle engine.Angle
+	walkSpeed     gm.SpeedMpS
+	runSpeed      gm.SpeedMpS
 
 	velocity engine.Vec
 }
@@ -30,11 +33,21 @@ func NewMovement(entity *entity.Entity, walkSpeed gm.SpeedMpS, runSpeed gm.Speed
 	}
 }
 
+func (r *Movement) OnCollide(target engine.Entity, targetLayer uint8) {
+	fmt.Printf("Collision %d -> %d on layer %d\n", r.entity.Id(), target.Id(), targetLayer)
+
+	r.entity.SetPosition(r.previousPos)
+	r.entity.SetRotation(r.previousAngle)
+}
+
 func (r *Movement) OnDraw(_ engine.Renderer) error {
 	return nil
 }
 
 func (r *Movement) OnUpdate(state engine.State) error {
+	r.previousPos = r.entity.Position()
+	r.previousAngle = r.entity.Rotation()
+
 	speedPerSecond := r.walkSpeed
 	if state.Movement().Shift() {
 		speedPerSecond = r.runSpeed
