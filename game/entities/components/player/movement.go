@@ -3,6 +3,7 @@ package player
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
@@ -17,12 +18,13 @@ const deAccelerationChangeDirectionMul = 0.45
 type Movement struct {
 	entity *entity.Entity
 
-	previousPos   engine.Vec
-	previousAngle engine.Angle
-	walkSpeed     gm.SpeedMpS
-	runSpeed      gm.SpeedMpS
+	walkSpeed gm.SpeedMpS
+	runSpeed  gm.SpeedMpS
 
-	velocity engine.Vec
+	velocity     engine.Vec
+	isCollide    bool
+	collideAngle engine.Angle
+	backAngle    engine.Angle
 }
 
 func NewMovement(entity *entity.Entity, walkSpeed gm.SpeedMpS, runSpeed gm.SpeedMpS) *Movement {
@@ -34,20 +36,40 @@ func NewMovement(entity *entity.Entity, walkSpeed gm.SpeedMpS, runSpeed gm.Speed
 }
 
 func (r *Movement) OnCollide(target engine.Entity, targetLayer uint8) {
-	fmt.Printf("Collision %d -> %d on layer %d\n", r.entity.Id(), target.Id(), targetLayer)
+	fmt.Printf("[%s] Collision %d (%s) -> %d on layer %d\n",
+		time.Now().String(),
+		r.entity.Id(),
+		r.entity.Position(),
+		target.Id(),
+		targetLayer,
+	)
 
-	r.entity.SetPosition(r.previousPos)
-	r.entity.SetRotation(r.previousAngle)
+	r.collideAngle = r.entity.Position().AngleTo(target.Position())
+	r.backAngle = r.collideAngle.Flip()
+	r.velocity = engine.VectorRight(25).Rotate(r.backAngle)
+
+	r.isCollide = true
 }
 
-func (r *Movement) OnDraw(_ engine.Renderer) error {
+func (r *Movement) OnDraw(d engine.Renderer) error {
+	d.DrawVector(engine.ColorGreen, 30, r.entity.Position(), r.collideAngle)
+	d.DrawVector(engine.ColorOrange, 25, r.entity.Position(), r.backAngle)
 	return nil
 }
 
 func (r *Movement) OnUpdate(state engine.State) error {
-	r.previousPos = r.entity.Position()
-	r.previousAngle = r.entity.Rotation()
+	if !r.isCollide {
+		r.updateWalkVelocity(state)
+	}
+	r.isCollide = false
 
+	r.entity.AddPosition(
+		r.velocity.Scale(state.Moment().DeltaTime()),
+	)
+
+	return nil
+}
+func (r *Movement) updateWalkVelocity(state engine.State) {
 	speedPerSecond := r.walkSpeed
 	if state.Movement().Shift() {
 		speedPerSecond = r.runSpeed
@@ -70,9 +92,6 @@ func (r *Movement) OnUpdate(state engine.State) error {
 	}
 
 	r.velocity = r.softClamp(r.velocity, speedPerSecond)
-	r.entity.AddPosition(r.velocity.Scale(dt))
-
-	return nil
 }
 
 func (r *Movement) softClamp(vec engine.Vec, unit float64) engine.Vec {

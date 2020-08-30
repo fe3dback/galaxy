@@ -123,6 +123,8 @@ type (
 
 	Entity interface {
 		Id() int64
+		Position() Vec
+		Rotation() Angle
 	}
 
 	// Game State

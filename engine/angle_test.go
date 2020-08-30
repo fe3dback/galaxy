@@ -245,3 +245,52 @@ func TestAngle_Unit(t *testing.T) {
 		})
 	}
 }
+
+func TestAngle_Flip(t *testing.T) {
+	tests := []struct {
+		name string
+		a    float64
+		want float64
+	}{
+		{
+			name: "left",
+			a:    0,
+			want: 180,
+		},
+		{
+			name: "right",
+			a:    180,
+			want: 0,
+		},
+		{
+			name: "top",
+			a:    90,
+			want: 270,
+		},
+		{
+			name: "bottom",
+			a:    270,
+			want: 90,
+		},
+		{
+			name: "top-left",
+			a:    45,
+			want: 225,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			aRad := NewAngle(tt.a)
+			wantRad := NewAngle(tt.want)
+
+			if got := aRad.Flip(); got != wantRad {
+				t.Errorf("Flip() = %v (%v), want %v (%v)",
+					got,
+					got.Degrees(),
+					wantRad,
+					wantRad.Degrees(),
+				)
+			}
+		})
+	}
+}

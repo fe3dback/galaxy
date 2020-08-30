@@ -9,7 +9,7 @@ lint:
 	golangci-lint run
 
 arch:
-	go run ./cmd/arch/*.go
+	go-arch-lint --project-path ${PWD}
 
 quality-check:
 	@echo "=======[ ARCH ] ========"

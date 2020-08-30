@@ -1,4 +1,16 @@
-path: github.com/fe3dback/galaxy
+version: 1
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - .idea
+  - vendor
+  - cmd
+  - resources
+  - registry
+
+excludeFiles:
+  - "^.*_test\\.go$"
 
 vendors:
   sdl:
@@ -34,6 +46,10 @@ components:
     in: engine/editor
   engine_loader:
     in: engine/loader
+  engine_collider:
+    in: engine/collider
+  engine_collision:
+    in: engine/collision
 
   shared_ui:
     in: shared/ui
@@ -47,18 +63,17 @@ components:
     in: game
   game_entities:
     in: game/entities
-  game_units:
-    in: game/units
   game_component:
-    in: game/entities/components
-    depth: true
+    in: game/entities/components/**
+  game_const:
+    in: game/gm
 
   generated:
     in: generated
   utils:
     in: utils
 
-common:
+commonComponents:
   - generated
   - utils
 
@@ -96,6 +111,15 @@ deps:
     mayDependOn:
       - engine
 
+  engine_collision:
+    mayDependOn:
+      - engine
+
+  engine_collider:
+    mayDependOn:
+      - engine
+      - engine_collision
+
   engine_editor:
     mayDependOn:
       - engine
@@ -119,19 +143,21 @@ deps:
       - engine_entity
       - engine_event
       - game_entities
+      - game_const
 
   game_entities:
     mayDependOn:
       - engine
       - engine_entity
       - game_component
+      - game_const
 
   game_component:
     mayDependOn:
       - engine
       - engine_entity
       - game_component
-      - game_units
+      - game_const
 
   shared_ui:
     mayDependOn:
@@ -146,9 +172,3 @@ deps:
       - engine_event
       - game
 
-exclude:
-  - .idea
-  - vendor
-  - cmd
-  - resources
-  - registry

@@ -1,6 +1,8 @@
 package game
 
 import (
+	"math/rand"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/collider"
 	"github.com/fe3dback/galaxy/engine/entity"
@@ -35,15 +37,28 @@ func NewLevel01() WorldProviderFn {
 		world.AddEntity(player)
 
 		// create walls
-		wallFactory := entities.NewStaticFactory(entities.StaticFactoryParams{
-			Collider: collider.NewRectCollider(engine.Rect{
-				Min: engine.Vec{X: -25, Y: -25},
-				Max: engine.Vec{X: 25, Y: 25},
-			}),
-		})
-		wall := entity.NewEntity(engine.Vec{X: 500, Y: 300}, engine.Angle0)
-		wall = wallFactory(wall, creator)
-		world.AddEntity(wall)
+		xRand := rand.Intn(4) + rand.Intn(16)
+		yRand := rand.Intn(4) + rand.Intn(16)
+
+		for xx := 0; xx < xRand; xx++ {
+			for yy := 0; yy < yRand; yy++ {
+				boxWidth := float64(10 + rand.Intn(50))
+
+				wallFactory := entities.NewStaticFactory(entities.StaticFactoryParams{
+					Collider: collider.NewRectCollider(engine.Rect{
+						Min: engine.Vec{X: -boxWidth, Y: -boxWidth},
+						Max: engine.Vec{X: boxWidth, Y: boxWidth},
+					}),
+				})
+
+				posX := float64(rand.Intn(100) * xx)
+				posY := float64(rand.Intn(100) * yy)
+
+				wall := entity.NewEntity(engine.Vec{X: posX, Y: posY}, engine.Angle0)
+				wall = wallFactory(wall, creator)
+				world.AddEntity(wall)
+			}
+		}
 
 		// return world
 		return world
