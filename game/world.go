@@ -12,12 +12,14 @@ type EntityList []*entity.Entity
 type World struct {
 	entities   EntityList
 	spawnQueue EntityList
+	physics    engine.Physics
 }
 
-func NewWorld() *World {
+func NewWorld(physicsWorld engine.Physics) *World {
 	return &World{
 		entities:   make(EntityList, 0),
 		spawnQueue: make(EntityList, 0),
+		physics:    physicsWorld,
 	}
 }
 
@@ -36,6 +38,7 @@ func (w *World) Entities() EntityList {
 func (w *World) OnUpdate(s engine.State) error {
 	needGc := false
 
+	// spawn new entities
 	if len(w.spawnQueue) > 0 {
 		for _, e := range w.spawnQueue {
 			w.AddEntity(e)
@@ -43,6 +46,10 @@ func (w *World) OnUpdate(s engine.State) error {
 		w.spawnQueue = w.spawnQueue[:0]
 	}
 
+	// update physics
+	w.physics.Update(s.Moment().DeltaTime())
+
+	// update game
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
 			needGc = true
@@ -52,23 +59,6 @@ func (w *World) OnUpdate(s engine.State) error {
 		err := e.OnUpdate(s)
 		if err != nil {
 			return fmt.Errorf("can`t update world entity `%T`: %v", e, err)
-		}
-	}
-
-	for _, eA := range w.entities {
-		if eA.IsDestroyed() {
-			continue
-		}
-
-		for _, eB := range w.entities {
-			if eB.IsDestroyed() {
-				continue
-			}
-
-			if eA.IsCollideWith(eB) {
-				// todo: collision masks
-				eA.OnCollide(eB, 0)
-			}
 		}
 	}
 

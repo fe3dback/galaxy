@@ -9,14 +9,13 @@ import (
 
 type (
 	components []Component
-	colliders  []*Collider
 
 	Entity struct {
 		id         int64
+		body       engine.PhysicsBody
 		position   engine.Vec
 		rotation   engine.Angle
 		components components
-		colliders  colliders
 		destroyed  bool
 	}
 )
@@ -30,7 +29,6 @@ func NewEntity(pos engine.Vec, rot engine.Angle) *Entity {
 		position:   pos,
 		rotation:   rot,
 		components: make(components, 0),
-		colliders:  make(colliders, 0),
 		destroyed:  false,
 	}
 }
@@ -39,11 +37,26 @@ func (e *Entity) Id() int64 {
 	return e.id
 }
 
+func (e *Entity) AttachPhysicsBody(body engine.PhysicsBody) {
+	if e.body != nil {
+		panic(fmt.Sprintf("Entity `%d` already have physics body", e.Id()))
+	}
+
+	e.body = body
+	e.updatePhysicsState()
+}
+
 func (e *Entity) Position() engine.Vec {
 	return e.position
 }
 
 func (e *Entity) SetPosition(pos engine.Vec) {
+	// todo: set phys pos
+	if e.body != nil {
+		// managed with physics
+		return
+	}
+
 	e.position = pos
 }
 
@@ -56,11 +69,29 @@ func (e *Entity) Rotation() engine.Angle {
 }
 
 func (e *Entity) SetRotation(rot engine.Angle) {
+	// todo: set phys angle
+	if e.body != nil {
+		// managed with physics
+		return
+	}
+
 	e.rotation = rot
 }
 
 func (e *Entity) AddRotation(rot engine.Angle) {
 	e.SetRotation(e.Rotation().Add(rot))
+}
+
+func (e *Entity) ApplyForceFrom(force engine.Vec, relativePosition engine.Vec) {
+	if e.body != nil {
+		e.body.ApplyForce(force, e.position.Add(relativePosition))
+	}
+}
+
+func (e *Entity) ApplyForce(force engine.Vec) {
+	if e.body != nil {
+		e.body.ApplyForce(force, e.position)
+	}
 }
 
 func (e *Entity) Destroy() {
@@ -71,36 +102,16 @@ func (e *Entity) IsDestroyed() bool {
 	return e.destroyed
 }
 
-func (e *Entity) IsCollideWith(another *Entity) bool {
-	if e.id == another.id {
-		return false
-	}
-
-	// todo: quadratic complexity, rewrite to optimized
-	// two step checking
-
-	// todo: collision mask's
-	for _, myCollider := range e.colliders {
-		for _, anotherCollider := range another.colliders {
-			if myCollider.IsCollideWith(anotherCollider) {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
 func (e *Entity) OnUpdate(s engine.State) error {
+	if e.body != nil {
+		e.updatePhysicsState()
+	}
+
 	for _, component := range e.components {
 		err := component.OnUpdate(s)
 		if err != nil {
 			return fmt.Errorf("can`t update entity `%T` component `%T`: %v", e, component, err)
 		}
-	}
-
-	for _, collider := range e.colliders {
-		collider.Update(e)
 	}
 
 	return nil
@@ -120,29 +131,12 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 	}
 
 	if r.Gizmos().Debug() {
-		for _, collider := range e.colliders {
-			collider.OnDraw(r)
+		if e.body != nil {
+			e.body.DebugDraw(r)
 		}
 	}
 
 	return nil
-}
-
-func (e *Entity) OnCollide(target engine.Entity, _ uint8) {
-	// todo: collision masks (layers)
-	for _, component := range e.components {
-		if resolver, ok := component.(engine.CollisionResolver); ok {
-			resolver.OnCollide(target, 0)
-		}
-	}
-}
-
-func (e *Entity) AddCollider(c *Collider) {
-	e.colliders = append(e.colliders, c)
-}
-
-func (e *Entity) Colliders() []*Collider {
-	return e.colliders
 }
 
 func (e *Entity) AddComponent(c Component) {
@@ -169,4 +163,9 @@ func (e *Entity) GetComponent(ref Component) Component {
 	}
 
 	panic(fmt.Sprintf("can`t find component `%s` in `%T`", id, e))
+}
+
+func (e *Entity) updatePhysicsState() {
+	e.position = e.body.Position()
+	e.rotation = e.body.Rotation()
 }

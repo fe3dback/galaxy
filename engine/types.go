@@ -69,10 +69,6 @@ type (
 		Present()
 	}
 
-	CollisionResolver interface {
-		OnCollide(target Entity, targetLayer uint8)
-	}
-
 	Updater interface {
 		OnUpdate(State) error
 	}
@@ -87,11 +83,37 @@ type (
 		SinceStart() time.Duration
 	}
 
+	// Physics
+
+	Physics interface {
+		Update(deltaTime float64)
+
+		// shapes
+		CreateShapeBox(width, height Pixel) PhysicsShape
+
+		// bodies
+		AddBodyStatic(pos Vec, rot Angle, shape PhysicsShape) PhysicsBody
+		AddBodyDynamic(pos Vec, rot Angle, mass Kilogram, shape PhysicsShape) PhysicsBody
+	}
+
+	PhysicsBody interface {
+		Position() Vec
+		Rotation() Angle
+		DebugDraw(r Renderer)
+
+		// mutate
+		ApplyForce(force Vec, position Vec)
+	}
+
+	PhysicsShape interface {
+	}
+
 	// Engine Assets
 
 	WorldCreator interface {
 		Loader() Loader
 		SoundMixer() SoundMixer
+		Physics() Physics
 	}
 
 	LoaderYaml interface {

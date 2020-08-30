@@ -3,6 +3,8 @@ package registry
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine/physics"
+
 	"github.com/fe3dback/galaxy/engine/lib/sound"
 
 	"github.com/fe3dback/galaxy/editor"
@@ -115,9 +117,12 @@ func makeRegistry(flags Flags) *Registry {
 		uiLayerSharedFPS,
 	)
 
+	// physics
+	physicsWorld := reg.registerPhysics(closer)
+
 	// game
 	assetsLoader := reg.registerAssetsLoader(soundManager)
-	worldCreator := reg.registerGameWorldCreator(assetsLoader, soundManager)
+	worldCreator := reg.registerGameWorldCreator(assetsLoader, soundManager, physicsWorld)
 	worldManager := reg.registerWorldManager(worldCreator, dispatcher)
 
 	// game ui
@@ -302,10 +307,19 @@ func (r registerFactory) registerAssetsLoader(soundManager *sound.Manager) *load
 	)
 }
 
-func (r registerFactory) registerGameWorldCreator(assetsLoader engine.Loader, soundManager *sound.Manager) *engine.GameWorldCreator {
+func (r registerFactory) registerPhysics(closer *utils.Closer) *physics.World {
+	return physics.NewWorld(closer)
+}
+
+func (r registerFactory) registerGameWorldCreator(
+	assetsLoader engine.Loader,
+	soundManager engine.SoundMixer,
+	physics engine.Physics,
+) *engine.GameWorldCreator {
 	return engine.NewGameWorldCreator(
 		assetsLoader,
 		soundManager,
+		physics,
 	)
 }
 

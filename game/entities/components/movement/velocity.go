@@ -3,7 +3,6 @@ package movement
 import (
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
-	"github.com/fe3dback/galaxy/game/gm"
 )
 
 type Velocity struct {
@@ -42,7 +41,7 @@ func (v *Velocity) OnUpdate(s engine.State) error {
 	// update position
 	v.entity.AddPosition(
 		v.velocity.
-			Scale(gm.PixelsPerMeter).
+			Scale(engine.PixelsPerMeter).
 			Scale(s.Moment().DeltaTime()),
 	)
 

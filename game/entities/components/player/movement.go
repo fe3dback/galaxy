@@ -1,13 +1,10 @@
 package player
 
 import (
-	"fmt"
 	"math"
-	"time"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
-	"github.com/fe3dback/galaxy/game/gm"
 )
 
 const accelerationMul = 4
@@ -18,55 +15,28 @@ const deAccelerationChangeDirectionMul = 0.45
 type Movement struct {
 	entity *entity.Entity
 
-	walkSpeed gm.SpeedMpS
-	runSpeed  gm.SpeedMpS
+	walkSpeed engine.SpeedMpS
+	runSpeed  engine.SpeedMpS
 
-	velocity     engine.Vec
-	isCollide    bool
-	collideAngle engine.Angle
-	backAngle    engine.Angle
+	velocity engine.Vec
 }
 
-func NewMovement(entity *entity.Entity, walkSpeed gm.SpeedMpS, runSpeed gm.SpeedMpS) *Movement {
+func NewMovement(entity *entity.Entity, walkSpeed engine.SpeedMpS, runSpeed engine.SpeedMpS) *Movement {
 	return &Movement{
 		entity:    entity,
-		walkSpeed: walkSpeed * gm.PixelsPerMeter,
-		runSpeed:  runSpeed * gm.PixelsPerMeter,
+		walkSpeed: walkSpeed * engine.PixelsPerMeter,
+		runSpeed:  runSpeed * engine.PixelsPerMeter,
 	}
 }
 
-func (r *Movement) OnCollide(target engine.Entity, targetLayer uint8) {
-	fmt.Printf("[%s] Collision %d (%s) -> %d on layer %d\n",
-		time.Now().String(),
-		r.entity.Id(),
-		r.entity.Position(),
-		target.Id(),
-		targetLayer,
-	)
-
-	r.collideAngle = r.entity.Position().AngleTo(target.Position())
-	r.backAngle = r.collideAngle.Flip()
-	r.velocity = engine.VectorRight(25).Rotate(r.backAngle)
-
-	r.isCollide = true
-}
-
-func (r *Movement) OnDraw(d engine.Renderer) error {
-	d.DrawVector(engine.ColorGreen, 30, r.entity.Position(), r.collideAngle)
-	d.DrawVector(engine.ColorOrange, 25, r.entity.Position(), r.backAngle)
+func (r *Movement) OnDraw(_ engine.Renderer) error {
 	return nil
 }
 
 func (r *Movement) OnUpdate(state engine.State) error {
-	if !r.isCollide {
-		r.updateWalkVelocity(state)
-	}
-	r.isCollide = false
+	r.updateWalkVelocity(state)
 
-	r.entity.AddPosition(
-		r.velocity.Scale(state.Moment().DeltaTime()),
-	)
-
+	r.entity.ApplyForce(r.velocity.Scale(state.Moment().DeltaTime()))
 	return nil
 }
 func (r *Movement) updateWalkVelocity(state engine.State) {

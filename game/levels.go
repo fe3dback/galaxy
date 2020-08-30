@@ -4,7 +4,6 @@ import (
 	"math/rand"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/collider"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities"
 	"github.com/fe3dback/galaxy/game/entities/components/weapon"
@@ -13,7 +12,7 @@ import (
 
 func NewLevel01() WorldProviderFn {
 	return func(creator engine.WorldCreator) *World {
-		world := NewWorld()
+		world := NewWorld(creator.Physics())
 
 		// basic
 		weaponsLoader := weapon.NewLoader(creator)
@@ -32,8 +31,20 @@ func NewLevel01() WorldProviderFn {
 			TextureRes:    generated.ResourcesImgCharDefaultCharSheet,
 			WeaponsLoader: weaponsLoader,
 		})
-		player := entity.NewEntity(engine.Vec{X: 500, Y: 400}, engine.Angle45)
+		player := entity.NewEntity(engine.Vec{}, engine.Angle0)
 		player = playerFactory(player, creator)
+		physShape := creator.Physics().CreateShapeBox(
+			40,
+			40,
+		)
+
+		physBody := creator.Physics().AddBodyDynamic(
+			engine.Vec{X: 500, Y: 400},
+			engine.Angle0,
+			1,
+			physShape,
+		)
+		player.AttachPhysicsBody(physBody)
 		world.AddEntity(player)
 
 		// create walls
@@ -42,20 +53,26 @@ func NewLevel01() WorldProviderFn {
 
 		for xx := 0; xx < xRand; xx++ {
 			for yy := 0; yy < yRand; yy++ {
-				boxWidth := float64(10 + rand.Intn(50))
-
-				wallFactory := entities.NewStaticFactory(entities.StaticFactoryParams{
-					Collider: collider.NewRectCollider(engine.Rect{
-						Min: engine.Vec{X: -boxWidth, Y: -boxWidth},
-						Max: engine.Vec{X: boxWidth, Y: boxWidth},
-					}),
-				})
-
+				boxWidth := int32(20 + rand.Intn(100))
 				posX := float64(rand.Intn(100) * xx)
 				posY := float64(rand.Intn(100) * yy)
 
-				wall := entity.NewEntity(engine.Vec{X: posX, Y: posY}, engine.Angle0)
+				shapeBox := creator.Physics().CreateShapeBox(
+					boxWidth,
+					boxWidth,
+				)
+
+				staticBody := creator.Physics().AddBodyStatic(
+					engine.Vec{X: posX, Y: posY},
+					engine.Angle0,
+					shapeBox,
+				)
+
+				wallFactory := entities.NewStaticFactory(entities.StaticFactoryParams{})
+
+				wall := entity.NewEntity(engine.Vec{}, engine.Angle0)
 				wall = wallFactory(wall, creator)
+				wall.AttachPhysicsBody(staticBody)
 				world.AddEntity(wall)
 			}
 		}

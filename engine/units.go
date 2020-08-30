@@ -1,4 +1,4 @@
-package gm
+package engine
 
 // count of Something
 type Pixel = int32
@@ -20,6 +20,9 @@ type SpeedMpS = float64
 
 // in km/h
 type SpeedKmH = float64
+
+// in kg
+type Kilogram = float64
 
 // map pixels to meters
 const PixelsPerMeter = 128.0
