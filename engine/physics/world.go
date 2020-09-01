@@ -34,7 +34,7 @@ type World struct {
 func NewWorld(closer *utils.Closer) *World {
 	world := box2d.MakeB2World(box2d.B2Vec2{
 		X: 0,
-		Y: 1,
+		Y: 0,
 	})
 
 	closer.EnqueueFree(func() {
@@ -85,12 +85,12 @@ func (w *World) AddBodyDynamic(
 
 	ref := w.newRefDynamic(pos, rot)
 
-	fixDef := box2d.MakeB2FixtureDef()
-	fixDef.Shape = sh.boxShape
-	fixDef.Density = mass // todo: calculate density
-	fixDef.Friction = 0.3
+	fixtureDef := box2d.MakeB2FixtureDef()
+	fixtureDef.Shape = sh.boxShape
+	fixtureDef.Density = mass // todo: calculate density
+	fixtureDef.Friction = 0.5 // todo
 
-	ref.CreateFixtureFromDef(&fixDef)
+	ref.CreateFixtureFromDef(&fixtureDef)
 
 	return newOurBody(ref, sh)
 }
@@ -98,7 +98,7 @@ func (w *World) AddBodyDynamic(
 func (w *World) newRefStatic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
 	def := box2d.NewB2BodyDef()
 	def.Position = vec2box(pos)
-	def.Angle = rot.Radians()
+	//def.Angle = rot.Radians()
 	def.Type = bodyTypeStatic
 	def.Active = true
 
@@ -108,7 +108,7 @@ func (w *World) newRefStatic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
 func (w *World) newRefDynamic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
 	def := box2d.NewB2BodyDef()
 	def.Position = vec2box(pos)
-	def.Angle = rot.Radians()
+	//def.Angle = rot.Radians()
 	def.Type = bodyTypeDynamic
 	def.Active = true
 	def.AllowSleep = false
