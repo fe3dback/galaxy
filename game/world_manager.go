@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/fe3dback/galaxy/engine/entity"
-
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
 )
@@ -61,10 +59,6 @@ func (w *WorldManager) Reset() {
 	w.current = nil
 	runtime.GC()
 	w.current = w.createWorldFn(w.worldCreator)
-}
-
-func (w *WorldManager) SpawnEntity(e engine.Entity) {
-	w.CurrentWorld().SpawnInGameEntity(e.(*entity.Entity))
 }
 
 func (w *WorldManager) CurrentWorld() *World {

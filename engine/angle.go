@@ -5,7 +5,6 @@ import "math"
 const circleFullDeg = 360.0
 const circleHalfDeg = 180.0
 const circleFullRad = math.Pi * 2
-const circleHalfRad = math.Pi
 const convDeg2Rad = math.Pi / circleHalfDeg
 const convRad2Deg = circleHalfDeg / math.Pi
 const floatRoundPow = 10000

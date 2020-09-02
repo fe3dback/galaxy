@@ -182,16 +182,16 @@ func TestLine2Line(t *testing.T) {
 			var variants = make([][2]engine.Line, 0)
 
 			variants = append(variants, [2]engine.Line{
-				{l1A, l1B}, {l2A, l2B},
+				{A: l1A, B: l1B}, {A: l2A, B: l2B},
 			})
 			variants = append(variants, [2]engine.Line{
-				{l1B, l1A}, {l2B, l2A},
+				{A: l1B, B: l1A}, {A: l2B, B: l2A},
 			})
 			variants = append(variants, [2]engine.Line{
-				{l2A, l2B}, {l1A, l1B},
+				{A: l2A, B: l2B}, {A: l1A, B: l1B},
 			})
 			variants = append(variants, [2]engine.Line{
-				{l2B, l2A}, {l1B, l1A},
+				{A: l2B, B: l2A}, {A: l1B, B: l1A},
 			})
 
 			for varId, variant := range variants {
@@ -371,8 +371,8 @@ func TestLine2Circle(t *testing.T) {
 			lB := engine.Vec{X: tt.args.line[2], Y: tt.args.line[3]}
 
 			variants := []engine.Line{
-				{lA, lB},
-				{lB, lA},
+				{A: lA, B: lB},
+				{A: lB, B: lA},
 			}
 
 			for varId, variant := range variants {

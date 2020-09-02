@@ -2,4 +2,4 @@ package entity
 
 import "github.com/fe3dback/galaxy/engine"
 
-type Factory = func(*Entity, engine.WorldCreator) *Entity
+type FactoryFn = func(*Entity, engine.WorldCreator) *Entity

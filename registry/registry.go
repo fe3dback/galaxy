@@ -138,7 +138,6 @@ func makeRegistry(flags Flags) *Registry {
 		mouse,
 		movement,
 		appState,
-		worldManager,
 		soundManager,
 	)
 
@@ -341,8 +340,7 @@ func (r registerFactory) registerGameState(
 	mouse engine.Mouse,
 	movement engine.Movement,
 	appState *engine.AppState,
-	worldManager *game.WorldManager,
 	soundMixer *sound.Manager,
 ) *engine.GameState {
-	return engine.NewGameState(moment, camera, mouse, movement, appState, worldManager, soundMixer)
+	return engine.NewGameState(moment, camera, mouse, movement, appState, soundMixer)
 }

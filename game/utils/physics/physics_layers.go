@@ -3,8 +3,7 @@ package physics
 import "fmt"
 
 const (
-	maskAll  Mask = 0xFFFF
-	maskNone Mask = 0xFFFF
+	maskAll Mask = 0xFFFF
 )
 
 const (

@@ -46,14 +46,18 @@ func (e *Entity) AttachPhysicsBody(body engine.PhysicsBody) {
 	e.updatePhysicsState()
 }
 
+func (e *Entity) PhysicsBody() engine.PhysicsBody {
+	return e.body
+}
+
 func (e *Entity) Position() engine.Vec {
 	return e.position
 }
 
 func (e *Entity) SetPosition(pos engine.Vec) {
-	// todo: set phys pos
 	if e.body != nil {
 		// managed with physics
+		e.body.SetPosition(pos)
 		return
 	}
 
@@ -69,9 +73,9 @@ func (e *Entity) Rotation() engine.Angle {
 }
 
 func (e *Entity) SetRotation(rot engine.Angle) {
-	// todo: set phys angle
 	if e.body != nil {
 		// managed with physics
+		e.body.SetRotation(rot)
 		return
 	}
 

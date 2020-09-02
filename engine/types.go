@@ -107,11 +107,14 @@ type (
 			categoryBits uint16,
 			maskBits uint16,
 		) PhysicsBody
+		DestroyBody(body PhysicsBody)
 	}
 
 	PhysicsBody interface {
 		Position() Vec
+		SetPosition(pos Vec)
 		Rotation() Angle
+		SetRotation(rot Angle)
 		DebugDraw(r Renderer)
 
 		// mutate
@@ -156,17 +159,7 @@ type (
 		Space() bool
 	}
 
-	Entity interface {
-		Id() int64
-		Position() Vec
-		Rotation() Angle
-	}
-
 	// Game State
-	EntitySpawner interface {
-		SpawnEntity(entity Entity)
-	}
-
 	SoundMixer interface {
 		Play(res generated.ResourcePath)
 	}
@@ -177,7 +170,6 @@ type (
 		Mouse() Mouse
 		Movement() Movement
 		InEditorMode() bool
-		EntitySpawner() EntitySpawner
 		SoundMixer() SoundMixer
 	}
 )

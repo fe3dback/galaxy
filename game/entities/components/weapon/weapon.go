@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/game/loader/weaponloader"
 )
 
 type (
 	Weapon struct {
-		spec       YamlSpec
+		spec       weaponloader.YamlSpec
 		soundMixer engine.SoundMixer
 
 		// state
@@ -31,14 +32,14 @@ type (
 
 	bulletSpawnParams struct {
 		spread engine.Angle
-		bullet YamlBullet
-		muzzle YamlMuzzle
-		trail  YamlTrail
+		bullet weaponloader.YamlBullet
+		muzzle weaponloader.YamlMuzzle
+		trail  weaponloader.YamlTrail
 	}
 	bulletSpawnFn func(bulletSpawnParams)
 )
 
-func NewWeapon(spec YamlSpec, soundMixer engine.SoundMixer) *Weapon {
+func NewWeapon(spec weaponloader.YamlSpec, soundMixer engine.SoundMixer) *Weapon {
 	weapon := &Weapon{
 		spec:       spec,
 		soundMixer: soundMixer,
@@ -163,5 +164,4 @@ func (w *Weapon) reloadMagazine() {
 	load := engine.ClampInt(needAmmo, 0, w.ammo.total)
 	w.ammo.magazine += load
 	w.ammo.total -= load
-	return
 }

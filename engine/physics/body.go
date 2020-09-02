@@ -21,8 +21,22 @@ func (b *ourBody) Position() engine.Vec {
 	return vec2eng(b.boxBody.GetPosition())
 }
 
+func (b *ourBody) SetPosition(pos engine.Vec) {
+	b.boxBody.SetTransform(
+		vec2box(pos),
+		b.boxBody.GetAngle(),
+	)
+}
+
 func (b *ourBody) Rotation() engine.Angle {
 	return engine.Angle(b.boxBody.GetAngle())
+}
+
+func (b *ourBody) SetRotation(rot engine.Angle) {
+	b.boxBody.SetTransform(
+		b.boxBody.GetPosition(),
+		rot.Radians(),
+	)
 }
 
 func (b *ourBody) ApplyForce(force engine.Vec, position engine.Vec) {

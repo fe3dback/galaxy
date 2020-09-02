@@ -43,7 +43,7 @@ func (anim *Animator) OnUpdate(s engine.State) error {
 		return nil
 	}
 
-	if seq.firstFrame == seq.firstFrame {
+	if seq.firstFrame == seq.lastFrame {
 		// if one frame sequence
 		return nil
 	}

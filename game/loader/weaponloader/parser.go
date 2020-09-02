@@ -1,11 +1,10 @@
-package weapon
+package weaponloader
 
 import (
 	"time"
 
-	"github.com/fe3dback/galaxy/generated"
-
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/generated"
 )
 
 type (

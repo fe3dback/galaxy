@@ -1,4 +1,4 @@
-package gm
+package utils
 
 type renderTarget = uint8
 

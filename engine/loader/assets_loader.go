@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 
 	"github.com/fe3dback/galaxy/engine"
-
 	"github.com/fe3dback/galaxy/generated"
+	"gopkg.in/validator.v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,6 +29,10 @@ func (l *AssetsLoader) LoadYaml(res generated.ResourcePath, data interface{}) {
 	err = yaml.Unmarshal(buffer, data)
 	if err != nil {
 		panic(fmt.Sprintf("can`t parse `%s`: %v", res, err))
+	}
+
+	if err := validator.Validate(data); err != nil {
+		panic(fmt.Sprintf("invalid spec '%s': %v", res, err))
 	}
 }
 

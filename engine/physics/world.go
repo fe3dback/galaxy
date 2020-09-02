@@ -22,9 +22,8 @@ const (
 )
 
 const (
-	bodyTypeStatic    = 0
-	bodyTypeKinematic = 1
-	bodyTypeDynamic   = 2
+	bodyTypeStatic  = 0
+	bodyTypeDynamic = 2
 )
 
 type World struct {
@@ -110,6 +109,19 @@ func (w *World) AddBodyDynamic(
 	ref.CreateFixtureFromDef(&fixtureDef)
 
 	return newOurBody(ref, sh)
+}
+
+func (w *World) DestroyBody(body engine.PhysicsBody) {
+	if body == nil {
+		return
+	}
+
+	ob, ok := body.(*ourBody)
+	if !ok {
+		panic(fmt.Sprintf("can`t destroy body, body %T should by instance of %T", body, ourBody{}))
+	}
+
+	w.world.DestroyBody(ob.boxBody)
 }
 
 func (w *World) newBoxBodyStatic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {

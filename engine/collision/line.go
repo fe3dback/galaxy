@@ -65,9 +65,5 @@ func Line2Circle(line engine.Line, circle engine.Circle) bool {
 	distX := closest.X - circle.Pos.X
 	distY := closest.Y - circle.Pos.Y
 
-	if math.Sqrt((distX*distX)+(distY*distY)) <= circle.Radius {
-		return true
-	}
-
-	return false
+	return math.Sqrt((distX*distX)+(distY*distY)) <= circle.Radius
 }

@@ -1,33 +1,32 @@
 package weapon
 
-import "github.com/fe3dback/galaxy/generated"
+import (
+	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/game/loader/weaponloader"
+	"github.com/fe3dback/galaxy/generated"
+)
 
-type equip struct {
-	weapons map[Id]*Weapon
+type (
+	id = generated.ResourcePath
 
-	currentWeapon Id
-	equipped      bool
-}
+	equip struct {
+		weapons map[id]*Weapon
 
-func newEquip(loader *Loader) *equip {
+		currentWeapon id
+		equipped      bool
+	}
+)
+
+func newEquip(weaponsLoader *weaponloader.Loader, mixer engine.SoundMixer) *equip {
 	equip := &equip{
-		weapons: map[Id]*Weapon{},
+		weapons: map[id]*Weapon{},
 	}
 
-	var lastId *Id
+	var lastId *id
 
-	for id, spec := range loader.Specs() {
+	for id, spec := range weaponsLoader.LoadedSpecs() {
 		lastId = &id
-		equip.weapons[id] = NewWeapon(spec, loader.creator.SoundMixer())
-
-		// load all weapons sound to memory
-		sounds := make([]generated.ResourcePath, 0)
-		sounds = append(sounds, spec.Audio.ShotSounds...)
-		sounds = append(sounds, spec.Audio.ReloadSounds...)
-
-		for _, sound := range sounds {
-			loader.creator.Loader().LoadSound(sound)
-		}
+		equip.weapons[id] = NewWeapon(spec, mixer)
 	}
 
 	if lastId != nil {
@@ -38,7 +37,7 @@ func newEquip(loader *Loader) *equip {
 	return equip
 }
 
-func (e *equip) Equip(id Id) {
+func (e *equip) Equip(id id) {
 	e.currentWeapon = id
 	e.equipped = true
 }

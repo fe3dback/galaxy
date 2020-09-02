@@ -58,9 +58,5 @@ func Rect2Circle(r engine.Rect, c engine.Circle) bool {
 	}
 
 	distance := c.Pos.Sub(test).Magnitude()
-	if distance <= c.Radius {
-		return true
-	}
-
-	return false
+	return distance <= c.Radius
 }

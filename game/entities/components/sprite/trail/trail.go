@@ -3,7 +3,7 @@ package trail
 import (
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
-	"github.com/fe3dback/galaxy/game/gm"
+	"github.com/fe3dback/galaxy/game/utils"
 )
 
 type Trail struct {
@@ -23,12 +23,12 @@ func NewTrail(entity *entity.Entity, color engine.Color) *Trail {
 }
 
 func (t *Trail) OnDraw(r engine.Renderer) error {
-	r.SetRenderTarget(gm.RenderTargetTrails)
+	r.SetRenderTarget(utils.RenderTargetTrails)
 	r.DrawLine(t.color, engine.Line{
 		A: t.previousPosition,
 		B: t.nextPosition,
 	})
-	r.SetRenderTarget(gm.RenderTargetPrimary)
+	r.SetRenderTarget(utils.RenderTargetPrimary)
 
 	return nil
 }
