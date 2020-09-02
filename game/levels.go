@@ -3,6 +3,8 @@ package game
 import (
 	"math/rand"
 
+	"github.com/fe3dback/galaxy/game/gm/physics"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities"
@@ -43,6 +45,8 @@ func NewLevel01() WorldProviderFn {
 			engine.Angle0,
 			1,
 			physShape,
+			physics.LayerPlayer.Category(),
+			physics.LayerPlayer.Mask(),
 		)
 		player.AttachPhysicsBody(physBody)
 		world.AddEntity(player)
@@ -66,6 +70,8 @@ func NewLevel01() WorldProviderFn {
 					engine.Vec{X: posX, Y: posY},
 					engine.Angle0,
 					shapeBox,
+					physics.LayerGround.Category(),
+					physics.LayerGround.Mask(),
 				)
 
 				wallFactory := entities.NewStaticFactory(entities.StaticFactoryParams{})

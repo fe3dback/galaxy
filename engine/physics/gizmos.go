@@ -5,7 +5,7 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 )
 
-const colorShape = engine.ColorGreen
+const colorShape = engine.ColorOrange
 
 func debugDrawPolygon(body *ourBody, sh *box2d.B2PolygonShape, r engine.Renderer) {
 	if sh.M_count <= 0 {

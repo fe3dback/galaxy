@@ -92,8 +92,21 @@ type (
 		CreateShapeBox(width, height Pixel) PhysicsShape
 
 		// bodies
-		AddBodyStatic(pos Vec, rot Angle, shape PhysicsShape) PhysicsBody
-		AddBodyDynamic(pos Vec, rot Angle, mass Kilogram, shape PhysicsShape) PhysicsBody
+		AddBodyStatic(
+			pos Vec,
+			rot Angle,
+			shape PhysicsShape,
+			categoryBits uint16,
+			maskBits uint16,
+		) PhysicsBody
+		AddBodyDynamic(
+			pos Vec,
+			rot Angle,
+			mass Kilogram,
+			shape PhysicsShape,
+			categoryBits uint16,
+			maskBits uint16,
+		) PhysicsBody
 	}
 
 	PhysicsBody interface {

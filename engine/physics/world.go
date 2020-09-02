@@ -60,14 +60,27 @@ func (w *World) CreateShapeBox(width, height engine.Pixel) engine.PhysicsShape {
 	return newOurShape(shape)
 }
 
-func (w *World) AddBodyStatic(pos engine.Vec, rot engine.Angle, shape engine.PhysicsShape) engine.PhysicsBody {
+func (w *World) AddBodyStatic(
+	pos engine.Vec,
+	rot engine.Angle,
+	shape engine.PhysicsShape,
+	categoryBits uint16,
+	maskBits uint16,
+) engine.PhysicsBody {
 	sh, ok := shape.(*ourShape)
 	if !ok {
 		panic(fmt.Sprintf("can`t add static body, shape %T should by instance of %T", shape, ourShape{}))
 	}
 
-	ref := w.newRefStatic(pos, rot)
-	ref.CreateFixture(sh.boxShape, 0)
+	ref := w.newBoxBodyStatic(pos, rot)
+
+	fixtureDef := box2d.MakeB2FixtureDef()
+	fixtureDef.Shape = sh.boxShape
+	fixtureDef.Density = 0
+	fixtureDef.Filter.CategoryBits = categoryBits
+	fixtureDef.Filter.MaskBits = maskBits
+
+	ref.CreateFixtureFromDef(&fixtureDef)
 
 	return newOurBody(ref, sh)
 }
@@ -77,38 +90,42 @@ func (w *World) AddBodyDynamic(
 	rot engine.Angle,
 	mass engine.Kilogram,
 	shape engine.PhysicsShape,
+	categoryBits uint16,
+	maskBits uint16,
 ) engine.PhysicsBody {
 	sh, ok := shape.(*ourShape)
 	if !ok {
 		panic(fmt.Sprintf("can`t add static body, shape %T should by instance of %T", shape, ourShape{}))
 	}
 
-	ref := w.newRefDynamic(pos, rot)
+	ref := w.newBoxBodyDynamic(pos, rot)
 
 	fixtureDef := box2d.MakeB2FixtureDef()
 	fixtureDef.Shape = sh.boxShape
 	fixtureDef.Density = mass // todo: calculate density
-	fixtureDef.Friction = 0.5 // todo
+	fixtureDef.Friction = 0.1
+	fixtureDef.Filter.CategoryBits = categoryBits
+	fixtureDef.Filter.MaskBits = maskBits
 
 	ref.CreateFixtureFromDef(&fixtureDef)
 
 	return newOurBody(ref, sh)
 }
 
-func (w *World) newRefStatic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
+func (w *World) newBoxBodyStatic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
 	def := box2d.NewB2BodyDef()
 	def.Position = vec2box(pos)
-	//def.Angle = rot.Radians()
+	def.Angle = rot.Radians()
 	def.Type = bodyTypeStatic
 	def.Active = true
 
 	return w.world.CreateBody(def)
 }
 
-func (w *World) newRefDynamic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
+func (w *World) newBoxBodyDynamic(pos engine.Vec, rot engine.Angle) *box2d.B2Body {
 	def := box2d.NewB2BodyDef()
 	def.Position = vec2box(pos)
-	//def.Angle = rot.Radians()
+	def.Angle = rot.Radians()
 	def.Type = bodyTypeDynamic
 	def.Active = true
 	def.AllowSleep = false
