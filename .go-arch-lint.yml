@@ -3,7 +3,6 @@ allow:
   depOnAnyVendor: false
 
 exclude:
-  - .idea
   - vendor
   - cmd
   - resources
