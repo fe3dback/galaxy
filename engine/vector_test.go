@@ -1199,7 +1199,7 @@ func TestVectorForward(t *testing.T) {
 	}
 }
 
-func TestVectorLeft(t *testing.T) {
+func TestVectorRight(t *testing.T) {
 	type args struct {
 		x float64
 	}
@@ -1214,7 +1214,7 @@ func TestVectorLeft(t *testing.T) {
 				x: 2.01,
 			},
 			want: Vec{
-				X: -2.01,
+				X: 2.01,
 				Y: 0,
 			},
 		},
@@ -1224,15 +1224,25 @@ func TestVectorLeft(t *testing.T) {
 				x: 2,
 			},
 			want: Vec{
-				X: -2,
+				X: 2,
+				Y: 0,
+			},
+		},
+		{
+			name: "negative 2",
+			args: args{
+				x: -3.01,
+			},
+			want: Vec{
+				X: -3.01,
 				Y: 0,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := VectorLeft(tt.args.x); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("VectorLeft() = %v, want %v", got, tt.want)
+			if got := VectorRight(tt.args.x); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("VectorRight() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -1497,6 +1507,62 @@ func TestVector2D_AngleTo(t *testing.T) {
 			},
 			want: NewAngle(225),
 		},
+		{
+			name: "relative x",
+			fields: fields{
+				X: 1,
+				Y: 0,
+			},
+			args: args{
+				to: Vec{
+					X: 2,
+					Y: 0,
+				},
+			},
+			want: NewAngle(0),
+		},
+		{
+			name: "relative x2",
+			fields: fields{
+				X: 1,
+				Y: 1,
+			},
+			args: args{
+				to: Vec{
+					X: -1,
+					Y: -1,
+				},
+			},
+			want: NewAngle(135),
+		},
+		{
+			name: "relative x3",
+			fields: fields{
+				X: 1,
+				Y: 1,
+			},
+			args: args{
+				to: Vec{
+					X: -1,
+					Y: 1,
+				},
+			},
+			want: NewAngle(180),
+		},
+		{
+			name: "relative x4",
+			fields: fields{
+				X: -5,
+				Y: 5,
+			},
+			args: args{
+				to: Vec{
+					X: 100,
+					Y: -100,
+				},
+			},
+			want: NewAngle(45),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1506,6 +1572,153 @@ func TestVector2D_AngleTo(t *testing.T) {
 			}
 			if got := v.AngleTo(tt.args.to); testNormAngle(got) != testNormAngle(tt.want) {
 				t.Errorf("AngleTo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestVec_ClampAbs(t *testing.T) {
+	type fields struct {
+		X float64
+		Y float64
+	}
+	type args struct {
+		to Vec
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   Vec
+	}{
+		{
+			name: "s1",
+			fields: fields{
+				X: 15,
+				Y: 10,
+			},
+			args: args{
+				to: Vec{
+					X: 5,
+					Y: 5,
+				},
+			},
+			want: Vec{
+				X: 5,
+				Y: 5,
+			},
+		},
+		{
+			name: "s2",
+			fields: fields{
+				X: 3,
+				Y: 10,
+			},
+			args: args{
+				to: Vec{
+					X: 5,
+					Y: 5,
+				},
+			},
+			want: Vec{
+				X: 3,
+				Y: 5,
+			},
+		},
+		{
+			name: "s3",
+			fields: fields{
+				X: 3,
+				Y: 1,
+			},
+			args: args{
+				to: Vec{
+					X: 5,
+					Y: 5,
+				},
+			},
+			want: Vec{
+				X: 3,
+				Y: 1,
+			},
+		},
+		{
+			name: "n1",
+			fields: fields{
+				X: -3,
+				Y: -1,
+			},
+			args: args{
+				to: Vec{
+					X: 5,
+					Y: 5,
+				},
+			},
+			want: Vec{
+				X: -3,
+				Y: -1,
+			},
+		},
+		{
+			name: "n2",
+			fields: fields{
+				X: -6,
+				Y: -4,
+			},
+			args: args{
+				to: Vec{
+					X: 5,
+					Y: 5,
+				},
+			},
+			want: Vec{
+				X: -5,
+				Y: -4,
+			},
+		},
+		{
+			name: "n3",
+			fields: fields{
+				X: -15,
+				Y: -25,
+			},
+			args: args{
+				to: Vec{
+					X: -3,
+					Y: -2,
+				},
+			},
+			want: Vec{
+				X: -3,
+				Y: -2,
+			},
+		},
+		{
+			name: "n4",
+			fields: fields{
+				X: 15,
+				Y: 25,
+			},
+			args: args{
+				to: Vec{
+					X: -3,
+					Y: -2,
+				},
+			},
+			want: Vec{
+				X: 3,
+				Y: 2,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := Vec{
+				X: tt.fields.X,
+				Y: tt.fields.Y,
+			}
+			if got := v.ClampAbs(tt.args.to); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ClampAbs() = %v, want %v", got, tt.want)
 			}
 		})
 	}

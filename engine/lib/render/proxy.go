@@ -21,6 +21,10 @@ func (r *Renderer) transRect(rect engine.Rect) sdl.Rect {
 	}
 }
 
+func (r *Renderer) transCircle(circle engine.Circle) (sdl.Point, float64) {
+	return r.transPoint(circle.Pos), circle.Radius
+}
+
 func (r *Renderer) transRectPtr(rect engine.Rect) *sdl.Rect {
 	rRect := r.transRect(rect)
 	return &rRect
@@ -65,6 +69,16 @@ func (r *Renderer) DrawSquare(color engine.Color, rect engine.Rect) {
 	}
 
 	r.internalDrawSquare(color, r.transRect(rect))
+}
+
+func (r *Renderer) DrawCircle(color engine.Color, circle engine.Circle) {
+	rect := circle.BoundingBox()
+	if !r.isRectInsideCamera(rect) {
+		return
+	}
+
+	pos, radius := r.transCircle(circle)
+	r.internalDrawCircle(color, pos, radius)
 }
 
 func (r *Renderer) DrawSquareEx(color engine.Color, angle engine.Angle, rect engine.Rect) {

@@ -10,17 +10,30 @@ import (
 type EntityList []*entity.Entity
 
 type World struct {
-	entities EntityList
+	entities     EntityList
+	spawnQueue   EntityList
+	physics      engine.Physics
+	worldCreator engine.WorldCreator
 }
 
-func NewWorld() *World {
+func NewWorld(creator engine.WorldCreator) *World {
 	return &World{
-		entities: make(EntityList, 0),
+		entities:     make(EntityList, 0),
+		spawnQueue:   make(EntityList, 0),
+		physics:      creator.Physics(),
+		worldCreator: creator,
 	}
 }
 
 func (w *World) AddEntity(e *entity.Entity) {
 	w.entities = append(w.entities, e)
+}
+
+func (w *World) SpawnEntity(pos engine.Vec, angle engine.Angle, factory entity.FactoryFn) {
+	e := entity.NewEntity(pos, angle)
+	e = factory(e, w.worldCreator)
+
+	w.spawnQueue = append(w.spawnQueue, e)
 }
 
 func (w *World) Entities() EntityList {
@@ -30,8 +43,21 @@ func (w *World) Entities() EntityList {
 func (w *World) OnUpdate(s engine.State) error {
 	needGc := false
 
+	// spawn new entities
+	if len(w.spawnQueue) > 0 {
+		for _, e := range w.spawnQueue {
+			w.AddEntity(e)
+		}
+		w.spawnQueue = w.spawnQueue[:0]
+	}
+
+	// update physics
+	w.physics.Update(s.Moment().DeltaTime())
+
+	// update game
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
+			w.physics.DestroyBody(e.PhysicsBody())
 			needGc = true
 			continue
 		}
@@ -50,6 +76,10 @@ func (w *World) OnUpdate(s engine.State) error {
 }
 
 func (w *World) OnDraw(r engine.Renderer) error {
+	// draw physics gizmos
+	w.physics.Draw(r)
+
+	// draw world
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
 			continue

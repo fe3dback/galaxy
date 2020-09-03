@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fe3dback/galaxy/game/units"
+	"github.com/fe3dback/galaxy/engine"
 
 	"github.com/fe3dback/galaxy/utils"
 )
@@ -37,7 +37,7 @@ type (
 	}
 
 	specWheels struct {
-		radius units.Meters
+		radius engine.Meter
 		wheels []specWheel
 	}
 

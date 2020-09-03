@@ -554,3 +554,66 @@ func TestLerpInverse(t *testing.T) {
 		})
 	}
 }
+
+func TestRandomRange(t *testing.T) {
+	type args struct {
+		min float64
+		max float64
+	}
+	tests := []struct {
+		name string
+		args args
+	}{
+		{
+			name: "s1",
+			args: args{
+				min: 1,
+				max: 2,
+			},
+		},
+		{
+			name: "s2",
+			args: args{
+				min: 1,
+				max: 1,
+			},
+		},
+		{
+			name: "s3",
+			args: args{
+				min: -1,
+				max: 1,
+			},
+		},
+		{
+			name: "s4",
+			args: args{
+				min: -2,
+				max: -1,
+			},
+		},
+		{
+			name: "s5",
+			args: args{
+				min: -1,
+				max: -2,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := RandomRange(tt.args.min, tt.args.max)
+
+			if tt.args.min > tt.args.max {
+				tt.args.min, tt.args.max = tt.args.max, tt.args.min
+			}
+
+			if got > tt.args.max {
+				t.Errorf("RandomRange() = %v > %v", got, tt.args.max)
+			}
+			if got < tt.args.min {
+				t.Errorf("RandomRange() = %v < %v", got, tt.args.min)
+			}
+		})
+	}
+}

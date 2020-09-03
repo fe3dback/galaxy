@@ -1,4 +1,4 @@
-package entities
+package factory
 
 import (
 	"github.com/fe3dback/galaxy/engine"
@@ -10,12 +10,12 @@ import (
 	"github.com/fe3dback/galaxy/generated"
 )
 
-type CarFactoryParams struct {
+type CarParams struct {
 	TextureRes generated.ResourcePath
 	PhysicsRes generated.ResourcePath
 }
 
-func NewCarFactory(params CarFactoryParams) entity.Factory {
+func CarFactoryFn(params CarParams) entity.FactoryFn {
 	return func(e *entity.Entity, creator engine.WorldCreator) *entity.Entity {
 		// common
 		e.AddComponent(debug.NewGridDrawer(e))

@@ -1,4 +1,15 @@
-path: github.com/fe3dback/galaxy
+version: 1
+allow:
+  depOnAnyVendor: false
+
+exclude:
+  - vendor
+  - cmd
+  - resources
+  - registry
+
+excludeFiles:
+  - "^.*_test\\.go$"
 
 vendors:
   sdl:
@@ -7,8 +18,14 @@ vendors:
     in: github.com/veandco/go-sdl2/ttf
   sdl-img:
     in: github.com/veandco/go-sdl2/img
-  loader-yaml:
+  sdl-mix:
+    in: github.com/veandco/go-sdl2/mix
+  box2d:
+    in: github.com/fe3dback/box2d
+  yaml-loader:
     in: gopkg.in/yaml.v2
+  yaml-validator:
+    in: gopkg.in/validator.v2
 
 components:
   main:
@@ -28,12 +45,18 @@ components:
     in: engine/lib
   engine_lib_render:
     in: engine/lib/render
+  engine_lib_sound:
+    in: engine/lib/sound
   engine_entity:
     in: engine/entity
   engine_editor:
     in: engine/editor
   engine_loader:
     in: engine/loader
+  engine_collision:
+    in: engine/collision
+  engine_physics:
+    in: engine/physics
 
   shared_ui:
     in: shared/ui
@@ -47,18 +70,21 @@ components:
     in: game
   game_entities:
     in: game/entities
-  game_units:
-    in: game/units
+  game_entities_factory:
+    in: game/entities/factory
   game_component:
-    in: game/entities/components
-    depth: true
+    in: game/entities/components/**
+  game_loader:
+    in: game/loader/*
+  game_utils:
+    in: game/utils/**
 
   generated:
     in: generated
   utils:
     in: utils
 
-common:
+commonComponents:
   - generated
   - utils
 
@@ -79,6 +105,10 @@ deps:
       - sdl-ttf
       - sdl-img
 
+  engine_lib_sound:
+    canUse:
+      - sdl-mix
+
   engine_event:
     mayDependOn:
       - engine
@@ -96,14 +126,27 @@ deps:
     mayDependOn:
       - engine
 
+  engine_collision:
+    mayDependOn:
+      - engine
+
   engine_editor:
     mayDependOn:
       - engine
       - engine_event
 
   engine_loader:
+    mayDependOn:
+      - engine
     canUse:
-      - loader-yaml
+      - yaml-loader
+      - yaml-validator
+
+  engine_physics:
+    mayDependOn:
+      - engine
+    canUse:
+      - box2d
 
   editor:
     mayDependOn:
@@ -119,19 +162,36 @@ deps:
       - engine_entity
       - engine_event
       - game_entities
+      - game_entities_factory
+      - game_utils
+      - game_loader
 
   game_entities:
     mayDependOn:
       - engine
       - engine_entity
       - game_component
+      - game_utils
+
+  game_entities_factory:
+    mayDependOn:
+      - engine
+      - engine_entity
+      - game_component
+      - game_utils
+      - game_loader
 
   game_component:
     mayDependOn:
       - engine
       - engine_entity
       - game_component
-      - game_units
+      - game_utils
+      - game_loader
+
+  game_loader:
+    mayDependOn:
+      - engine
 
   shared_ui:
     mayDependOn:
@@ -146,9 +206,3 @@ deps:
       - engine_event
       - game
 
-exclude:
-  - .idea
-  - vendor
-  - cmd
-  - resources
-  - registry

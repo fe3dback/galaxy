@@ -40,7 +40,7 @@ func (manager *TextureManager) Load(path generated.ResourcePath) *Texture {
 
 	tex, err := img.LoadTexture(manager.sdlRenderer, string(path))
 	utils.Check("load", err)
-	manager.closer.Enqueue(tex.Destroy)
+	manager.closer.EnqueueClose(tex.Destroy)
 
 	_, _, w, h, err := tex.Query()
 	utils.Check("query", err)

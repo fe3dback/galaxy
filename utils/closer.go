@@ -4,6 +4,7 @@ import "fmt"
 
 type (
 	CloseFn func() error
+	FreeFn  func()
 	Closer  struct {
 		queue []CloseFn
 	}
@@ -15,8 +16,16 @@ func NewCloser() *Closer {
 	}
 }
 
-func (c *Closer) Enqueue(fn CloseFn) {
+func (c *Closer) EnqueueClose(fn CloseFn) {
 	c.queue = append(c.queue, fn)
+}
+
+func (c *Closer) EnqueueFree(fn FreeFn) {
+	c.EnqueueClose(func() error {
+		fn()
+
+		return nil
+	})
 }
 
 func (c *Closer) Close() error {

@@ -3,6 +3,10 @@ package registry
 import (
 	"fmt"
 
+	"github.com/fe3dback/galaxy/engine/physics"
+
+	"github.com/fe3dback/galaxy/engine/lib/sound"
+
 	"github.com/fe3dback/galaxy/editor"
 	editorcomponents "github.com/fe3dback/galaxy/editor/components"
 	"github.com/fe3dback/galaxy/engine"
@@ -75,6 +79,7 @@ func makeRegistry(flags Flags) *Registry {
 	)
 
 	// engine
+	soundManager := reg.registerSoundManager(closer)
 	appState := reg.registerAppState()
 	dispatcher := reg.registerDispatcher(
 		reg.eventQuit(frames),
@@ -112,9 +117,12 @@ func makeRegistry(flags Flags) *Registry {
 		uiLayerSharedFPS,
 	)
 
+	// physics
+	physicsWorld := reg.registerPhysics(closer)
+
 	// game
-	assetsLoader := reg.registerAssetsLoader()
-	worldCreator := reg.registerGameWorldCreator(assetsLoader)
+	assetsLoader := reg.registerAssetsLoader(soundManager)
+	worldCreator := reg.registerGameWorldCreator(assetsLoader, soundManager, physicsWorld)
 	worldManager := reg.registerWorldManager(worldCreator, dispatcher)
 
 	// game ui
@@ -130,6 +138,7 @@ func makeRegistry(flags Flags) *Registry {
 		mouse,
 		movement,
 		appState,
+		soundManager,
 	)
 
 	// build
@@ -191,6 +200,10 @@ func (r registerFactory) registerSdlWindow(sdlLib *lib.SDLLib) *sdl.Window {
 
 func (r registerFactory) registerSdlRenderer(sdlLib *lib.SDLLib) *sdl.Renderer {
 	return sdlLib.Renderer()
+}
+
+func (r registerFactory) registerSoundManager(closer *utils.Closer) *sound.Manager {
+	return sound.NewManager(closer)
 }
 
 // ----------------------------------------
@@ -287,13 +300,25 @@ func (r registerFactory) registerFrames(targetFps int) *system.Frames {
 	return system.NewFrames(targetFps)
 }
 
-func (r registerFactory) registerAssetsLoader() *loader.AssetsLoader {
-	return loader.NewAssetsLoader()
+func (r registerFactory) registerAssetsLoader(soundManager *sound.Manager) *loader.AssetsLoader {
+	return loader.NewAssetsLoader(
+		soundManager,
+	)
 }
 
-func (r registerFactory) registerGameWorldCreator(assetsLoader engine.Loader) *engine.GameWorldCreator {
+func (r registerFactory) registerPhysics(closer *utils.Closer) *physics.World {
+	return physics.NewWorld(closer)
+}
+
+func (r registerFactory) registerGameWorldCreator(
+	assetsLoader engine.Loader,
+	soundManager engine.SoundMixer,
+	physics engine.Physics,
+) *engine.GameWorldCreator {
 	return engine.NewGameWorldCreator(
 		assetsLoader,
+		soundManager,
+		physics,
 	)
 }
 
@@ -315,6 +340,7 @@ func (r registerFactory) registerGameState(
 	mouse engine.Mouse,
 	movement engine.Movement,
 	appState *engine.AppState,
+	soundMixer *sound.Manager,
 ) *engine.GameState {
-	return engine.NewGameState(moment, camera, mouse, movement, appState)
+	return engine.NewGameState(moment, camera, mouse, movement, appState, soundMixer)
 }

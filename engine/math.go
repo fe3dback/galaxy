@@ -1,6 +1,9 @@
 package engine
 
-import "math"
+import (
+	"math"
+	"math/rand"
+)
 
 func RoundTo(n float64) float64 {
 	if n == 0 {
@@ -49,4 +52,24 @@ func Clamp(n, min, max float64) float64 {
 	}
 
 	return n
+}
+
+func ClampInt(n, min, max int) int {
+	if n <= min {
+		return min
+	}
+
+	if n >= max {
+		return max
+	}
+
+	return n
+}
+
+func RandomRange(from, to float64) float64 {
+	if from > to {
+		from, to = to, from
+	}
+
+	return from + rand.Float64()*(to-from)
 }

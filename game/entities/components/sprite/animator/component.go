@@ -38,10 +38,13 @@ func (anim *Animator) OnUpdate(s engine.State) error {
 
 	seq := anim.activeSequence
 
-	anim.entity.AddRotation(engine.NewAngle(1))
-
-	// if one time sequence
 	if seq.finished {
+		// if one time sequence
+		return nil
+	}
+
+	if seq.firstFrame == seq.lastFrame {
+		// if one frame sequence
 		return nil
 	}
 

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/fe3dback/galaxy/game/units"
-
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/generated"
 )
@@ -32,7 +30,7 @@ type movements struct {
 	// calculated
 	clcEngineTorque     float64
 	clcPreviousPosition engine.Vec
-	clcSpeed            units.SpeedKmH
+	clcSpeed            engine.SpeedKmH
 	clcGasPedal         float64 // input gas 0 .. 1
 
 	// components
@@ -90,10 +88,10 @@ func (mv *movements) update(s engine.State) (engine.Vec, engine.Angle) {
 	return mv.position, mv.rotation
 }
 
-func (mv *movements) updateSpeed(s engine.State) units.SpeedKmH {
+func (mv *movements) updateSpeed(s engine.State) engine.SpeedKmH {
 	pixelsPerFrame := mv.position.Sub(mv.clcPreviousPosition).Magnitude()
 	pixelsPerSecond := pixelsPerFrame * float64(s.Moment().TargetFPS())
-	metersPerSecond := pixelsPerSecond / units.PixelsPerMeter
+	metersPerSecond := pixelsPerSecond / engine.PixelsPerMeter
 	metersPerHour := metersPerSecond * 3600
 
 	return metersPerHour / 1000

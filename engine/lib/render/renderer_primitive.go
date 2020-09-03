@@ -18,6 +18,49 @@ func (r *Renderer) internalDrawSquare(color engine.Color, rect sdl.Rect) {
 	utils.Check("draw square", err)
 }
 
+func (r *Renderer) internalDrawCircle(color engine.Color, pos sdl.Point, radius float64) {
+	r.SetDrawColor(color)
+
+	diameter := int(radius * 2)
+
+	x := int32(radius - 1)
+	var y int32 = 0
+	tx := 1
+	ty := 1
+	err := tx - diameter
+
+	for {
+		if x >= y {
+			break
+		}
+
+		centreX := pos.X
+		centreY := pos.Y
+
+		//  Each of the following renders an octant of the circle
+		r.internalDrawPoint(color, sdl.Point{X: centreX + x, Y: centreY - y})
+		r.internalDrawPoint(color, sdl.Point{X: centreX + x, Y: centreY + y})
+		r.internalDrawPoint(color, sdl.Point{X: centreX - x, Y: centreY - y})
+		r.internalDrawPoint(color, sdl.Point{X: centreX - x, Y: centreY + y})
+		r.internalDrawPoint(color, sdl.Point{X: centreX + y, Y: centreY - x})
+		r.internalDrawPoint(color, sdl.Point{X: centreX + y, Y: centreY + x})
+		r.internalDrawPoint(color, sdl.Point{X: centreX - y, Y: centreY - x})
+		r.internalDrawPoint(color, sdl.Point{X: centreX - y, Y: centreY + x})
+
+		if err <= 0 {
+			y++
+			err += ty
+			ty += 2
+		}
+
+		if err > 0 {
+			x--
+			tx += 2
+			err += tx - diameter
+		}
+	}
+}
+
 func (r *Renderer) internalDrawLines(color engine.Color, line []sdl.Point) {
 	r.SetDrawColor(color)
 	err := r.ref.DrawLines(line)

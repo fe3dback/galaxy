@@ -41,6 +41,7 @@ type (
 		// base
 		SetDrawColor(Color)
 		DrawSquare(color Color, rect Rect)
+		DrawCircle(color Color, circle Circle)
 		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)
 		DrawVector(color Color, dist float64, vec Vec, angle Angle)
@@ -62,6 +63,7 @@ type (
 		// system
 		InEditorMode() bool
 		Gizmos() Gizmos
+		SetRenderTarget(id uint8)
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
 		Clear(Color)
@@ -82,14 +84,66 @@ type (
 		SinceStart() time.Duration
 	}
 
+	// Physics
+
+	Physics interface {
+		Update(deltaTime float64)
+		Draw(renderer Renderer)
+
+		// shapes
+		CreateShapeBox(width, height Pixel) PhysicsShape
+
+		// bodies
+		AddBodyStatic(
+			pos Vec,
+			rot Angle,
+			shape PhysicsShape,
+			categoryBits uint16,
+			maskBits uint16,
+		) PhysicsBody
+		AddBodyDynamic(
+			pos Vec,
+			rot Angle,
+			mass Kilogram,
+			shape PhysicsShape,
+			categoryBits uint16,
+			maskBits uint16,
+		) PhysicsBody
+		DestroyBody(body PhysicsBody)
+	}
+
+	PhysicsBody interface {
+		Position() Vec
+		SetPosition(pos Vec)
+		Rotation() Angle
+		SetRotation(rot Angle)
+
+		// mutate
+		ApplyForce(force Vec, position Vec)
+	}
+
+	PhysicsShape interface {
+	}
+
 	// Engine Assets
 
 	WorldCreator interface {
 		Loader() Loader
+		SoundMixer() SoundMixer
+		Physics() Physics
+	}
+
+	LoaderYaml interface {
+		LoadYaml(res generated.ResourcePath, data interface{})
+	}
+
+	LoaderSound interface {
+		LoadSound(res generated.ResourcePath)
 	}
 
 	Loader interface {
-		LoadYaml(res generated.ResourcePath, data interface{})
+		LoaderYaml
+		LoaderSound
 	}
 
 	// Controls
@@ -107,6 +161,9 @@ type (
 	}
 
 	// Game State
+	SoundMixer interface {
+		Play(res generated.ResourcePath)
+	}
 
 	State interface {
 		Camera() Camera
@@ -114,5 +171,6 @@ type (
 		Mouse() Mouse
 		Movement() Movement
 		InEditorMode() bool
+		SoundMixer() SoundMixer
 	}
 )
