@@ -134,12 +134,6 @@ func (e *Entity) OnDraw(r engine.Renderer) error {
 		r.DrawVector(engine.ColorForeground, 10, e.position, e.rotation)
 	}
 
-	if r.Gizmos().Debug() {
-		if e.body != nil {
-			e.body.DebugDraw(r)
-		}
-	}
-
 	return nil
 }
 

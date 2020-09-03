@@ -42,9 +42,3 @@ func (b *ourBody) SetRotation(rot engine.Angle) {
 func (b *ourBody) ApplyForce(force engine.Vec, position engine.Vec) {
 	b.boxBody.ApplyForce(vec2box(force), vec2box(position), true)
 }
-
-func (b *ourBody) DebugDraw(r engine.Renderer) {
-	for _, shape := range b.shapes {
-		shape.debugDraw(b, r)
-	}
-}

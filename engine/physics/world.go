@@ -22,8 +22,9 @@ const (
 )
 
 const (
-	bodyTypeStatic  = 0
-	bodyTypeDynamic = 2
+	bodyTypeStatic    = 0
+	bodyTypeKinematic = 1
+	bodyTypeDynamic   = 2
 )
 
 type World struct {
@@ -47,6 +48,10 @@ func NewWorld(closer *utils.Closer) *World {
 
 func (w *World) Update(deltaTime float64) {
 	w.world.Step(deltaTime, velocityIterations, positionIterations)
+}
+
+func (w *World) Draw(renderer engine.Renderer) {
+	debugDrawWorld(w.world, renderer)
 }
 
 func (w *World) CreateShapeBox(width, height engine.Pixel) engine.PhysicsShape {
@@ -140,7 +145,6 @@ func (w *World) newBoxBodyDynamic(pos engine.Vec, rot engine.Angle) *box2d.B2Bod
 	def.Angle = rot.Radians()
 	def.Type = bodyTypeDynamic
 	def.Active = true
-	def.AllowSleep = false
 
 	return w.world.CreateBody(def)
 }

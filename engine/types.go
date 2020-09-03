@@ -41,6 +41,7 @@ type (
 		// base
 		SetDrawColor(Color)
 		DrawSquare(color Color, rect Rect)
+		DrawCircle(color Color, circle Circle)
 		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)
 		DrawVector(color Color, dist float64, vec Vec, angle Angle)
@@ -87,6 +88,7 @@ type (
 
 	Physics interface {
 		Update(deltaTime float64)
+		Draw(renderer Renderer)
 
 		// shapes
 		CreateShapeBox(width, height Pixel) PhysicsShape
@@ -115,7 +117,6 @@ type (
 		SetPosition(pos Vec)
 		Rotation() Angle
 		SetRotation(rot Angle)
-		DebugDraw(r Renderer)
 
 		// mutate
 		ApplyForce(force Vec, position Vec)

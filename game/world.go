@@ -76,6 +76,10 @@ func (w *World) OnUpdate(s engine.State) error {
 }
 
 func (w *World) OnDraw(r engine.Renderer) error {
+	// draw physics gizmos
+	w.physics.Draw(r)
+
+	// draw world
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
 			continue
