@@ -21,14 +21,21 @@ jobs:
 
       - name: install sdl and linters
         run: |
+          @echo "install sdl libs"
           sudo apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev
+
+          @echo "install go metalinter"
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.30.0
-          go get -u github.com/fe3dback/go-arch-lint
-          cd ${GITHUB_WORKSPACE}
-          go mod vendor
 
       - name: checkout
         uses: actions/checkout@v2
+
+      - name: install goarch
+        working-directory: ${HOME}
+        run: go get -u github.com/fe3dback/go-arch-lint
+
+      - name: vendor deps
+        run: go mod vendor
 
       - name: arch
         run: make arch
