@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install goarch
-        working-directory: ${HOME}
+        working-directory: /home
         run: go get -u github.com/fe3dback/go-arch-lint
 
       - name: vendor deps
