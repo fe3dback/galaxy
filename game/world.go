@@ -3,18 +3,22 @@ package game
 import (
 	"fmt"
 
+	"go.uber.org/zap"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 )
 
-type EntityList []*entity.Entity
+type (
+	EntityList []*entity.Entity
 
-type World struct {
-	entities     EntityList
-	spawnQueue   EntityList
-	physics      engine.Physics
-	worldCreator engine.WorldCreator
-}
+	World struct {
+		entities     EntityList
+		spawnQueue   EntityList
+		physics      engine.Physics
+		worldCreator engine.WorldCreator
+	}
+)
 
 func NewWorld(creator engine.WorldCreator) *World {
 	return &World{
@@ -29,9 +33,28 @@ func (w *World) AddEntity(e *entity.Entity) {
 	w.entities = append(w.entities, e)
 }
 
-func (w *World) SpawnEntity(pos engine.Vec, angle engine.Angle, factory entity.FactoryFn) {
+func (w *World) SpawnEntity(pos engine.Vec, angle engine.Angle, scheme entity.Scheme) {
+	defer func() {
+		if data := recover(); data != nil {
+			zap.S().Errorf("panic: failed to spawn entity by scheme `%s`: %s", scheme.SchemeID(), data)
+			return
+		}
+	}()
+
 	e := entity.NewEntity(pos, angle)
-	e = factory(e, w.worldCreator)
+	schemeFactoryBuilder, ok := schemeFactoryMap[scheme.SchemeID()]
+	if !ok {
+		zap.S().Errorf("Can`t spawn entity: not found scheme factory for scheme: %s", scheme.SchemeID())
+		return
+	}
+
+	factoryMethod := schemeFactoryBuilder(scheme)
+	if !ok {
+		zap.S().Errorf("Can`t spawn entity: scheme factory '%s' not implement factory method", scheme.SchemeID())
+		return
+	}
+
+	e = factoryMethod(e, w.worldCreator)
 
 	w.spawnQueue = append(w.spawnQueue, e)
 }

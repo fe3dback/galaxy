@@ -64,6 +64,13 @@ func (w *World) CreateShapeBox(width, height engine.Pixel) engine.PhysicsShape {
 	return newOurShape(shape)
 }
 
+func (w *World) CreateShapeCircle(radius engine.Pixel) engine.PhysicsShape {
+	shape := box2d.NewB2CircleShape()
+	shape.SetRadius(float64(radius))
+
+	return newOurShape(shape)
+}
+
 func (w *World) AddBodyStatic(
 	pos engine.Vec,
 	rot engine.Angle,

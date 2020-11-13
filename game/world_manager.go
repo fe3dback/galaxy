@@ -1,7 +1,7 @@
 package game
 
 import (
-	"fmt"
+	"log"
 	"runtime"
 
 	"github.com/fe3dback/galaxy/engine"
@@ -54,7 +54,7 @@ func (w *WorldManager) OnFrameStart() {
 }
 
 func (w *WorldManager) Reset() {
-	fmt.Println("Resetting world..")
+	log.Println("Resetting world..")
 
 	w.current = nil
 	runtime.GC()

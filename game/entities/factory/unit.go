@@ -8,33 +8,27 @@ import (
 	"github.com/fe3dback/galaxy/game/entities/components/player"
 	"github.com/fe3dback/galaxy/game/entities/components/sprite/animator"
 	"github.com/fe3dback/galaxy/game/entities/components/weapon"
-	weaponLoader "github.com/fe3dback/galaxy/game/loader/weaponloader"
+	"github.com/fe3dback/galaxy/game/entities/factory/schemefactory"
 	"github.com/fe3dback/galaxy/game/utils/physics"
 	"github.com/fe3dback/galaxy/generated"
 )
 
-type UnitParams struct {
-	EntitySpawner entity.Spawner
-	TextureRes    generated.ResourcePath
-	WeaponsLoader *weaponLoader.Loader
-}
-
-func UnitFactoryFn(params UnitParams) entity.FactoryFn {
+func UnitFactoryFn(scheme schemefactory.Unit) entity.FactoryFn {
 	return func(e *entity.Entity, creator engine.WorldCreator) *entity.Entity {
 		// debug
 		e.AddComponent(debug.NewGridDrawer(e))
 
 		// anim
 		anim := animator.NewAnimator(e)
-		anim.AddSequence("idle", animSeqIdle(params.TextureRes))
+		anim.AddSequence("idle", animSeqIdle(scheme.TextureRes))
 		e.AddComponent(anim)
 
 		// weapon
 		e.AddComponent(weapon.NewCharacterInventory(
 			e,
-			params.WeaponsLoader,
+			scheme.WeaponsLoader,
 			creator.SoundMixer(),
-			params.EntitySpawner,
+			scheme.EntitySpawner,
 		))
 
 		// player

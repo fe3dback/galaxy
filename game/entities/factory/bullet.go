@@ -1,39 +1,29 @@
 package factory
 
 import (
-	"time"
-
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities/components/game"
 	"github.com/fe3dback/galaxy/game/entities/components/movement"
 	"github.com/fe3dback/galaxy/game/entities/components/sprite/trail"
+	"github.com/fe3dback/galaxy/game/entities/factory/schemefactory"
 )
 
-type BulletParams struct {
-	StartAccelerationVec engine.Vec
-	StartVelocityVec     engine.Vec
-	MaxVelocityVec       engine.Vec
-	LifeTime             time.Duration
-	HasTrail             bool
-	TrailColor           engine.Color
-}
-
-func BulletFactoryFn(params BulletParams) entity.FactoryFn {
+func BulletFactoryFn(scheme schemefactory.Bullet) entity.FactoryFn {
 	return func(e *entity.Entity, creator engine.WorldCreator) *entity.Entity {
 		e.AddComponent(movement.NewVelocity(
 			e,
-			params.StartAccelerationVec,
-			params.StartVelocityVec,
-			params.MaxVelocityVec,
+			scheme.StartAccelerationVec,
+			scheme.StartVelocityVec,
+			scheme.MaxVelocityVec,
 		))
 
 		// add LifeTime component
-		e.AddComponent(game.NewLifeTime(e, params.LifeTime))
+		e.AddComponent(game.NewLifeTime(e, scheme.LifeTime))
 
 		// add trail
-		if params.HasTrail {
-			e.AddComponent(trail.NewTrail(e, params.TrailColor))
+		if scheme.HasTrail {
+			e.AddComponent(trail.NewTrail(e, scheme.TrailColor))
 		}
 
 		return e

@@ -2,10 +2,16 @@ package registry
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
 
 	"github.com/fe3dback/galaxy/engine/physics"
 
+	"go.uber.org/zap"
+
 	"github.com/fe3dback/galaxy/engine/lib/sound"
+
+	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/fe3dback/galaxy/editor"
 	editorcomponents "github.com/fe3dback/galaxy/editor/components"
@@ -21,13 +27,13 @@ import (
 	"github.com/fe3dback/galaxy/shared/ui"
 	"github.com/fe3dback/galaxy/system"
 	"github.com/fe3dback/galaxy/utils"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type (
 	registerFactory struct{}
 	Registry        struct {
 		Closer *utils.Closer
+		Logger *zap.SugaredLogger
 		Sdl    *SdlRegistry
 		Engine *EngineRegistry
 		Game   *GameRegistry
@@ -62,9 +68,16 @@ type (
 func makeRegistry(flags Flags) *Registry {
 	reg := &registerFactory{}
 
+	// core rand seed
+	rand.Seed(flags.Seed)
+
 	// main
 	closer := reg.registerCloser()
+	logger := reg.registerLogger(closer)
 	sdlLib := reg.registerSDLLib(closer, flags.FullScreen)
+	logger.Infow("Initialized random seed",
+		zap.Int64("seed", flags.Seed),
+	)
 
 	// system
 	options := reg.registerGameOptions(flags)
@@ -144,6 +157,7 @@ func makeRegistry(flags Flags) *Registry {
 	// build
 	return &Registry{
 		Closer: closer,
+		Logger: logger,
 		Engine: &EngineRegistry{
 			FontCollection: fontManager,
 			Renderer:       renderer,
@@ -173,6 +187,41 @@ func makeRegistry(flags Flags) *Registry {
 
 func (r registerFactory) registerCloser() *utils.Closer {
 	return utils.NewCloser()
+}
+
+func (r registerFactory) registerLogger(closer *utils.Closer) *zap.SugaredLogger {
+	const (
+		logPathDebug  = "./galaxy-debug.log"
+		logPathErrors = "./galaxy-error.log"
+	)
+
+	_ = os.Remove(logPathDebug)
+	_ = os.Remove(logPathErrors)
+
+	cfg := zap.Config{
+		Level:             zap.NewAtomicLevelAt(zap.DebugLevel),
+		Development:       true,
+		DisableCaller:     false,
+		DisableStacktrace: false,
+		Encoding:          "console",
+		EncoderConfig:     zap.NewDevelopmentEncoderConfig(),
+		OutputPaths:       []string{"stdout", logPathDebug},
+		ErrorOutputPaths:  []string{"stderr", logPathErrors},
+	}
+
+	logger, err := cfg.Build()
+	if err != nil {
+		panic("failed to create logger")
+	}
+
+	closedStd := zap.RedirectStdLog(logger)
+	restoreLogger := zap.ReplaceGlobals(logger)
+
+	closer.EnqueueClose(logger.Sync)
+	closer.EnqueueFree(closedStd)
+	closer.EnqueueFree(restoreLogger)
+
+	return logger.Sugar()
 }
 
 // ----------------------------------------
@@ -291,7 +340,7 @@ func (r registerFactory) registerGameOptions(flags Flags) *system.GameOptions {
 			World:       false,
 		},
 		Frames: system.FramesOpt{
-			TargetFps: 30,
+			TargetFps: 60,
 		},
 	}
 }

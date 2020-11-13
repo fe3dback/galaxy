@@ -7,23 +7,18 @@ import (
 	"github.com/fe3dback/galaxy/game/entities/components/debug"
 	"github.com/fe3dback/galaxy/game/entities/components/game"
 	"github.com/fe3dback/galaxy/game/entities/components/sprite/sprite2d"
-	"github.com/fe3dback/galaxy/generated"
+	"github.com/fe3dback/galaxy/game/entities/factory/schemefactory"
 )
 
-type CarParams struct {
-	TextureRes generated.ResourcePath
-	PhysicsRes generated.ResourcePath
-}
-
-func CarFactoryFn(params CarParams) entity.FactoryFn {
+func CarFactoryFn(scheme schemefactory.Car) entity.FactoryFn {
 	return func(e *entity.Entity, creator engine.WorldCreator) *entity.Entity {
 		// common
 		e.AddComponent(debug.NewGridDrawer(e))
-		e.AddComponent(sprite2d.NewSprite2D(e, params.TextureRes))
+		e.AddComponent(sprite2d.NewSprite2D(e, scheme.TextureRes))
 
 		// physics
 		physicsSpec := car.YamlSpec{}
-		creator.Loader().LoadYaml(params.PhysicsRes, &physicsSpec)
+		creator.Loader().LoadYaml(scheme.PhysicsRes, &physicsSpec)
 		e.AddComponent(car.NewPhysics(e, physicsSpec))
 
 		// camera

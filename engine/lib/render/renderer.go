@@ -2,6 +2,7 @@ package render
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
@@ -146,7 +147,7 @@ func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float32) {
 	flags := r.window.GetFlags()
 	fullScreen := flags&sdl.WINDOW_FULLSCREEN != 0
 
-	fmt.Printf("Resize to [%dx%d] (fullScreen = %v, zoom = %v)\n",
+	log.Printf("Resize to [%dx%d] (fullScreen = %v, zoom = %v)\n",
 		width,
 		height,
 		fullScreen,

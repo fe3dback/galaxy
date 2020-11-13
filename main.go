@@ -3,9 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
+	"time"
 
 	"github.com/fe3dback/galaxy/registry"
 )
@@ -23,6 +25,7 @@ func main() {
 		IsProfiling:   *isProfiling,
 		ProfilingPort: *profilingPort,
 		FullScreen:    *fullScreen,
+		Seed:          time.Now().UnixNano(),
 	}
 
 	provider := registry.NewProvider(flags)
@@ -39,7 +42,7 @@ func run(provider *registry.Provider) {
 		panic(err)
 	}
 
-	fmt.Printf("params loop sucessfully ended\n")
+	log.Printf("params loop sucessfully ended")
 }
 
 func profile() {

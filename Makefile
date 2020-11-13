@@ -9,7 +9,9 @@ lint:
 	golangci-lint run
 
 arch:
-	go-arch-lint --project-path ${PWD}
+	docker run --rm \
+		-v ${PWD}:/app \
+		fe3dback/go-arch-lint:latest-stable-release check --project-path /app
 
 quality-check:
 	@echo "=======[ ARCH ] ========"
