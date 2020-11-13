@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"runtime"
 
 	"github.com/fe3dback/galaxy/registry"
@@ -31,23 +31,28 @@ func debugMemory() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
-	fmt.Printf("-- system:\n")
-	fmt.Printf("      mem: %s\n", utils.FormatBytes(m.Alloc))
-	fmt.Printf("total mem: %s\n", utils.FormatBytes(m.TotalAlloc))
-	fmt.Printf("  sys mem: %s\n", utils.FormatBytes(m.Sys))
+	log.Printf("memory: [alloc: %s, total: %s, sys: %s]",
+		utils.FormatBytes(m.Alloc),
+		utils.FormatBytes(m.TotalAlloc),
+		utils.FormatBytes(m.Sys),
+	)
 }
 
 func debugPrintFps(f *system.Frames) {
-	fmt.Printf("-- frames:\n")
-	fmt.Printf("           FPS: %d / %d\n", f.FPS(), f.TargetFPS())
-	fmt.Printf("frame duration: %s\n", f.FrameDuration())
-	fmt.Printf("frame throttle: %s\n", f.LimitDuration())
-	fmt.Printf("limit duration: %s\n", f.FrameThrottle())
-	fmt.Printf("    delta time: %f\n", f.DeltaTime())
-	fmt.Printf("       seconds: %s\n", f.SinceStart())
+	log.Printf("frames: [fps: %d / %d, duration: %s / %s, throttle: %s]",
+		f.FPS(), f.TargetFPS(),
+		f.FrameDuration(),
+		f.LimitDuration(),
+		f.FrameThrottle(),
+	)
+	log.Printf("frames: [dt: %.4f, sec: %s]",
+		f.DeltaTime(),
+		f.SinceStart(),
+	)
 }
 
 func debugPrintWorld(w *game.World) {
-	fmt.Printf("-- world:\n")
-	fmt.Printf("      entities: %d\n", len(w.Entities()))
+	log.Printf("world: [entities: %d]",
+		len(w.Entities()),
+	)
 }

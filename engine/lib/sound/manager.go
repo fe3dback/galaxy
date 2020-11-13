@@ -75,28 +75,30 @@ func (m *Manager) LoadSound(res generated.ResourcePath) {
 }
 
 func (m *Manager) acquireChannel() (int, bool) {
-	var channelId *int
-
-	// find free channel
-	for i, locked := range m.channels {
-		if locked {
-			continue
-		}
-
-		channelId = &i
-		break
-	}
-
+	channelId := m.findFreeChannelId()
 	if channelId == nil {
 		// max sounds is already played
 		return 0, false
 	}
 
-	// lock channel
-	m.channels[*channelId] = true
-
-	// return found channel
+	m.lockChannel(*channelId)
 	return *channelId, true
+}
+
+func (m *Manager) findFreeChannelId() *int {
+	for i, locked := range m.channels {
+		if locked {
+			continue
+		}
+
+		return &i
+	}
+
+	return nil
+}
+
+func (m *Manager) lockChannel(id int) {
+	m.channels[id] = true
 }
 
 func (m *Manager) freeChannel(id int) {

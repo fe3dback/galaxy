@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
@@ -21,7 +21,7 @@ func (r registerFactory) registerDispatcher(
 
 func (r registerFactory) eventQuit(frames *system.Frames) event.HandlerQuit {
 	return func(quit event.QuitEvent) error {
-		fmt.Printf("sdl quit event handled\n")
+		log.Print("sdl quit event handled")
 		frames.Interrupt()
 
 		return nil

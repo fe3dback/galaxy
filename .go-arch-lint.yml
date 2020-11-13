@@ -26,6 +26,8 @@ vendors:
     in: gopkg.in/yaml.v2
   yaml-validator:
     in: gopkg.in/validator.v2
+  logger:
+    in: go.uber.org/zap
 
 components:
   main:
@@ -72,6 +74,8 @@ components:
     in: game/entities
   game_entities_factory:
     in: game/entities/factory
+  game_entities_factory_scheme:
+    in: game/entities/factory/schemefactory
   game_component:
     in: game/entities/components/**
   game_loader:
@@ -83,6 +87,9 @@ components:
     in: generated
   utils:
     in: utils
+
+commonVendors:
+  - logger
 
 commonComponents:
   - generated
@@ -163,6 +170,7 @@ deps:
       - engine_event
       - game_entities
       - game_entities_factory
+      - game_entities_factory_scheme
       - game_utils
       - game_loader
 
@@ -177,8 +185,15 @@ deps:
     mayDependOn:
       - engine
       - engine_entity
-      - game_component
       - game_utils
+      - game_loader
+      - game_component
+      - game_entities_factory_scheme
+
+  game_entities_factory_scheme:
+    mayDependOn:
+      - engine
+      - engine_entity
       - game_loader
 
   game_component:
@@ -188,6 +203,7 @@ deps:
       - game_component
       - game_utils
       - game_loader
+      - game_entities_factory_scheme
 
   game_loader:
     mayDependOn:
@@ -204,5 +220,3 @@ deps:
       - system
       - engine
       - engine_event
-      - game
-

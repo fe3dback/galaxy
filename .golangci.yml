@@ -341,6 +341,7 @@ linters:
     - maligned
     - prealloc
     - scopelint # todo: enable after excluding tests (because of "Using the variable on range scope")
+    - gosec
   disable-all: false
   presets:
     - bugs

@@ -6,6 +6,7 @@ import (
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 	"github.com/fe3dback/galaxy/game/entities/factory"
+	"github.com/fe3dback/galaxy/game/entities/factory/schemefactory"
 	"github.com/fe3dback/galaxy/game/loader/weaponloader"
 	"github.com/fe3dback/galaxy/generated"
 )
@@ -24,7 +25,7 @@ func NewLevel01() WorldProviderFn {
 		//world.AddEntity(car)
 
 		// create player
-		playerFactory := factory.UnitFactoryFn(factory.UnitParams{
+		playerFactory := factory.UnitFactoryFn(schemefactory.Unit{
 			TextureRes:    generated.ResourcesImgCharDefaultCharSheet,
 			WeaponsLoader: weaponloader.NewLoader(creator.Loader()),
 			EntitySpawner: world,
@@ -44,7 +45,7 @@ func NewLevel01() WorldProviderFn {
 				posX := float64(rand.Intn(100) * xx)
 				posY := float64(rand.Intn(100) * yy)
 
-				wallFactory := factory.WallFactoryFn(factory.WallParams{
+				wallFactory := factory.WallFactoryFn(schemefactory.Wall{
 					BoxWidth: boxWidth,
 				})
 

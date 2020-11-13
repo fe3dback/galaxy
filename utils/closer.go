@@ -1,6 +1,8 @@
 package utils
 
-import "fmt"
+import (
+	"log"
+)
 
 type (
 	CloseFn func() error
@@ -32,7 +34,7 @@ func (c *Closer) Close() error {
 	for _, closeFn := range c.queue {
 		err := closeFn()
 		if err != nil {
-			fmt.Printf("close error: %v", err)
+			log.Printf("close error: %v", err)
 		}
 	}
 

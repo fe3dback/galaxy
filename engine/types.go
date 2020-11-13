@@ -92,6 +92,7 @@ type (
 
 		// shapes
 		CreateShapeBox(width, height Pixel) PhysicsShape
+		CreateShapeCircle(radius Pixel) PhysicsShape
 
 		// bodies
 		AddBodyStatic(

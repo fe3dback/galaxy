@@ -22,16 +22,9 @@ func newEquip(weaponsLoader *weaponloader.Loader, mixer engine.SoundMixer) *equi
 		weapons: map[id]*Weapon{},
 	}
 
-	var lastId *id
-
 	for id, spec := range weaponsLoader.LoadedSpecs() {
-		lastId = &id
 		equip.weapons[id] = NewWeapon(spec, mixer)
-	}
-
-	if lastId != nil {
-		// equip weapon by default
-		equip.Equip(*lastId)
+		equip.Equip(id)
 	}
 
 	return equip

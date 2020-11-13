@@ -1,7 +1,7 @@
 package system
 
 import (
-	"fmt"
+	"log"
 	"math"
 	"os"
 	"os/signal"
@@ -64,7 +64,7 @@ func (f *Frames) listenOsSignals() {
 		sig := <-c
 		f.isInterrupted = true
 
-		fmt.Printf("got os signal %v\n", sig)
+		log.Printf("got os signal: %v", sig)
 	}()
 }
 

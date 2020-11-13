@@ -2,6 +2,7 @@ package car
 
 import (
 	"fmt"
+	"log"
 	"math"
 
 	"github.com/fe3dback/galaxy/engine"
@@ -152,7 +153,7 @@ func (mv *movements) updateMotor(s engine.State) {
 	}
 
 	// free acceleration
-	fmt.Println(friction)
+	log.Print(friction)
 
 	// update velocity
 	mv.velocity = mv.velocity.
