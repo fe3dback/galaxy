@@ -1,9 +1,10 @@
 package lib
 
 import (
-	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
+
+	"github.com/fe3dback/galaxy/utils"
 )
 
 type SDLLib struct {
@@ -71,7 +72,11 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 	err = window.UpdateSurface()
 	utils.Check("update window surface", err)
 
-	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	renderer, err := window.GetRenderer()
+	if renderer == nil {
+		renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
+	}
+
 	utils.Check("create renderer", err)
 	closer.EnqueueClose(renderer.Destroy)
 
