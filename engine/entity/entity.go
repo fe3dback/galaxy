@@ -12,7 +12,6 @@ type (
 
 	Entity struct {
 		id         int64
-		body       engine.PhysicsBody
 		position   engine.Vec
 		rotation   engine.Angle
 		components components
@@ -37,30 +36,11 @@ func (e *Entity) Id() int64 {
 	return e.id
 }
 
-func (e *Entity) AttachPhysicsBody(body engine.PhysicsBody) {
-	if e.body != nil {
-		panic(fmt.Sprintf("Entity `%d` already have physics body", e.Id()))
-	}
-
-	e.body = body
-	e.updatePhysicsState()
-}
-
-func (e *Entity) PhysicsBody() engine.PhysicsBody {
-	return e.body
-}
-
 func (e *Entity) Position() engine.Vec {
 	return e.position
 }
 
 func (e *Entity) SetPosition(pos engine.Vec) {
-	if e.body != nil {
-		// managed with physics
-		e.body.SetPosition(pos)
-		return
-	}
-
 	e.position = pos
 }
 
@@ -73,29 +53,11 @@ func (e *Entity) Rotation() engine.Angle {
 }
 
 func (e *Entity) SetRotation(rot engine.Angle) {
-	if e.body != nil {
-		// managed with physics
-		e.body.SetRotation(rot)
-		return
-	}
-
 	e.rotation = rot
 }
 
 func (e *Entity) AddRotation(rot engine.Angle) {
 	e.SetRotation(e.Rotation().Add(rot))
-}
-
-func (e *Entity) ApplyForceFrom(force engine.Vec, relativePosition engine.Vec) {
-	if e.body != nil {
-		e.body.ApplyForce(force, e.position.Add(relativePosition))
-	}
-}
-
-func (e *Entity) ApplyForce(force engine.Vec) {
-	if e.body != nil {
-		e.body.ApplyForce(force, e.position)
-	}
 }
 
 func (e *Entity) Destroy() {
@@ -107,10 +69,6 @@ func (e *Entity) IsDestroyed() bool {
 }
 
 func (e *Entity) OnUpdate(s engine.State) error {
-	if e.body != nil {
-		e.updatePhysicsState()
-	}
-
 	for _, component := range e.components {
 		err := component.OnUpdate(s)
 		if err != nil {
@@ -161,9 +119,4 @@ func (e *Entity) GetComponent(ref Component) Component {
 	}
 
 	panic(fmt.Sprintf("can`t find component `%s` in `%T`", id, e))
-}
-
-func (e *Entity) updatePhysicsState() {
-	e.position = e.body.Position()
-	e.rotation = e.body.Rotation()
 }

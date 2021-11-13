@@ -84,48 +84,6 @@ type (
 		SinceStart() time.Duration
 	}
 
-	// Physics
-
-	Physics interface {
-		Update(deltaTime float64)
-		Draw(renderer Renderer)
-
-		// shapes
-		CreateShapeBox(width, height Pixel) PhysicsShape
-		CreateShapeCircle(radius Pixel) PhysicsShape
-
-		// bodies
-		AddBodyStatic(
-			pos Vec,
-			rot Angle,
-			shape PhysicsShape,
-			categoryBits uint16,
-			maskBits uint16,
-		) PhysicsBody
-		AddBodyDynamic(
-			pos Vec,
-			rot Angle,
-			mass Kilogram,
-			shape PhysicsShape,
-			categoryBits uint16,
-			maskBits uint16,
-		) PhysicsBody
-		DestroyBody(body PhysicsBody)
-	}
-
-	PhysicsBody interface {
-		Position() Vec
-		SetPosition(pos Vec)
-		Rotation() Angle
-		SetRotation(rot Angle)
-
-		// mutate
-		ApplyForce(force Vec, position Vec)
-	}
-
-	PhysicsShape interface {
-	}
-
 	// Engine Assets
 
 	LoaderYaml interface {
@@ -167,5 +125,28 @@ type (
 		Movement() Movement
 		InEditorMode() bool
 		SoundMixer() SoundMixer
+	}
+
+	GameObject interface {
+		Drawer
+		Updater
+		Destroy()
+		IsDestroyed() bool
+	}
+
+	Scene interface {
+		OnUpdate(s State) error
+		OnDraw(r Renderer) error
+		Entities() []GameObject
+	}
+
+	SceneBlueprint interface {
+		CreateEntities() []GameObject
+	}
+
+	SceneManager interface {
+		AddBlueprint(ID string, blueprint SceneBlueprint)
+		Switch(nextID string)
+		Current() Scene
 	}
 )

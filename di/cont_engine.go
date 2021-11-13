@@ -9,6 +9,7 @@ import (
 	"github.com/fe3dback/galaxy/engine/lib/render"
 	"github.com/fe3dback/galaxy/engine/lib/sound"
 	"github.com/fe3dback/galaxy/engine/loader"
+	"github.com/fe3dback/galaxy/engine/scene"
 	"github.com/fe3dback/galaxy/generated"
 )
 
@@ -101,6 +102,19 @@ func (c *Container) provideSoundMixer() *sound.Manager {
 
 	c.memstate.engine.soundMixer = soundMixer
 	return c.memstate.engine.soundMixer
+}
+
+func (c *Container) ProvideEngineScenesManager() *scene.Manager {
+	if c.memstate.engine.scenesManager != nil {
+		return c.memstate.engine.scenesManager
+	}
+
+	scenesManager := scene.NewManager(
+		c.ProvideEventDispatcher(),
+	)
+
+	c.memstate.engine.scenesManager = scenesManager
+	return c.memstate.engine.scenesManager
 }
 
 func (c *Container) ProvideEngineRenderer() *render.Renderer {

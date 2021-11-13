@@ -36,7 +36,6 @@ func (r *Movement) OnDraw(_ engine.Renderer) error {
 func (r *Movement) OnUpdate(state engine.State) error {
 	r.updateWalkVelocity(state)
 
-	r.entity.ApplyForce(r.velocity.Scale(state.Moment().DeltaTime()))
 	return nil
 }
 func (r *Movement) updateWalkVelocity(state engine.State) {

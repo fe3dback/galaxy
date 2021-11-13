@@ -1,43 +1,40 @@
-package game
+package scene
 
 import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/entity"
 )
 
-type (
-	EntityList []*entity.Entity
+type Scene struct {
+	destroyed  bool
+	entities   []engine.GameObject
+	spawnQueue []engine.GameObject
+}
 
-	World struct {
-		entities   EntityList
-		spawnQueue EntityList
-	}
-)
-
-func NewWorld() *World {
-	return &World{
-		entities:   make(EntityList, 0),
-		spawnQueue: make(EntityList, 0),
+func NewScene(entities []engine.GameObject) *Scene {
+	return &Scene{
+		destroyed:  false,
+		entities:   entities,
+		spawnQueue: []engine.GameObject{},
 	}
 }
 
-func (w *World) AddEntity(e *entity.Entity) {
-	w.entities = append(w.entities, e)
-}
-
-func (w *World) Entities() EntityList {
+func (w *Scene) Entities() []engine.GameObject {
 	return w.entities
 }
 
-func (w *World) OnUpdate(s engine.State) error {
+func (w *Scene) OnUpdate(s engine.State) error {
 	needGc := false
+
+	if w.destroyed {
+		return nil
+	}
 
 	// spawn new entities
 	if len(w.spawnQueue) > 0 {
 		for _, e := range w.spawnQueue {
-			w.AddEntity(e)
+			w.entities = append(w.entities, e)
 		}
 		w.spawnQueue = w.spawnQueue[:0]
 	}
@@ -62,7 +59,11 @@ func (w *World) OnUpdate(s engine.State) error {
 	return nil
 }
 
-func (w *World) OnDraw(r engine.Renderer) error {
+func (w *Scene) OnDraw(r engine.Renderer) error {
+	if w.destroyed {
+		return nil
+	}
+
 	// draw world
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
@@ -78,8 +79,8 @@ func (w *World) OnDraw(r engine.Renderer) error {
 	return nil
 }
 
-func (w *World) garbageCollect() {
-	list := make(EntityList, 0, len(w.entities))
+func (w *Scene) garbageCollect() {
+	list := make([]engine.GameObject, 0, len(w.entities))
 
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
@@ -90,4 +91,12 @@ func (w *World) garbageCollect() {
 	}
 
 	w.entities = list
+}
+
+func (w *Scene) destroy() {
+	for _, e := range w.entities {
+		e.Destroy()
+	}
+
+	w.garbageCollect()
 }

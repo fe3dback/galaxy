@@ -5,7 +5,7 @@ import (
 	"runtime"
 
 	"github.com/fe3dback/galaxy/di"
-	"github.com/fe3dback/galaxy/game"
+	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/system"
 	"github.com/fe3dback/galaxy/utils"
 )
@@ -22,7 +22,7 @@ func debug(c *di.Container) {
 	}
 
 	if debug.World {
-		debugPrintWorld(c.ProvideGameWorldManager().CurrentWorld())
+		debugPrintWorld(c.ProvideEngineScenesManager().Current())
 	}
 }
 
@@ -50,8 +50,8 @@ func debugPrintFps(f *system.Frames) {
 	)
 }
 
-func debugPrintWorld(w *game.World) {
-	log.Printf("world: [entities: %d]",
-		len(w.Entities()),
+func debugPrintWorld(s engine.Scene) {
+	log.Printf("scene: [entities: %d]",
+		len(s.Entities()),
 	)
 }

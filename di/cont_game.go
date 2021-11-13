@@ -45,13 +45,13 @@ func (c *Container) ProvideGameUI() *ui.UI {
 	return c.memstate.game.ui
 }
 
-func (c *Container) ProvideGameWorldManager() *game.WorldManager {
-	if c.memstate.game.worldManager != nil {
-		return c.memstate.game.worldManager
+func (c *Container) ProvideGameScenesLoader() *game.ScenesLoader {
+	if c.memstate.game.ScenesLoader != nil {
+		return c.memstate.game.ScenesLoader
 	}
 
-	c.memstate.game.worldManager = game.NewWorldManager(
-		c.ProvideEventDispatcher(),
+	c.memstate.game.ScenesLoader = game.NewScenesLoader(
+		c.ProvideEngineScenesManager(),
 	)
-	return c.memstate.game.worldManager
+	return c.memstate.game.ScenesLoader
 }

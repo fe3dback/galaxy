@@ -16,12 +16,15 @@ func gameLoop(c *di.Container) error {
 	frames := c.ProvideFrames()
 	renderer := c.ProvideEngineRenderer()
 	dispatcher := c.ProvideEventDispatcher()
+	scenesManager := c.ProvideEngineScenesManager()
 
 	// shared
-	worldState := c.ProvideEngineGameState()
+	gameState := c.ProvideEngineGameState()
 
 	// game
-	gameManager := c.ProvideGameWorldManager()
+	gameSceneLoader := c.ProvideGameScenesLoader()
+	gameSceneLoader.LoadGameScenes()
+	gameSceneLoader.EnterToFirstScene()
 	gameUI := c.ProvideGameUI()
 
 	// editor
@@ -48,14 +51,14 @@ func gameLoop(c *di.Container) error {
 		// update state
 		// -----------------------------------
 		if appState.InEditorState() {
-			err = editorManager.OnUpdate(worldState)
+			err = editorManager.OnUpdate(gameState)
 			if err != nil {
 				return fmt.Errorf("can`t update editor: %w", err)
 			}
 		} else {
-			err = gameManager.CurrentWorld().OnUpdate(worldState)
+			err = scenesManager.Current().OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update game: %w", err)
+				return fmt.Errorf("can`t update game scene: %w", err)
 			}
 		}
 
@@ -63,12 +66,12 @@ func gameLoop(c *di.Container) error {
 		// update ui
 		// -----------------------------------
 		if appState.InEditorState() {
-			err = editorUI.OnUpdate(worldState)
+			err = editorUI.OnUpdate(gameState)
 			if err != nil {
 				return fmt.Errorf("can`t update editor ui: %v", err)
 			}
 		} else {
-			err = gameUI.OnUpdate(worldState)
+			err = gameUI.OnUpdate(gameState)
 			if err != nil {
 				return fmt.Errorf("can`t update game ui: %v", err)
 			}
@@ -80,7 +83,7 @@ func gameLoop(c *di.Container) error {
 		renderer.Clear(engine.ColorBackground)
 
 		renderer.SetRenderMode(engine.RenderModeWorld)
-		err = gameManager.CurrentWorld().OnDraw(renderer)
+		err = scenesManager.Current().OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}

@@ -12,6 +12,7 @@ import (
 	"github.com/fe3dback/galaxy/engine/lib/render"
 	"github.com/fe3dback/galaxy/engine/lib/sound"
 	"github.com/fe3dback/galaxy/engine/loader"
+	"github.com/fe3dback/galaxy/engine/scene"
 	"github.com/fe3dback/galaxy/game"
 	"github.com/fe3dback/galaxy/shared/ui"
 	"github.com/fe3dback/galaxy/system"
@@ -32,11 +33,12 @@ type Container struct {
 			renderer       *render.Renderer
 		}
 		engine struct {
-			editorGizmos *engineEditor.DrawGizmos
-			appState     *engine.AppState
-			gameState    *engine.GameState
-			soundMixer   *sound.Manager
-			assetsLoader *loader.AssetsLoader
+			editorGizmos  *engineEditor.DrawGizmos
+			appState      *engine.AppState
+			gameState     *engine.GameState
+			soundMixer    *sound.Manager
+			assetsLoader  *loader.AssetsLoader
+			scenesManager *scene.Manager
 		}
 		control struct {
 			mouse    *control.Mouse
@@ -47,7 +49,7 @@ type Container struct {
 			ui      *ui.UI
 		}
 		game struct {
-			worldManager *game.WorldManager
+			ScenesLoader *game.ScenesLoader
 			ui           *ui.UI
 		}
 		eventDispatcher *event.Dispatcher
