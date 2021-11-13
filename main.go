@@ -4,12 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 	"runtime"
-	"time"
 
-	"github.com/fe3dback/galaxy/registry"
+	"github.com/fe3dback/galaxy/di"
 )
 
 // -- flags
@@ -19,30 +20,38 @@ var fullScreen = flag.Bool("fullscreen", false, "run in fullscreen mode")
 
 func main() {
 	runtime.LockOSThread()
+	container := setup()
 
-	flag.Parse()
-	flags := registry.Flags{
-		IsProfiling:   *isProfiling,
-		ProfilingPort: *profilingPort,
-		FullScreen:    *fullScreen,
-		Seed:          time.Now().UnixNano(),
-	}
-
-	provider := registry.NewProvider(flags)
-	run(provider)
+	os.Exit(run(container))
 }
 
-func run(provider *registry.Provider) {
-	if provider.Registry.Game.Options.Debug.InProfiling {
+func setup() *di.Container {
+	flag.Parse()
+	flags := di.NewInitFlags()
+	flags.IsProfiling = *isProfiling
+	flags.ProfilingPort = *profilingPort
+	flags.FullScreen = *fullScreen
+
+	return di.NewContainer(flags)
+}
+
+func run(container *di.Container) int {
+	if container.Flags().IsProfiling {
 		profile()
 	}
 
-	err := gameLoop(provider)
+	// core rand seed
+	rand.Seed(container.Flags().Seed)
+
+	// run game loop
+	err := gameLoop(container)
 	if err != nil {
-		panic(err)
+		log.Println(fmt.Errorf("game loop exited with error: %w", err))
+		return 1
 	}
 
-	log.Printf("params loop sucessfully ended")
+	log.Printf("game loop sucessfully ended")
+	return 0
 }
 
 func profile() {

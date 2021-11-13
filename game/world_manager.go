@@ -4,29 +4,23 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
 )
 
 type (
-	WorldProviderFn func(creator engine.WorldCreator) *World
-
 	WorldManager struct {
-		current       *World
-		worldCreator  engine.WorldCreator
-		createWorldFn WorldProviderFn
-		resetQueued   bool
+		current     *World
+		resetQueued bool
 	}
 )
 
-func NewWorldManager(createWorldFn WorldProviderFn, gameWorldCreator engine.WorldCreator, dispatcher *event.Dispatcher) *WorldManager {
+func NewWorldManager(dispatcher *event.Dispatcher) *WorldManager {
 	manager := &WorldManager{
-		current:       createWorldFn(gameWorldCreator),
-		worldCreator:  gameWorldCreator,
-		createWorldFn: createWorldFn,
-		resetQueued:   false,
+		current:     NewWorld(),
+		resetQueued: false,
 	}
 	dispatcher.OnKeyBoard(manager.handleKeyboard)
+	dispatcher.OnFrameStart(manager.handleFrameStart)
 
 	return manager
 }
@@ -44,21 +38,22 @@ func (w *WorldManager) handleKeyboard(keyboard event.KeyBoardEvent) error {
 	return nil
 }
 
-func (w *WorldManager) OnFrameStart() {
+func (w *WorldManager) handleFrameStart(_ event.FrameStartEvent) error {
 	if !w.resetQueued {
-		return
+		return nil
 	}
 
 	w.resetQueued = false
-	w.Reset()
+	w.reset()
+	return nil
 }
 
-func (w *WorldManager) Reset() {
+func (w *WorldManager) reset() {
 	log.Println("Resetting world..")
 
 	w.current = nil
 	runtime.GC()
-	w.current = w.createWorldFn(w.worldCreator)
+	w.current = NewWorld()
 }
 
 func (w *WorldManager) CurrentWorld() *World {

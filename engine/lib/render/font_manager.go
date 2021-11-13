@@ -21,20 +21,20 @@ type (
 	FontsMap       map[FontId]*Font
 	FontsParamsMap map[FontId]FontParams
 
-	FontManager struct {
+	FontsManager struct {
 		fonts  FontsMap
 		closer *utils.Closer
 	}
 )
 
-func NewFontManager(closer *utils.Closer) *FontManager {
-	return &FontManager{
+func NewFontsManager(closer *utils.Closer) *FontsManager {
+	return &FontsManager{
 		fonts:  map[FontId]*Font{},
 		closer: closer,
 	}
 }
 
-func (fc *FontManager) Load(id FontId) {
+func (fc *FontsManager) Load(id FontId) {
 	if _, ok := fc.fonts[id]; ok {
 		panic(fmt.Sprintf("font `%s` already loadedTextures", id))
 	}
@@ -47,7 +47,7 @@ func (fc *FontManager) Load(id FontId) {
 	fc.fonts[id] = NewFont(id, params, fc.closer)
 }
 
-func (fc *FontManager) Get(id FontId) *Font {
+func (fc *FontsManager) Get(id FontId) *Font {
 	if font, ok := fc.fonts[id]; ok {
 		return font
 	}

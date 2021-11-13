@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/veandco/go-sdl2/sdl"
+
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
 	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 const surfacesCount = 4
@@ -17,7 +18,7 @@ type (
 	Renderer struct {
 		window         *sdl.Window
 		ref            *sdl.Renderer
-		fontManager    *FontManager
+		fontManager    *FontsManager
 		textureManager *TextureManager
 		camera         *Camera
 		renderMode     engine.RenderMode
@@ -40,7 +41,7 @@ type Point = sdl.Point
 func NewRenderer(
 	sdlWindow *sdl.Window,
 	sdlRenderer *sdl.Renderer,
-	fontManager *FontManager,
+	fontManager *FontsManager,
 	textureManager *TextureManager,
 	camera *Camera,
 	dispatcher *event.Dispatcher,

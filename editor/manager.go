@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/engine"
+	"github.com/fe3dback/galaxy/engine/event"
 )
 
 type Manager struct {
+	dispatcher *event.Dispatcher
 	components []Component
 }
 

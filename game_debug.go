@@ -4,26 +4,25 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/fe3dback/galaxy/registry"
-	"github.com/fe3dback/galaxy/system"
-
+	"github.com/fe3dback/galaxy/di"
 	"github.com/fe3dback/galaxy/game"
+	"github.com/fe3dback/galaxy/system"
 	"github.com/fe3dback/galaxy/utils"
 )
 
-func debug(provider *registry.Provider) {
-	debug := provider.Registry.Game.Options.Debug
+func debug(c *di.Container) {
+	debug := c.ProvideGameOptions().Debug
 
 	if debug.Memory {
 		debugMemory()
 	}
 
 	if debug.Frames {
-		debugPrintFps(provider.Registry.Game.Frames)
+		debugPrintFps(c.ProvideFrames())
 	}
 
 	if debug.World {
-		debugPrintWorld(provider.Registry.Game.WorldManager.CurrentWorld())
+		debugPrintWorld(c.ProvideGameWorldManager().CurrentWorld())
 	}
 }
 

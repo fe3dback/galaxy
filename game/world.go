@@ -3,8 +3,6 @@ package game
 import (
 	"fmt"
 
-	"go.uber.org/zap"
-
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/entity"
 )
@@ -13,50 +11,20 @@ type (
 	EntityList []*entity.Entity
 
 	World struct {
-		entities     EntityList
-		spawnQueue   EntityList
-		physics      engine.Physics
-		worldCreator engine.WorldCreator
+		entities   EntityList
+		spawnQueue EntityList
 	}
 )
 
-func NewWorld(creator engine.WorldCreator) *World {
+func NewWorld() *World {
 	return &World{
-		entities:     make(EntityList, 0),
-		spawnQueue:   make(EntityList, 0),
-		physics:      creator.Physics(),
-		worldCreator: creator,
+		entities:   make(EntityList, 0),
+		spawnQueue: make(EntityList, 0),
 	}
 }
 
 func (w *World) AddEntity(e *entity.Entity) {
 	w.entities = append(w.entities, e)
-}
-
-func (w *World) SpawnEntity(pos engine.Vec, angle engine.Angle, scheme entity.Scheme) {
-	defer func() {
-		if data := recover(); data != nil {
-			zap.S().Errorf("panic: failed to spawn entity by scheme `%s`: %s", scheme.SchemeID(), data)
-			return
-		}
-	}()
-
-	e := entity.NewEntity(pos, angle)
-	schemeFactoryBuilder, ok := schemeFactoryMap[scheme.SchemeID()]
-	if !ok {
-		zap.S().Errorf("Can`t spawn entity: not found scheme factory for scheme: %s", scheme.SchemeID())
-		return
-	}
-
-	factoryMethod := schemeFactoryBuilder(scheme)
-	if !ok {
-		zap.S().Errorf("Can`t spawn entity: scheme factory '%s' not implement factory method", scheme.SchemeID())
-		return
-	}
-
-	e = factoryMethod(e, w.worldCreator)
-
-	w.spawnQueue = append(w.spawnQueue, e)
 }
 
 func (w *World) Entities() EntityList {
@@ -74,13 +42,9 @@ func (w *World) OnUpdate(s engine.State) error {
 		w.spawnQueue = w.spawnQueue[:0]
 	}
 
-	// update physics
-	w.physics.Update(s.Moment().DeltaTime())
-
 	// update game
 	for _, e := range w.entities {
 		if e.IsDestroyed() {
-			w.physics.DestroyBody(e.PhysicsBody())
 			needGc = true
 			continue
 		}
@@ -99,9 +63,6 @@ func (w *World) OnUpdate(s engine.State) error {
 }
 
 func (w *World) OnDraw(r engine.Renderer) error {
-	// draw physics gizmos
-	w.physics.Draw(r)
-
 	// draw world
 	for _, e := range w.entities {
 		if e.IsDestroyed() {

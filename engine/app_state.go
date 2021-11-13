@@ -1,6 +1,10 @@
 package engine
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/fe3dback/galaxy/engine/event"
+)
 
 const (
 	modeGame mode = iota
@@ -10,27 +14,58 @@ const (
 type (
 	mode     uint8
 	AppState struct {
-		mode mode
+		switchQueued bool
+		mode         mode
 	}
 )
 
-func NewAppState() *AppState {
-	return &AppState{
-		mode: modeGame,
+func NewAppState(dispatcher *event.Dispatcher) *AppState {
+	as := &AppState{
+		switchQueued: false,
+		mode:         modeGame,
 	}
+
+	dispatcher.OnKeyBoard(as.handleKeyboard)
+	dispatcher.OnFrameStart(as.handleFrameStart)
+
+	return as
 }
 
-func (e *AppState) SwitchState() {
-	switch e.mode {
+func (as *AppState) handleKeyboard(keyboard event.KeyBoardEvent) error {
+	if keyboard.PressType != event.KeyboardPressTypePressed {
+		return nil
+	}
+
+	if keyboard.Key != event.KeyF1 {
+		return nil
+	}
+
+	as.switchQueued = true
+	return nil
+}
+
+func (as *AppState) handleFrameStart(_ event.FrameStartEvent) error {
+	if !as.switchQueued {
+		return nil
+	}
+
+	as.switchQueued = false
+	as.switchState()
+
+	return nil
+}
+
+func (as *AppState) switchState() {
+	switch as.mode {
 	case modeEditor:
-		e.mode = modeGame
+		as.mode = modeGame
 	case modeGame:
-		e.mode = modeEditor
+		as.mode = modeEditor
 	default:
-		panic(fmt.Sprintf("unknown app mode `%d`", e.mode))
+		panic(fmt.Sprintf("unknown app mode `%d`", as.mode))
 	}
 }
 
-func (e *AppState) InEditorState() bool {
-	return e.mode == modeEditor
+func (as *AppState) InEditorState() bool {
+	return as.mode == modeEditor
 }

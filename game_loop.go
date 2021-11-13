@@ -3,31 +3,30 @@ package main
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/engine/event"
-
+	"github.com/fe3dback/galaxy/di"
 	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/registry"
+	"github.com/fe3dback/galaxy/engine/event"
 )
 
-func gameLoop(provider *registry.Provider) error {
+func gameLoop(c *di.Container) error {
 	var err error
 
 	// engine
-	appState := provider.Registry.Engine.AppState
-	frames := provider.Registry.Game.Frames
-	renderer := provider.Registry.Engine.Renderer
-	dispatcher := provider.Registry.Engine.Dispatcher
+	appState := c.ProvideEngineAppState()
+	frames := c.ProvideFrames()
+	renderer := c.ProvideEngineRenderer()
+	dispatcher := c.ProvideEventDispatcher()
 
 	// shared
-	worldState := provider.Registry.State
+	worldState := c.ProvideEngineGameState()
 
 	// game
-	worldManager := provider.Registry.Game.WorldManager
-	gameUI := provider.Registry.Game.Ui
+	gameManager := c.ProvideGameWorldManager()
+	gameUI := c.ProvideGameUI()
 
 	// editor
-	editorManager := provider.Registry.Editor.Manager
-	editorUI := provider.Registry.Editor.Ui
+	editorManager := c.ProvideEditorManager()
+	editorUI := c.ProvideEditorUI()
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(engine.ColorBackground)
@@ -46,21 +45,29 @@ func gameLoop(provider *registry.Provider) error {
 		dispatcher.Dispatch()
 
 		// -----------------------------------
-		// update
+		// update state
 		// -----------------------------------
-		worldManager.OnFrameStart()
-
 		if appState.InEditorState() {
 			err = editorManager.OnUpdate(worldState)
 			if err != nil {
-				return fmt.Errorf("can`t update editor: %v", err)
+				return fmt.Errorf("can`t update editor: %w", err)
 			}
 		} else {
-			err = worldManager.CurrentWorld().OnUpdate(worldState)
+			err = gameManager.CurrentWorld().OnUpdate(worldState)
 			if err != nil {
-				return fmt.Errorf("can`t update game world: %v", err)
+				return fmt.Errorf("can`t update game: %w", err)
 			}
+		}
 
+		// -----------------------------------
+		// update ui
+		// -----------------------------------
+		if appState.InEditorState() {
+			err = editorUI.OnUpdate(worldState)
+			if err != nil {
+				return fmt.Errorf("can`t update editor ui: %v", err)
+			}
+		} else {
 			err = gameUI.OnUpdate(worldState)
 			if err != nil {
 				return fmt.Errorf("can`t update game ui: %v", err)
@@ -73,7 +80,7 @@ func gameLoop(provider *registry.Provider) error {
 		renderer.Clear(engine.ColorBackground)
 
 		renderer.SetRenderMode(engine.RenderModeWorld)
-		err = worldManager.CurrentWorld().OnDraw(renderer)
+		err = gameManager.CurrentWorld().OnDraw(renderer)
 		if err != nil {
 			return fmt.Errorf("can`t draw world: %v", err)
 		}
@@ -102,7 +109,7 @@ func gameLoop(provider *registry.Provider) error {
 		// -----------------------------------
 		// debug
 		// -----------------------------------
-		debug(provider)
+		debug(c)
 
 		// -----------------------------------
 		// finalize frame

@@ -128,12 +128,6 @@ type (
 
 	// Engine Assets
 
-	WorldCreator interface {
-		Loader() Loader
-		SoundMixer() SoundMixer
-		Physics() Physics
-	}
-
 	LoaderYaml interface {
 		LoadYaml(res generated.ResourcePath, data interface{})
 	}
