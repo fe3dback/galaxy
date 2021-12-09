@@ -16,3 +16,11 @@ func CheckPanic(context string) {
 		panic(err)
 	}
 }
+
+func CheckPanicWith(context string, onPanic func()) {
+	if data := recover(); data != nil {
+		err := fmt.Errorf("recovered in %s: %v", context, data)
+		onPanic()
+		panic(err)
+	}
+}

@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/fe3dback/galaxy/utils"
 	"github.com/veandco/go-sdl2/sdl"
+
+	"github.com/fe3dback/galaxy/utils"
 )
 
 func (d *Dispatcher) pullSDLEvents() {
@@ -26,6 +27,8 @@ func (d *Dispatcher) dispatchSDLEvent(ev sdl.Event) {
 		d.PublishEventKeyBoard(assembleKeyboard(sdlEvent))
 	case *sdl.WindowEvent:
 		d.PublishEventWindow(assembleWindow(sdlEvent))
+	case *sdl.MouseButtonEvent:
+		d.PublishEventMouseButton(assembleMouseButton(sdlEvent))
 	case *sdl.MouseWheelEvent:
 		d.PublishEventMouseWheel(assembleMouseWheel(sdlEvent))
 	}
@@ -53,6 +56,15 @@ func assembleKeyboard(ev *sdl.KeyboardEvent) KeyBoardEvent {
 func assembleMouseWheel(mouseWheelEvent *sdl.MouseWheelEvent) MouseWheelEvent {
 	return MouseWheelEvent{
 		ScrollOffset: float64(mouseWheelEvent.Y),
+	}
+}
+
+func assembleMouseButton(mouseButtonEvent *sdl.MouseButtonEvent) MouseButtonEvent {
+	return MouseButtonEvent{
+		IsLeft:     mouseButtonEvent.Button == sdl.BUTTON_LEFT,
+		IsRight:    mouseButtonEvent.Button == sdl.BUTTON_RIGHT,
+		IsPressed:  mouseButtonEvent.State == sdl.PRESSED,
+		IsReleased: mouseButtonEvent.State == sdl.RELEASED,
 	}
 }
 

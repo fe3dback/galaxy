@@ -8,6 +8,7 @@ const (
 	eventTypeQuit eventType = iota
 	eventTypeKeyBoard
 	eventTypeWindow
+	eventTypeMouseButton
 	eventTypeMouseWheel
 	eventTypeFrameStart
 	eventTypeFrameEnd

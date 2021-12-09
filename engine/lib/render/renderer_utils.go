@@ -1,8 +1,9 @@
 package render
 
 import (
-	"github.com/fe3dback/galaxy/engine"
 	"github.com/veandco/go-sdl2/sdl"
+
+	"github.com/fe3dback/galaxy/engine"
 
 	"github.com/fe3dback/galaxy/utils"
 )
@@ -41,7 +42,7 @@ func (r *Renderer) Clear(color engine.Color) {
 	utils.Check("clear primary surface", err)
 }
 
-func (r *Renderer) Present() {
+func (r *Renderer) EndEngineFrame() {
 	var err error
 	r.SetRenderTarget(0)
 
@@ -55,6 +56,8 @@ func (r *Renderer) Present() {
 	// draw primary
 	err = r.ref.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 	utils.Check("set blendMode for present", err)
+}
 
+func (r *Renderer) UpdateGPU() {
 	r.ref.Present()
 }

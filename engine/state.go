@@ -1,12 +1,13 @@
 package engine
 
 type GameState struct {
-	moment     Moment
-	camera     Camera
-	mouse      Mouse
-	movement   Movement
-	appState   *AppState
-	soundMixer SoundMixer
+	moment       Moment
+	camera       Camera
+	mouse        Mouse
+	movement     Movement
+	appState     *AppState
+	soundMixer   SoundMixer
+	sceneManager SceneManager
 }
 
 func NewGameState(
@@ -16,14 +17,16 @@ func NewGameState(
 	movement Movement,
 	appState *AppState,
 	soundMixer SoundMixer,
+	sceneManager SceneManager,
 ) *GameState {
 	return &GameState{
-		moment:     moment,
-		camera:     camera,
-		mouse:      mouse,
-		movement:   movement,
-		appState:   appState,
-		soundMixer: soundMixer,
+		moment:       moment,
+		camera:       camera,
+		mouse:        mouse,
+		movement:     movement,
+		appState:     appState,
+		soundMixer:   soundMixer,
+		sceneManager: sceneManager,
 	}
 }
 
@@ -45,6 +48,10 @@ func (g *GameState) Movement() Movement {
 
 func (g *GameState) SoundMixer() SoundMixer {
 	return g.soundMixer
+}
+
+func (g *GameState) Scene() Scene {
+	return g.sceneManager.Current()
 }
 
 func (g *GameState) InEditorMode() bool {

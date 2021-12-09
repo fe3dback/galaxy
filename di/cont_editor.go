@@ -27,6 +27,7 @@ func (c *Container) ProvideEditorUI() *ui.UI {
 
 	c.memstate.editor.ui = ui.NewUI(
 		c.createUILayerFPS(),
+		c.createEditorUILayerEntities(),
 	)
 	return c.memstate.editor.ui
 }

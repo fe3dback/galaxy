@@ -33,13 +33,14 @@ func gameLoop(c *di.Container) error {
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(engine.ColorBackground)
-	renderer.Present()
+	renderer.EndEngineFrame()
 
 	for frames.Ready() {
 		// -----------------------------------
 		// start frame
 		// -----------------------------------
 		frames.Begin()
+		renderer.StartGUIFrame()
 		dispatcher.PublishEventFrameStart(event.FrameStartEvent{})
 
 		// -----------------------------------
@@ -107,7 +108,9 @@ func gameLoop(c *di.Container) error {
 			}
 		}
 
-		renderer.Present()
+		renderer.EndEngineFrame()
+		renderer.EndGUIFrame()
+		renderer.UpdateGPU()
 
 		// -----------------------------------
 		// debug

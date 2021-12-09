@@ -67,7 +67,12 @@ type (
 		SetRenderMode(RenderMode)
 		FillRect(Rect)
 		Clear(Color)
-		Present()
+		EndEngineFrame()
+		UpdateGPU()
+
+		// gui
+		StartGUIFrame()
+		EndGUIFrame()
 	}
 
 	Updater interface {
@@ -125,6 +130,7 @@ type (
 		Movement() Movement
 		InEditorMode() bool
 		SoundMixer() SoundMixer
+		Scene() Scene
 	}
 
 	GameObject interface {
@@ -132,6 +138,11 @@ type (
 		Updater
 		Destroy()
 		IsDestroyed() bool
+		Id() int64
+		Position() Vec
+		SetPosition(pos Vec)
+		Rotation() Angle
+		SetRotation(rot Angle)
 	}
 
 	Scene interface {

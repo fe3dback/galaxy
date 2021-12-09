@@ -125,6 +125,8 @@ func (c *Container) ProvideEngineRenderer() *render.Renderer {
 	renderer := render.NewRenderer(
 		c.provideSDL().Window(),
 		c.provideSDL().Renderer(),
+		c.provideSDL().GUIRenderer(),
+		c.provideSDL().GUI(),
 		c.provideRenderFontsManager(),
 		c.provideRenderTextureManager(),
 		c.provideRenderCamera(),
@@ -149,6 +151,7 @@ func (c *Container) ProvideEngineGameState() *engine.GameState {
 		c.provideEngineControlMovement(),
 		c.ProvideEngineAppState(),
 		c.provideSoundMixer(),
+		c.ProvideEngineScenesManager(),
 	)
 
 	c.memstate.engine.gameState = gameState

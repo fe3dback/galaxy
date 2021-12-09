@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/inkyblackness/imgui-go/v4"
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/fe3dback/galaxy/engine"
 	"github.com/fe3dback/galaxy/engine/event"
+	"github.com/fe3dback/galaxy/engine/lib"
 	"github.com/fe3dback/galaxy/generated"
 	"github.com/fe3dback/galaxy/utils"
 )
@@ -18,6 +20,8 @@ type (
 	Renderer struct {
 		window         *sdl.Window
 		ref            *sdl.Renderer
+		guiRenderer    lib.GUIRenderer
+		gui            imgui.IO
 		fontManager    *FontsManager
 		textureManager *TextureManager
 		camera         *Camera
@@ -25,6 +29,10 @@ type (
 		gizmos         engine.Gizmos
 		appState       *engine.AppState
 		renderTarget   renderTarget
+
+		guiTime              uint64
+		guiMousePressedLeft  bool
+		guiMousePressedRight bool
 	}
 
 	renderTarget struct {
@@ -41,6 +49,8 @@ type Point = sdl.Point
 func NewRenderer(
 	sdlWindow *sdl.Window,
 	sdlRenderer *sdl.Renderer,
+	guiRenderer lib.GUIRenderer,
+	gui imgui.IO,
 	fontManager *FontsManager,
 	textureManager *TextureManager,
 	camera *Camera,
@@ -51,6 +61,8 @@ func NewRenderer(
 	renderer := &Renderer{
 		window:         sdlWindow,
 		ref:            sdlRenderer,
+		guiRenderer:    guiRenderer,
+		gui:            gui,
 		fontManager:    fontManager,
 		textureManager: textureManager,
 		camera:         camera,
@@ -82,6 +94,20 @@ func NewRenderer(
 			int32(cameraUpdateEvent.Height),
 			float32(cameraUpdateEvent.Zoom),
 		)
+
+		return nil
+	})
+
+	dispatcher.OnMouseButton(func(mouseButtonEvent event.MouseButtonEvent) error {
+		if mouseButtonEvent.IsLeft {
+			renderer.onMouseLeft(mouseButtonEvent.IsPressed)
+			return nil
+		}
+
+		if mouseButtonEvent.IsRight {
+			renderer.onMouseRight(mouseButtonEvent.IsPressed)
+			return nil
+		}
 
 		return nil
 	})
@@ -142,6 +168,14 @@ func (r *Renderer) TextureQuery(res generated.ResourcePath) engine.TextureInfo {
 func (r *Renderer) onWindowResize() {
 	width, height := r.window.GetSize()
 	r.Camera().Resize(int(width), int(height))
+}
+
+func (r *Renderer) onMouseLeft(isPressed bool) {
+	r.guiMousePressedLeft = isPressed
+}
+
+func (r *Renderer) onMouseRight(isPressed bool) {
+	r.guiMousePressedRight = isPressed
 }
 
 func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float32) {
