@@ -1,18 +1,22 @@
-package main
+package galaxy
 
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/di"
-	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/engine/event"
+	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine/event"
 )
 
-func gameLoop(c *di.Container) error {
+const (
+	defaultColor = 0x282A36FF
+)
+
+func gameLoop(game *Game) error {
 	var err error
+	c := game.container
 
 	// engine
-	appState := c.ProvideEngineAppState()
+	engineState := c.ProvideEngineState()
 	frames := c.ProvideFrames()
 	renderer := c.ProvideEngineRenderer()
 	dispatcher := c.ProvideEventDispatcher()
@@ -22,9 +26,6 @@ func gameLoop(c *di.Container) error {
 	gameState := c.ProvideEngineGameState()
 
 	// game
-	gameSceneLoader := c.ProvideGameScenesLoader()
-	gameSceneLoader.LoadGameScenes()
-	gameSceneLoader.EnterToFirstScene()
 	gameUI := c.ProvideGameUI()
 
 	// editor
@@ -32,7 +33,7 @@ func gameLoop(c *di.Container) error {
 	editorUI := c.ProvideEditorUI()
 
 	// clear first time screen (fix copy texture from underlying memory)
-	renderer.Clear(engine.ColorBackground)
+	renderer.Clear(defaultColor)
 	renderer.EndEngineFrame()
 
 	for frames.Ready() {
@@ -51,7 +52,7 @@ func gameLoop(c *di.Container) error {
 		// -----------------------------------
 		// update state
 		// -----------------------------------
-		if appState.InEditorState() {
+		if engineState.InEditorMode() {
 			err = editorManager.OnUpdate(gameState)
 			if err != nil {
 				return fmt.Errorf("can`t update editor: %w", err)
@@ -66,45 +67,45 @@ func gameLoop(c *di.Container) error {
 		// -----------------------------------
 		// update ui
 		// -----------------------------------
-		if appState.InEditorState() {
+		if engineState.InEditorMode() {
 			err = editorUI.OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update editor ui: %v", err)
+				return fmt.Errorf("can`t update editor ui: %w", err)
 			}
 		} else {
 			err = gameUI.OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update game ui: %v", err)
+				return fmt.Errorf("can`t update game ui: %w", err)
 			}
 		}
 
 		// -----------------------------------
 		// draw
 		// -----------------------------------
-		renderer.Clear(engine.ColorBackground)
+		renderer.Clear(defaultColor)
 
 		renderer.SetRenderMode(engine.RenderModeWorld)
 		err = scenesManager.Current().OnDraw(renderer)
 		if err != nil {
-			return fmt.Errorf("can`t draw world: %v", err)
+			return fmt.Errorf("can`t draw world: %w", err)
 		}
 
 		renderer.SetRenderMode(engine.RenderModeUI)
 
-		if appState.InEditorState() {
+		if engineState.InEditorMode() {
 			err = editorManager.OnDraw(renderer)
 			if err != nil {
-				return fmt.Errorf("can`t draw editor: %v", err)
+				return fmt.Errorf("can`t draw editor: %w", err)
 			}
 
 			err = editorUI.OnDraw(renderer)
 			if err != nil {
-				return fmt.Errorf("can`t draw editor ui: %v", err)
+				return fmt.Errorf("can`t draw editor ui: %w", err)
 			}
 		} else {
 			err = gameUI.OnDraw(renderer)
 			if err != nil {
-				return fmt.Errorf("can`t draw game ui: %v", err)
+				return fmt.Errorf("can`t draw game ui: %w", err)
 			}
 		}
 

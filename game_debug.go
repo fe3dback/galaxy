@@ -1,17 +1,16 @@
-package main
+package galaxy
 
 import (
 	"log"
 	"runtime"
 
-	"github.com/fe3dback/galaxy/di"
-	"github.com/fe3dback/galaxy/engine"
-	"github.com/fe3dback/galaxy/system"
-	"github.com/fe3dback/galaxy/utils"
+	"github.com/fe3dback/galaxy/internal/di"
+	"github.com/fe3dback/galaxy/internal/frames"
+	"github.com/fe3dback/galaxy/internal/utils"
 )
 
 func debug(c *di.Container) {
-	debug := c.ProvideGameOptions().Debug
+	debug := c.Flags().DebugOpts()
 
 	if debug.Memory {
 		debugMemory()
@@ -19,10 +18,6 @@ func debug(c *di.Container) {
 
 	if debug.Frames {
 		debugPrintFps(c.ProvideFrames())
-	}
-
-	if debug.World {
-		debugPrintWorld(c.ProvideEngineScenesManager().Current())
 	}
 }
 
@@ -37,7 +32,7 @@ func debugMemory() {
 	)
 }
 
-func debugPrintFps(f *system.Frames) {
+func debugPrintFps(f *frames.Frames) {
 	log.Printf("frames: [fps: %d / %d, duration: %s / %s, throttle: %s]",
 		f.FPS(), f.TargetFPS(),
 		f.FrameDuration(),
@@ -47,11 +42,5 @@ func debugPrintFps(f *system.Frames) {
 	log.Printf("frames: [dt: %.4f, sec: %s]",
 		f.DeltaTime(),
 		f.SinceStart(),
-	)
-}
-
-func debugPrintWorld(s engine.Scene) {
-	log.Printf("scene: [entities: %d]",
-		len(s.Entities()),
 	)
 }

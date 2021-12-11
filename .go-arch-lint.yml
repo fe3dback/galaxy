@@ -1,222 +1,72 @@
 version: 1
 allow:
-  depOnAnyVendor: false
+  depOnAnyVendor: true
 
 exclude:
   - vendor
   - cmd
-  - resources
-  - registry
 
 excludeFiles:
   - "^.*_test\\.go$"
 
-vendors:
-  sdl:
-    in: github.com/veandco/go-sdl2/sdl
-  sdl-ttf:
-    in: github.com/veandco/go-sdl2/ttf
-  sdl-img:
-    in: github.com/veandco/go-sdl2/img
-  sdl-mix:
-    in: github.com/veandco/go-sdl2/mix
-  box2d:
-    in: github.com/fe3dback/box2d
-  yaml-loader:
-    in: gopkg.in/yaml.v2
-  yaml-validator:
-    in: gopkg.in/validator.v2
-  logger:
-    in: go.uber.org/zap
-
 components:
-  main:
+  consts:
+    in: consts
+
+  innerDI:
+    in: internal/di
+  innerEngine:
+    in: internal/engine/**
+  innerFrames:
+    in: internal/frames
+  innerUtils:
+    in: internal/utils
+
+  galx:
+    in: galx
+
+  scopeEditor:
+    in: scope/editor/**
+  scopeGame:
+    in: scope/game/**
+  scopeShared:
+    in: scope/shared/**
+
+  cfg:
+    in: cfg
+  bootstrap:
     in: .
-  registry:
-    in: registry
-  system:
-    in: system
-
-  engine:
-    in: engine
-  engine_event:
-    in: engine/event
-  engine_control:
-    in: engine/control
-  engine_lib:
-    in: engine/lib
-  engine_lib_render:
-    in: engine/lib/render
-  engine_lib_sound:
-    in: engine/lib/sound
-  engine_entity:
-    in: engine/entity
-  engine_editor:
-    in: engine/editor
-  engine_loader:
-    in: engine/loader
-  engine_collision:
-    in: engine/collision
-  engine_physics:
-    in: engine/physics
-
-  shared_ui:
-    in: shared/ui
-
-  editor:
-    in: editor
-  editor_components:
-    in: editor/components
-
-  game:
-    in: game
-  game_entities:
-    in: game/entities
-  game_entities_factory:
-    in: game/entities/factory
-  game_entities_factory_scheme:
-    in: game/entities/factory/schemefactory
-  game_component:
-    in: game/entities/components/**
-  game_loader:
-    in: game/loader/*
-  game_utils:
-    in: game/utils/**
-
-  generated:
-    in: generated
-  utils:
-    in: utils
-
-commonVendors:
-  - logger
 
 commonComponents:
-  - generated
-  - utils
+  - consts
 
 deps:
-  engine_lib:
-    canUse:
-      - sdl
-      - sdl-ttf
-      - sdl-img
+  innerDI:
+    anyVendorDeps: true
+    anyProjectDeps: true
 
-  engine_lib_render:
+  bootstrap:
     mayDependOn:
-      - engine
-      - engine_lib
-      - engine_event
-    canUse:
-      - sdl
-      - sdl-ttf
-      - sdl-img
+      - innerDI
+      - innerEngine
+      - innerFrames
+      - innerUtils
+      - cfg
 
-  engine_lib_sound:
-    canUse:
-      - sdl-mix
-
-  engine_event:
+  innerEngine:
     mayDependOn:
-      - engine
-    canUse:
-      - sdl
+      - galx
+      - innerUtils
+      - innerEngine
 
-  engine_control:
+  scopeEditor:
     mayDependOn:
-      - engine
-      - engine_event
-    canUse:
-      - sdl
+      - galx
 
-  engine_entity:
+  scopeGame:
     mayDependOn:
-      - engine
+      - galx
 
-  engine_collision:
+  scopeShared:
     mayDependOn:
-      - engine
-
-  engine_editor:
-    mayDependOn:
-      - engine
-      - engine_event
-
-  engine_loader:
-    mayDependOn:
-      - engine
-    canUse:
-      - yaml-loader
-      - yaml-validator
-
-  engine_physics:
-    mayDependOn:
-      - engine
-    canUse:
-      - box2d
-
-  editor:
-    mayDependOn:
-      - engine
-
-  editor_components:
-    mayDependOn:
-      - engine
-
-  game:
-    mayDependOn:
-      - engine
-      - engine_entity
-      - engine_event
-      - game_entities
-      - game_entities_factory
-      - game_entities_factory_scheme
-      - game_utils
-      - game_loader
-
-  game_entities:
-    mayDependOn:
-      - engine
-      - engine_entity
-      - game_component
-      - game_utils
-
-  game_entities_factory:
-    mayDependOn:
-      - engine
-      - engine_entity
-      - game_utils
-      - game_loader
-      - game_component
-      - game_entities_factory_scheme
-
-  game_entities_factory_scheme:
-    mayDependOn:
-      - engine
-      - engine_entity
-      - game_loader
-
-  game_component:
-    mayDependOn:
-      - engine
-      - engine_entity
-      - game_component
-      - game_utils
-      - game_loader
-      - game_entities_factory_scheme
-
-  game_loader:
-    mayDependOn:
-      - engine
-
-  shared_ui:
-    mayDependOn:
-      - engine
-
-  main:
-    mayDependOn:
-      - game
-      - registry
-      - system
-      - engine
-      - engine_event
+      - galx
