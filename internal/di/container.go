@@ -4,12 +4,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/fe3dback/galaxy/cfg"
-	engine2 "github.com/fe3dback/galaxy/internal/engine"
-	control2 "github.com/fe3dback/galaxy/internal/engine/control"
+	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine/control"
 	engineEditor "github.com/fe3dback/galaxy/internal/engine/editor"
+	"github.com/fe3dback/galaxy/internal/engine/entity"
 	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
-	render2 "github.com/fe3dback/galaxy/internal/engine/lib/render"
+	"github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
@@ -26,22 +27,25 @@ type Container struct {
 		logger   *zap.SugaredLogger
 		renderer struct {
 			sdl            *lib.SDLLib
-			fontsManager   *render2.FontsManager
-			textureManager *render2.TextureManager
-			camera         *render2.Camera
-			renderer       *render2.Renderer
+			fontsManager   *render.FontsManager
+			textureManager *render.TextureManager
+			camera         *render.Camera
+			renderer       *render.Renderer
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos
-			appState      *engine2.EngineState
-			gameState     *engine2.GameState
+			appState      *engine.EngineState
+			gameState     *engine.GameState
 			soundMixer    *sound.Manager
 			assetsLoader  *loader.AssetsLoader
 			scenesManager *scene.Manager
 		}
 		control struct {
-			mouse    *control2.Mouse
-			movement *control2.Movement
+			mouse    *control.Mouse
+			movement *control.Movement
+		}
+		entity struct {
+			componentsRegistry *entity.ComponentsRegistry
 		}
 		editor struct {
 			manager *editor.Manager

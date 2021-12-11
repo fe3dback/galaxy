@@ -9,6 +9,7 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/lib"
 	render2 "github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
+	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 )
 
@@ -49,7 +50,7 @@ func (c *Container) provideRenderFontsManager() *render2.FontsManager {
 	}
 
 	fonts := render2.NewFontsManager(c.closer())
-	fonts.Load(consts.DefaultFont)
+	fonts.Load(consts.AssetDefaultFont)
 
 	c.memstate.renderer.fontsManager = fonts
 	return c.memstate.renderer.fontsManager
@@ -110,6 +111,9 @@ func (c *Container) ProvideEngineScenesManager() *scene.Manager {
 
 	scenesManager := scene.NewManager(
 		c.ProvideEventDispatcher(),
+		c.provideEngineAssetsLoader(),
+		c.provideEngineEntityComponentsRegistry(),
+		c.flags.IsIncludeEditor(),
 	)
 
 	c.memstate.engine.scenesManager = scenesManager
@@ -155,4 +159,10 @@ func (c *Container) ProvideEngineGameState() *engine2.GameState {
 
 	c.memstate.engine.gameState = gameState
 	return c.memstate.engine.gameState
+}
+
+func (c *Container) provideEngineAssetsLoader() *loader.AssetsLoader {
+	return loader.NewAssetsLoader(
+		c.provideSoundMixer(),
+	)
 }

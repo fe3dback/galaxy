@@ -1,8 +1,6 @@
 package editor
 
-import (
-	"github.com/fe3dback/galaxy/galx"
-)
+import "github.com/fe3dback/galaxy/galx"
 
 type (
 	Component interface {

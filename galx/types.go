@@ -88,21 +88,6 @@ type (
 		SinceStart() time.Duration
 	}
 
-	// Engine Assets
-
-	LoaderYaml interface {
-		LoadYaml(res consts.AssetsPath, data interface{})
-	}
-
-	LoaderSound interface {
-		LoadSound(res consts.AssetsPath)
-	}
-
-	Loader interface {
-		LoaderYaml
-		LoaderSound
-	}
-
 	// Controls
 
 	Mouse interface {
@@ -118,6 +103,7 @@ type (
 	}
 
 	// Game State
+
 	SoundMixer interface {
 		Play(res consts.AssetsPath)
 	}
@@ -137,7 +123,7 @@ type (
 		Updater
 		Destroy()
 		IsDestroyed() bool
-		Id() int64
+		Id() string
 		Position() Vec
 		SetPosition(pos Vec)
 		AddPosition(pos Vec)
@@ -152,12 +138,7 @@ type (
 		Entities() []GameObject
 	}
 
-	SceneBlueprint interface {
-		CreateEntities() []GameObject
-	}
-
 	SceneManager interface {
-		AddBlueprint(ID string, blueprint SceneBlueprint)
 		Switch(nextID string)
 		Current() Scene
 	}

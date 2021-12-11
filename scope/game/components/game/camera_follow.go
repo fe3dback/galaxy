@@ -9,10 +9,20 @@ type CameraFollower struct {
 	cam    galx.Camera
 }
 
-func NewCameraFollower(entity galx.GameObject) *CameraFollower {
-	return &CameraFollower{
-		entity: entity,
-	}
+func (r CameraFollower) Id() string {
+	return "4c8b05b5-a006-4d44-8cf8-2132cf1010de"
+}
+
+func (r CameraFollower) Title() string {
+	return "Game.Camera Follower"
+}
+
+func (r CameraFollower) Description() string {
+	return "Component will lock camera on entity, and update it position each frame"
+}
+
+func (r *CameraFollower) OnCreated(entity galx.GameObject) {
+	r.entity = entity
 }
 
 func (r *CameraFollower) OnDraw(d galx.Renderer) error {

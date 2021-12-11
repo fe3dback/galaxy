@@ -1,20 +1,20 @@
 package di
 
 import (
-	editor2 "github.com/fe3dback/galaxy/scope/editor"
-	editorcomponents "github.com/fe3dback/galaxy/scope/editor/components"
+	"github.com/fe3dback/galaxy/scope/editor"
+	"github.com/fe3dback/galaxy/scope/editor/components"
 	"github.com/fe3dback/galaxy/scope/shared/ui"
 )
 
-func (c *Container) ProvideEditorManager() *editor2.Manager {
+func (c *Container) ProvideEditorManager() *editor.Manager {
 	if c.memstate.editor.manager != nil {
 		return c.memstate.editor.manager
 	}
 
 	// todo auto register all editor components
-	components := make([]editor2.Component, 0)
-	components = append(components, editorcomponents.NewCamera())
-	manager := editor2.NewManager(components)
+	componentList := make([]editor.Component, 0)
+	componentList = append(componentList, components.NewCamera())
+	manager := editor.NewManager(componentList)
 
 	c.memstate.editor.manager = manager
 	return c.memstate.editor.manager

@@ -21,6 +21,7 @@ func gameLoop(game *Game) error {
 	renderer := c.ProvideEngineRenderer()
 	dispatcher := c.ProvideEventDispatcher()
 	scenesManager := c.ProvideEngineScenesManager()
+	scenesManager.LoadScenes()
 
 	// shared
 	gameState := c.ProvideEngineGameState()

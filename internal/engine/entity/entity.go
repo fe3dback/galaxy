@@ -2,16 +2,16 @@ package entity
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/fe3dback/galaxy/galx"
 )
 
 type (
+	UUID       = string
 	components []Component
 
 	Entity struct {
-		id         int64
+		id         UUID
 		position   galx.Vec
 		rotation   galx.Angle
 		components components
@@ -19,12 +19,9 @@ type (
 	}
 )
 
-var lastId int64 = 0
-
-func NewEntity(pos galx.Vec, rot galx.Angle) *Entity {
-	lastId++
+func NewEntity(id UUID, pos galx.Vec, rot galx.Angle) *Entity {
 	return &Entity{
-		id:         lastId,
+		id:         id,
 		position:   pos,
 		rotation:   rot,
 		components: make(components, 0),
@@ -32,7 +29,7 @@ func NewEntity(pos galx.Vec, rot galx.Angle) *Entity {
 	}
 }
 
-func (e *Entity) Id() int64 {
+func (e *Entity) Id() UUID {
 	return e.id
 }
 
@@ -70,9 +67,14 @@ func (e *Entity) IsDestroyed() bool {
 
 func (e *Entity) OnUpdate(s galx.State) error {
 	for _, component := range e.components {
-		err := component.OnUpdate(s)
+		updatableComponent, ok := component.(ComponentCycleUpdated)
+		if !ok {
+			continue
+		}
+
+		err := updatableComponent.OnUpdate(s)
 		if err != nil {
-			return fmt.Errorf("can`t update entity `%T` component `%T`: %w", e, component, err)
+			return fmt.Errorf("can`t update entity `%T` component '%s' (%s): %w", e, component.Title(), component.Id(), err)
 		}
 	}
 
@@ -81,9 +83,14 @@ func (e *Entity) OnUpdate(s galx.State) error {
 
 func (e *Entity) OnDraw(r galx.Renderer) error {
 	for _, component := range e.components {
-		err := component.OnDraw(r)
+		drawer, ok := component.(ComponentCycleDrawer)
+		if !ok {
+			continue
+		}
+
+		err := drawer.OnDraw(r)
 		if err != nil {
-			return fmt.Errorf("can`t draw entity `%T` component `%s`: %w", e, component, err)
+			return fmt.Errorf("can`t draw entity `%T` component '%s' (%s): %w", e, component.Title(), component.Id(), err)
 		}
 	}
 
@@ -96,12 +103,9 @@ func (e *Entity) OnDraw(r galx.Renderer) error {
 }
 
 func (e *Entity) AddComponent(c Component) {
-	id := reflect.TypeOf(c).String()
-
 	for _, component := range e.components {
-		newId := reflect.TypeOf(component).String()
-		if id == newId {
-			panic(fmt.Sprintf("can`t add component `%s` to entity `%T`, already exist", id, e))
+		if component.Id() == c.Id() {
+			panic(fmt.Sprintf("can`t add component '%s' (%s) to entity `%T`, already exist", component.Title(), component.Id(), e))
 		}
 	}
 
@@ -109,14 +113,11 @@ func (e *Entity) AddComponent(c Component) {
 }
 
 func (e *Entity) GetComponent(ref Component) Component {
-	id := reflect.TypeOf(ref).String()
-
 	for _, component := range e.components {
-		newId := reflect.TypeOf(component).String()
-		if id == newId {
+		if component.Id() == ref.Id() {
 			return component
 		}
 	}
 
-	panic(fmt.Sprintf("can`t find component `%s` in `%T`", id, e))
+	panic(fmt.Sprintf("can`t find component '%s' (%s) in `%T`", ref.Title(), ref.Id(), e))
 }

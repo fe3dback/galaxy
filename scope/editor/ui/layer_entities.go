@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"fmt"
-	"strconv"
-
 	"github.com/inkyblackness/imgui-go/v4"
 
 	"github.com/fe3dback/galaxy/galx"
@@ -27,10 +24,10 @@ func (l *LayerEntities) OnUpdate(s galx.State) error {
 
 	for _, gameObject := range s.Scene().Entities() {
 		// game object
-		imgui.PushID(strconv.FormatInt(gameObject.Id(), 10))
+		imgui.PushID(gameObject.Id())
 
 		// properties tree
-		if imgui.TreeNode(fmt.Sprintf("ID %d", gameObject.Id())) {
+		if imgui.TreeNode(gameObject.Id()) {
 			// pos
 			imgui.PushID("pos")
 			pos := [2]float32{float32(gameObject.Position().X), float32(gameObject.Position().Y)}

@@ -11,12 +11,20 @@ type GridDrawer struct {
 	entity galx.GameObject
 }
 
-func NewGridDrawer(entity galx.GameObject) *GridDrawer {
-	comp := &GridDrawer{
-		entity: entity,
-	}
+func (td GridDrawer) Id() string {
+	return "12173a53-9253-4709-bb3a-469433cab957"
+}
 
-	return comp
+func (td GridDrawer) Title() string {
+	return "Debug.Grid Drawer"
+}
+
+func (td GridDrawer) Description() string {
+	return "Draw grid over entity, used for debug purpose"
+}
+
+func (td *GridDrawer) OnCreated(entity galx.GameObject) {
+	td.entity = entity
 }
 
 func (td *GridDrawer) OnDraw(r galx.Renderer) error {
@@ -47,7 +55,7 @@ func (td *GridDrawer) OnDraw(r galx.Renderer) error {
 
 			if r.Gizmos().Debug() {
 				r.DrawText(
-					consts.DefaultFont,
+					consts.AssetDefaultFont,
 					galx.ColorSelection,
 					fmt.Sprintf("%.0f, %.0f", x/consts.DistanceMeter, y/consts.DistanceMeter),
 					galx.Vec{

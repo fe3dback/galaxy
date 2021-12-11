@@ -1,5 +1,7 @@
 package cfg
 
+import "github.com/fe3dback/galaxy/internal/engine/entity"
+
 type (
 	Modifier = func(*InitFlags)
 )
@@ -33,5 +35,17 @@ func WithDebugOpts(system, memory, frames, world bool) Modifier {
 			Frames: frames,
 			World:  world,
 		}
+	}
+}
+
+func WithIncludeEditor(include bool) Modifier {
+	return func(flags *InitFlags) {
+		flags.includeEditor = include
+	}
+}
+
+func WithComponent(component entity.Component) Modifier {
+	return func(flags *InitFlags) {
+		flags.components[component.Id()] = component
 	}
 }

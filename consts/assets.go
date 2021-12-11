@@ -2,11 +2,17 @@ package consts
 
 // engine wide hardcoded assets required for start up
 const (
-	// DefaultFont used for rendering debug/engine stats
-	DefaultFont = "assets/default-font.ttf"
+	// AssetDefaultFont used for rendering debug/engine stats
+	AssetDefaultFont AssetsPath = "assets/default-font.ttf"
 
-	// ScenesDefinitionXML point to xml file with scenes refs and settings
-	ScenesDefinitionXML = "assets/scenes/scenes.xml"
+	// AssetScenesRoot point to scenes root directory
+	AssetScenesRoot AssetsPath = "assets/scenes"
+
+	// AssetScenesDefinitionXML point to xml file with scenes refs and settings
+	AssetScenesDefinitionXML = AssetScenesRoot + "/scenes.xml"
+
+	// AssetScenesObjectsFileName is file name where scene objects is defined
+	AssetScenesObjectsFileName = "objects.xml"
 )
 
 type (

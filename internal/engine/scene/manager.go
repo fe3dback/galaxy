@@ -6,55 +6,56 @@ import (
 	"runtime"
 
 	"github.com/fe3dback/galaxy/galx"
-	event2 "github.com/fe3dback/galaxy/internal/engine/event"
+	"github.com/fe3dback/galaxy/internal/engine/entity"
+	"github.com/fe3dback/galaxy/internal/engine/event"
+	"github.com/fe3dback/galaxy/internal/engine/loader"
 )
 
-const blueprintIDDefaultScene = "_empty"
-
-type sceneID = string
+type (
+	ID         = string
+	blueprint  = func() []galx.GameObject
+	blueprints = map[ID]blueprint
+)
 
 type Manager struct {
-	blueprints   map[sceneID]galx.SceneBlueprint
-	currentID    sceneID
-	currentScene *Scene
+	assetsLoader      *loader.AssetsLoader
+	componentRegistry *entity.ComponentsRegistry
 
-	resetQueued bool
+	blueprints   blueprints
+	currentID    ID
+	currentScene *Scene
+	resetQueued  bool
 }
 
-func NewManager(dispatcher *event2.Dispatcher) *Manager {
-	defBlueprint := emptySceneBlueprint{}
-
-	blueprints := make(map[string]galx.SceneBlueprint)
-	blueprints[blueprintIDDefaultScene] = defBlueprint
-
+func NewManager(
+	dispatcher *event.Dispatcher,
+	assetsLoader *loader.AssetsLoader,
+	componentRegistry *entity.ComponentsRegistry,
+	includeEditor bool,
+) *Manager {
 	manager := &Manager{
-		blueprints:   blueprints,
-		currentID:    blueprintIDDefaultScene,
-		currentScene: createSceneFromBlueprint(defBlueprint),
+		assetsLoader:      assetsLoader,
+		componentRegistry: componentRegistry,
+		blueprints:        make(blueprints),
 	}
-	dispatcher.OnKeyBoard(manager.handleKeyboard)
-	dispatcher.OnFrameStart(manager.handleFrameStart)
+
+	if includeEditor {
+		dispatcher.OnKeyBoard(manager.handleKeyboard)
+		dispatcher.OnFrameStart(manager.handleFrameStart)
+	}
 
 	return manager
 }
 
-func (m *Manager) CurrentSceneID() string {
+func (m *Manager) CurrentSceneID() ID {
 	return m.currentID
-}
-
-func (m *Manager) AddBlueprint(ID string, blueprint galx.SceneBlueprint) {
-	if _, ok := m.blueprints[ID]; ok {
-		panic(fmt.Errorf("scene blueprint '%s' already exist", ID))
-	}
-
-	m.blueprints[ID] = blueprint
 }
 
 func (m *Manager) Current() galx.Scene {
 	return m.currentScene
 }
 
-func (m *Manager) Switch(nextID string) {
+func (m *Manager) Switch(nextID ID) {
 	if _, ok := m.blueprints[nextID]; !ok {
 		panic(fmt.Errorf("failed switch scene from '%s' to '%s'. Next scene not exist", m.currentID, nextID))
 	}
@@ -62,8 +63,10 @@ func (m *Manager) Switch(nextID string) {
 	previousID := m.currentID
 
 	// destroy current
-	m.currentScene.destroy()
-	runtime.GC()
+	if m.currentScene != nil {
+		m.currentScene.destroy()
+		runtime.GC()
+	}
 
 	// create from blueprint
 	m.currentID = nextID
@@ -74,12 +77,12 @@ func (m *Manager) Switch(nextID string) {
 	log.Println(fmt.Sprintf("scene switched from '%s' to '%s'", previousID, nextID))
 }
 
-func (m *Manager) handleKeyboard(keyboard event2.KeyBoardEvent) error {
-	if keyboard.PressType != event2.KeyboardPressTypePressed {
+func (m *Manager) handleKeyboard(keyboard event.KeyBoardEvent) error {
+	if keyboard.PressType != event.KeyboardPressTypePressed {
 		return nil
 	}
 
-	if keyboard.Key != event2.KeyF4 {
+	if keyboard.Key != event.KeyF4 {
 		return nil
 	}
 
@@ -87,7 +90,7 @@ func (m *Manager) handleKeyboard(keyboard event2.KeyBoardEvent) error {
 	return nil
 }
 
-func (m *Manager) handleFrameStart(_ event2.FrameStartEvent) error {
+func (m *Manager) handleFrameStart(_ event.FrameStartEvent) error {
 	if !m.resetQueued {
 		return nil
 	}
@@ -105,8 +108,6 @@ func (m *Manager) reset() {
 	m.Switch(m.currentID)
 }
 
-func createSceneFromBlueprint(p galx.SceneBlueprint) *Scene {
-	return NewScene(
-		p.CreateEntities(),
-	)
+func createSceneFromBlueprint(bp blueprint) *Scene {
+	return NewScene(bp())
 }

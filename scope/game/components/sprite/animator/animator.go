@@ -20,6 +20,8 @@ type (
 	}
 )
 
+// todo: refactor to new components system
+
 func NewAnimator(entity galx.GameObject) *Animator {
 	return &Animator{
 		entity:           entity,

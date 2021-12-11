@@ -43,7 +43,6 @@ func (g *Game) run() int {
 	rand.Seed(g.container.Flags().Seed())
 
 	// run game loop
-	// g.container.Logger().In
 	err := gameLoop(g)
 	if err != nil {
 		log.Println(fmt.Errorf("game loop exited with error: %w", err))

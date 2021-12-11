@@ -2,6 +2,8 @@ package cfg
 
 import (
 	"time"
+
+	"github.com/fe3dback/galaxy/internal/engine/entity"
 )
 
 type (
@@ -11,7 +13,11 @@ type (
 		profilingPort int
 
 		// system
-		seed int64
+		includeEditor bool
+		seed          int64
+
+		// game
+		components map[string]entity.Component
 
 		// render
 		targetFPS    int
@@ -37,7 +43,11 @@ func NewInitFlags(modifiers ...Modifier) *InitFlags {
 		profilingPort: 0,
 
 		// system
-		seed: time.Now().Unix(),
+		includeEditor: true,
+		seed:          time.Now().Unix(),
+
+		// game
+		components: map[string]entity.Component{},
 
 		// render
 		targetFPS:    60,
@@ -83,4 +93,12 @@ func (f *InitFlags) ScreenHeight() int {
 
 func (f *InitFlags) DebugOpts() DebugOpt {
 	return f.debugOpt
+}
+
+func (f *InitFlags) IsIncludeEditor() bool {
+	return f.includeEditor
+}
+
+func (f *InitFlags) Components() map[string]entity.Component {
+	return f.components
 }

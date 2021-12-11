@@ -8,7 +8,7 @@ import (
 )
 
 var FontVars = FontsParamsMap{
-	consts.DefaultFont: FontParams{
+	consts.AssetDefaultFont: FontParams{
 		size: 14,
 	},
 }

@@ -11,6 +11,8 @@ type Sprite2D struct {
 	textureInfo *galx.TextureInfo
 }
 
+// todo: refactor to new components system
+
 func NewSprite2D(entity galx.GameObject, resource consts.AssetsPath) *Sprite2D {
 	return &Sprite2D{
 		entity:   entity,

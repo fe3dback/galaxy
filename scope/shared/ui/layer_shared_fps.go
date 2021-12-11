@@ -136,7 +136,7 @@ func (l *LayerFPS) OnDraw(r galx.Renderer) (err error) {
 		}
 
 		r.DrawText(
-			consts.DefaultFont,
+			consts.AssetDefaultFont,
 			galx.ColorGreen,
 			fmt.Sprintf("%s :: fps: %d / %s",
 				mode,
@@ -152,7 +152,7 @@ func (l *LayerFPS) OnDraw(r galx.Renderer) (err error) {
 
 	if r.Gizmos().Primary() {
 		r.DrawText(
-			consts.DefaultFont,
+			consts.AssetDefaultFont,
 			galx.ColorGreen,
 			fmt.Sprintf("cam: %.2f, %.2f",
 				r.Camera().Position().X,

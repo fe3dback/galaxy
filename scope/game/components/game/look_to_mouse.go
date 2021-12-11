@@ -8,10 +8,20 @@ type LookToMouse struct {
 	entity galx.GameObject
 }
 
-func NewLookToMouse(entity galx.GameObject) *LookToMouse {
-	return &LookToMouse{
-		entity: entity,
-	}
+func (r LookToMouse) Id() string {
+	return "e40e3f52-db31-45cd-a6de-752ba942bd8e"
+}
+
+func (r LookToMouse) Title() string {
+	return "Game.Look to mouse"
+}
+
+func (r LookToMouse) Description() string {
+	return "Will lock entity rotation towards current mouse position"
+}
+
+func (r *LookToMouse) OnCreated(entity galx.GameObject) {
+	r.entity = entity
 }
 
 func (r *LookToMouse) OnDraw(_ galx.Renderer) error {

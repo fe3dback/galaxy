@@ -11,18 +11,26 @@ type AngleOverlay struct {
 	entity galx.GameObject
 }
 
-func NewAngleOverlay(entity galx.GameObject) *AngleOverlay {
-	comp := &AngleOverlay{
-		entity: entity,
-	}
+func (td AngleOverlay) Id() string {
+	return "e8cd7c22-0057-4362-9896-8bf0d4487763"
+}
 
-	return comp
+func (td AngleOverlay) Title() string {
+	return "Debug.Angle overlay"
+}
+
+func (td AngleOverlay) Description() string {
+	return "Draw angle overlay over entity, used for debug rotations"
+}
+
+func (td *AngleOverlay) OnCreated(entity galx.GameObject) {
+	td.entity = entity
 }
 
 func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	// center
 	r.DrawCrossLines(galx.ColorOrange, 10, td.entity.Position())
-	r.DrawText(consts.DefaultFont, galx.ColorOrange, td.entity.Position().String(), td.entity.Position().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.Position().String(), td.entity.Position().Add(galx.Vec{
 		X: 0,
 		Y: -20,
 	}))
@@ -32,7 +40,7 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 
 	// real data
 	direction := fmt.Sprintf("%.2f %.2f", td.entity.Rotation().Radians(), td.entity.Rotation().Degrees())
-	r.DrawText(consts.DefaultFont, galx.ColorGreen, direction, td.entity.Position())
+	r.DrawText(consts.AssetDefaultFont, galx.ColorGreen, direction, td.entity.Position())
 
 	// test vectors
 	// rotate around
@@ -42,7 +50,7 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	}).RotateAround(td.entity.Position(), td.entity.Rotation())
 	r.DrawCrossLines(galx.ColorGreen, 10, rotateAround)
 	rotateAroundText := fmt.Sprintf("ra (%s)", rotateAround)
-	r.DrawText(consts.DefaultFont, galx.ColorOrange, rotateAroundText, td.entity.Position().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, rotateAroundText, td.entity.Position().Add(galx.Vec{
 		X: 0,
 		Y: 20,
 	}))
@@ -59,7 +67,7 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	vec = vec.Rotate(td.entity.Rotation().Add(galx.NewAngle(90)))
 	r.DrawVector(galx.ColorOrange, 50, td.entity.Position(), vec.Direction())
 	rotateDir := fmt.Sprintf("S+90 (%.2f)", vec.Direction())
-	r.DrawText(consts.DefaultFont, galx.ColorOrange, rotateDir, td.entity.Position().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, rotateDir, td.entity.Position().Add(galx.Vec{
 		X: -20,
 		Y: 40,
 	}))

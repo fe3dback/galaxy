@@ -8,18 +8,25 @@ import (
 type Velocity struct {
 	entity galx.GameObject
 
-	acceleration galx.Vec
-	velocity     galx.Vec
-	maxVelocity  galx.Vec
+	Acceleration galx.Vec
+	Velocity     galx.Vec
+	MaxVelocity  galx.Vec
 }
 
-func NewVelocity(entity galx.GameObject, acceleration, velocity, maxVelocity galx.Vec) *Velocity {
-	return &Velocity{
-		entity:       entity,
-		acceleration: acceleration,
-		velocity:     velocity,
-		maxVelocity:  maxVelocity,
-	}
+func (v Velocity) Id() string {
+	return "a47f4771-2de7-4f2b-85e0-d35425bb6994"
+}
+
+func (v Velocity) Title() string {
+	return "Movement.Velocity"
+}
+
+func (v Velocity) Description() string {
+	return "Set stable entity velocity, will move and speedup entity each frame toward velocity direction"
+}
+
+func (v *Velocity) OnCreated(entity galx.GameObject) {
+	v.entity = entity
 }
 
 func (v *Velocity) OnDraw(r galx.Renderer) error {
@@ -27,20 +34,20 @@ func (v *Velocity) OnDraw(r galx.Renderer) error {
 		return nil
 	}
 
-	r.DrawVector(galx.ColorYellow, 10, v.entity.Position(), v.velocity.Direction())
+	r.DrawVector(galx.ColorYellow, 10, v.entity.Position(), v.Velocity.Direction())
 
 	return nil
 }
 
 func (v *Velocity) OnUpdate(s galx.State) error {
 	// update velocity
-	v.velocity = v.velocity.
-		Add(v.acceleration.Scale(s.Moment().DeltaTime())).
-		ClampAbs(v.maxVelocity)
+	v.Velocity = v.Velocity.
+		Add(v.Acceleration.Scale(s.Moment().DeltaTime())).
+		ClampAbs(v.MaxVelocity)
 
 	// update position
 	v.entity.AddPosition(
-		v.velocity.
+		v.Velocity.
 			Scale(consts.PixelsPerMeter).
 			Scale(s.Moment().DeltaTime()),
 	)
