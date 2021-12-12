@@ -7,12 +7,12 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/control"
 	engineEditor "github.com/fe3dback/galaxy/internal/engine/editor"
-	"github.com/fe3dback/galaxy/internal/engine/entity"
 	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
 	"github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/loader"
+	"github.com/fe3dback/galaxy/internal/engine/node"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/frames"
 	"github.com/fe3dback/galaxy/internal/utils"
@@ -44,8 +44,9 @@ type Container struct {
 			mouse    *control.Mouse
 			movement *control.Movement
 		}
-		entity struct {
-			componentsRegistry *entity.ComponentsRegistry
+		node struct {
+			componentsRegistry *node.ComponentsRegistry
+			query              *node.ObjectQuery
 		}
 		editor struct {
 			manager *editor.Manager

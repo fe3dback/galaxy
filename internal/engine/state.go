@@ -3,13 +3,14 @@ package engine
 import "github.com/fe3dback/galaxy/galx"
 
 type GameState struct {
-	moment       galx.Moment
-	camera       galx.Camera
-	mouse        galx.Mouse
-	movement     galx.Movement
-	engineState  galx.EngineState
-	soundMixer   galx.SoundMixer
-	sceneManager galx.SceneManager
+	moment        galx.Moment
+	camera        galx.Camera
+	mouse         galx.Mouse
+	movement      galx.Movement
+	engineState   galx.EngineState
+	soundMixer    galx.SoundMixer
+	sceneManager  galx.SceneManager
+	objectQueries galx.ObjectQueries
 }
 
 func NewGameState(
@@ -20,15 +21,17 @@ func NewGameState(
 	appState galx.EngineState,
 	soundMixer galx.SoundMixer,
 	sceneManager galx.SceneManager,
+	objectQueries galx.ObjectQueries,
 ) *GameState {
 	return &GameState{
-		moment:       moment,
-		camera:       camera,
-		mouse:        mouse,
-		movement:     movement,
-		engineState:  appState,
-		soundMixer:   soundMixer,
-		sceneManager: sceneManager,
+		moment:        moment,
+		camera:        camera,
+		mouse:         mouse,
+		movement:      movement,
+		engineState:   appState,
+		soundMixer:    soundMixer,
+		sceneManager:  sceneManager,
+		objectQueries: objectQueries,
 	}
 }
 
@@ -58,4 +61,8 @@ func (g *GameState) Scene() galx.Scene {
 
 func (g *GameState) EngineState() galx.EngineState {
 	return g.engineState
+}
+
+func (g *GameState) ObjectQueries() galx.ObjectQueries {
+	return g.objectQueries
 }

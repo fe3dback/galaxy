@@ -49,6 +49,14 @@ func (c *Camera) Position() galx.Vec {
 	return c.position
 }
 
+func (c *Camera) Screen2World(screen galx.Vec) galx.Vec {
+	return screen.Add(c.position)
+}
+
+func (c *Camera) World2Screen(world galx.Vec) galx.Vec {
+	return world.Sub(c.position)
+}
+
 func (c *Camera) Width() int {
 	return c.width
 }

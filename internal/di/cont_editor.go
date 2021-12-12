@@ -15,6 +15,7 @@ func (c *Container) ProvideEditorManager() *editor.Manager {
 	componentList := make([]editor.Component, 0)
 	componentList = append(componentList, components.NewCamera())
 	componentList = append(componentList, components.NewGrid())
+	componentList = append(componentList, components.NewSelect(c.provideEngineNodeQuery()))
 	manager := editor.NewManager(componentList)
 
 	c.memstate.editor.manager = manager

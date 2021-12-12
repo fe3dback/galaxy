@@ -112,7 +112,7 @@ func (c *Container) ProvideEngineScenesManager() *scene.Manager {
 	scenesManager := scene.NewManager(
 		c.ProvideEventDispatcher(),
 		c.provideEngineAssetsLoader(),
-		c.provideEngineEntityComponentsRegistry(),
+		c.provideEngineNodeComponentsRegistry(),
 		c.flags.IsIncludeEditor(),
 	)
 
@@ -155,6 +155,7 @@ func (c *Container) ProvideEngineGameState() *engine2.GameState {
 		c.ProvideEngineState(),
 		c.provideSoundMixer(),
 		c.ProvideEngineScenesManager(),
+		c.provideEngineNodeQuery(),
 	)
 
 	c.memstate.engine.gameState = gameState

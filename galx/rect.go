@@ -35,6 +35,23 @@ func (r Rect) Height() float64 {
 	return r.Max.Y - r.Min.Y
 }
 
+func (r Rect) Contains(v Vec) bool {
+	if v.X < r.Min.X {
+		return false
+	}
+	if v.Y < r.Min.Y {
+		return false
+	}
+	if v.X > r.Max.X {
+		return false
+	}
+	if v.Y > r.Max.Y {
+		return false
+	}
+
+	return true
+}
+
 func (r Rect) Edges() [4]Line {
 	corners := r.Vertices()
 

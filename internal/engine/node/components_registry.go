@@ -1,4 +1,4 @@
-package entity
+package node
 
 import (
 	"fmt"

@@ -25,7 +25,7 @@ func (c *Grid) OnUpdate(s galx.State) error {
 }
 
 func (c *Grid) OnDraw(r galx.Renderer) error {
-	if !r.Gizmos().Secondary() {
+	if !r.Gizmos().Debug() {
 		return nil
 	}
 

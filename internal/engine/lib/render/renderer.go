@@ -31,6 +31,7 @@ type (
 		appState       *engine.EngineState
 		renderTarget   renderTarget
 
+		textCache            map[string]*cachedText
 		guiTime              uint64
 		guiMousePressedLeft  bool
 		guiMousePressedRight bool
@@ -41,6 +42,12 @@ type (
 		height    int32
 		primary   *sdl.Texture
 		secondary [surfacesCount]*sdl.Texture
+	}
+
+	cachedText struct {
+		tex    *sdl.Texture
+		width  int32
+		height int32
 	}
 )
 
@@ -73,6 +80,7 @@ func NewRenderer(
 		renderTarget: renderTarget{
 			primary: sdlRenderer.GetRenderTarget(),
 		},
+		textCache: map[string]*cachedText{},
 	}
 
 	// create all render targets

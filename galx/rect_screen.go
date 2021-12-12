@@ -25,6 +25,14 @@ func (r Rect) Screen() Rect {
 	}
 }
 
+func (r Rect) MaxToSize() Rect {
+	size := r.Max.Sub(r.Min)
+	return Rect{
+		Min: r.Min,
+		Max: size,
+	}.Screen()
+}
+
 func RectScreen(x, y, w, h int) Rect {
 	return Rect{
 		Min: Vec{

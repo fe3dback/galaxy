@@ -138,10 +138,10 @@ func (l *LayerFPS) OnDraw(r galx.Renderer) (err error) {
 		r.DrawText(
 			consts.AssetDefaultFont,
 			galx.ColorGreen,
-			fmt.Sprintf("%s :: fps: %d / %s",
+			fmt.Sprintf("%s :: fps: %d / %dms",
 				mode,
 				l.moment.FPS(),
-				l.moment.FrameDuration().String(),
+				l.moment.FrameDuration().Milliseconds(),
 			),
 			galx.Vec{
 				X: uiInfoFpsX,

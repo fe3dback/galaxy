@@ -6,7 +6,7 @@ import (
 
 	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/engine/entity"
+	"github.com/fe3dback/galaxy/internal/engine/node"
 )
 
 type (
@@ -130,14 +130,12 @@ func (m *Manager) createGameObject(trackedIDs trackedIDs, res ResObject) galx.Ga
 	trackedIDs[uniqueID] = struct{}{}
 
 	// create
-	object := entity.NewEntity(
-		uniqueID,
-		galx.Vec{
-			X: res.Transform.Position.X,
-			Y: res.Transform.Position.Y,
-		},
-		galx.Angle(res.Transform.Rotation),
-	)
+	object := node.NewNode(uniqueID)
+	object.SetPosition(galx.Vec{
+		X: res.Transform.Position.X,
+		Y: res.Transform.Position.Y,
+	})
+	object.SetRotation(galx.Angle(res.Transform.Rotation))
 	object.SetName(res.Name)
 
 	// apply components

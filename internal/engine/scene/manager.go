@@ -6,9 +6,9 @@ import (
 	"runtime"
 
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/engine/entity"
 	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/engine/loader"
+	"github.com/fe3dback/galaxy/internal/engine/node"
 )
 
 type (
@@ -19,7 +19,7 @@ type (
 
 type Manager struct {
 	assetsLoader      *loader.AssetsLoader
-	componentRegistry *entity.ComponentsRegistry
+	componentRegistry *node.ComponentsRegistry
 
 	blueprints   blueprints
 	currentID    ID
@@ -30,7 +30,7 @@ type Manager struct {
 func NewManager(
 	dispatcher *event.Dispatcher,
 	assetsLoader *loader.AssetsLoader,
-	componentRegistry *entity.ComponentsRegistry,
+	componentRegistry *node.ComponentsRegistry,
 	includeEditor bool,
 ) *Manager {
 	manager := &Manager{

@@ -53,6 +53,13 @@ type (
 		Name() string
 		SetName(name string)
 
+		Lock()
+		Unlock()
+		IsLocked() bool
+		Select()
+		Unselect()
+		IsSelected() bool
+
 		AbsPosition() Vec
 		SetPosition(pos Vec)
 		AddPosition(pos Vec)
@@ -70,6 +77,9 @@ type (
 		AddChild(child GameObject)
 		RemoveChild(id string)
 		SetParent(parent GameObject)
+		HierarchyLevel() uint8
+
+		BoundingBox(padding float64) Rect
 	}
 
 	Component interface {
@@ -95,6 +105,13 @@ type (
 // State
 // --------------------------------------------
 
+const (
+	QueryFlagExcludeLocked QueryFlag = 1 << iota
+	QueryFlagExcludeRoots
+	QueryFlagExcludeLeaf
+	QueryFlagOnlyOnScreen
+)
+
 type (
 	State interface {
 		Camera() Camera
@@ -104,9 +121,19 @@ type (
 		EngineState() EngineState
 		SoundMixer() SoundMixer
 		Scene() Scene
+		ObjectQueries() ObjectQueries
+	}
+
+	QueryFlag = uint32
+
+	ObjectQueries interface {
+		All() []GameObject
+		AllIn(QueryFlag) []GameObject
 	}
 
 	Camera interface {
+		Screen2World(screen Vec) Vec
+		World2Screen(world Vec) Vec
 		Position() Vec
 		Width() int
 		Height() int
@@ -145,6 +172,13 @@ type (
 		MouseCoords() Vec
 		ScrollPosition() float64
 		ScrollLastOffset() float64
+
+		LeftPressed() bool
+		LeftReleased() bool
+		LeftDown() bool
+		RightPressed() bool
+		RightReleased() bool
+		RightDown() bool
 	}
 
 	Movement interface {
