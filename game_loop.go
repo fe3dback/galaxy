@@ -91,14 +91,16 @@ func gameLoop(game *Game) error {
 			return fmt.Errorf("can`t draw world: %w", err)
 		}
 
-		renderer.SetRenderMode(engine.RenderModeUI)
-
 		if engineState.InEditorMode() {
 			err = editorManager.OnDraw(renderer)
 			if err != nil {
 				return fmt.Errorf("can`t draw editor: %w", err)
 			}
+		}
 
+		renderer.SetRenderMode(engine.RenderModeUI)
+
+		if engineState.InEditorMode() {
 			err = editorUI.OnDraw(renderer)
 			if err != nil {
 				return fmt.Errorf("can`t draw editor ui: %w", err)

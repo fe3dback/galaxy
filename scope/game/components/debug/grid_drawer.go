@@ -32,8 +32,8 @@ func (td *GridDrawer) OnDraw(r galx.Renderer) error {
 		return nil
 	}
 
-	px := td.entity.Position().X
-	py := td.entity.Position().Y
+	px := td.entity.AbsPosition().X
+	py := td.entity.AbsPosition().Y
 
 	worldX := consts.Meter(int(px/consts.DistanceMeter) * int(consts.DistanceMeter))
 	worldY := consts.Meter(int(py/consts.DistanceMeter) * int(consts.DistanceMeter))

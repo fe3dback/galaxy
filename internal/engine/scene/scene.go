@@ -39,6 +39,12 @@ func (w *Scene) OnUpdate(s galx.State) error {
 
 	// update game
 	for _, e := range w.entities {
+		if !e.IsRoot() {
+			// scene will update only root entities
+			// all child entities will be updated from parent
+			continue
+		}
+
 		if e.IsDestroyed() {
 			needGc = true
 			continue
@@ -64,6 +70,12 @@ func (w *Scene) OnDraw(r galx.Renderer) error {
 
 	// draw world
 	for _, e := range w.entities {
+		if !e.IsRoot() {
+			// scene will draw only root entities
+			// all child entities will be drawn from parent
+			continue
+		}
+
 		if e.IsDestroyed() {
 			continue
 		}

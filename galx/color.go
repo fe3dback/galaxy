@@ -9,6 +9,8 @@ type Color uint32
 //goland:noinspection GoUnusedConst
 const (
 	ColorBackground Color = 0x282A36FF
+	ColorGray1      Color = 0x333333FF
+	ColorGray2      Color = 0x555555FF
 	ColorForeground Color = 0xF8F8F2FF
 	ColorSelection  Color = 0x44475AFF
 	ColorRed        Color = 0xFF5555FF

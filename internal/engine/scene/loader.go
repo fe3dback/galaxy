@@ -10,6 +10,8 @@ import (
 )
 
 type (
+	trackedIDs = map[string]struct{}
+
 	ResScene struct {
 		Default ID       `xml:"default"`
 		Refs    []string `xml:"refs>scene"`
@@ -21,8 +23,10 @@ type (
 
 	ResObject struct {
 		ID         string         `xml:"id,attr"`
+		Name       string         `xml:"name,attr"`
 		Transform  ResTransform   `xml:"transform"`
 		Components []ResComponent `xml:"components>component"`
+		Child      []ResObject    `xml:"child>object"`
 	}
 
 	ResTransform struct {
@@ -106,40 +110,58 @@ func (m *Manager) loadScene(sceneID ID) (bp blueprint, err error) {
 
 func (m *Manager) createBlueprint(scene ResObjects) blueprint {
 	return func() []galx.GameObject {
+		trackedIDs := make(trackedIDs)
 		objects := make([]galx.GameObject, 0, len(scene.Objects))
 
 		for _, object := range scene.Objects {
-			objects = append(objects, m.createGameObject(object))
+			objects = append(objects, m.createGameObject(trackedIDs, object))
 		}
 
 		return objects
 	}
 }
 
-func (m *Manager) createGameObject(res ResObject) galx.GameObject {
+func (m *Manager) createGameObject(trackedIDs trackedIDs, res ResObject) galx.GameObject {
+	// track ids
+	uniqueID := res.ID
+	if _, exist := trackedIDs[uniqueID]; exist {
+		panic(fmt.Sprintf("failed create gameObject, entity with id '%s' already loaded. (duplicate ID in scene file)", uniqueID))
+	}
+	trackedIDs[uniqueID] = struct{}{}
+
+	// create
 	object := entity.NewEntity(
-		res.ID,
+		uniqueID,
 		galx.Vec{
 			X: res.Transform.Position.X,
 			Y: res.Transform.Position.Y,
 		},
 		galx.Angle(res.Transform.Rotation),
 	)
+	object.SetName(res.Name)
 
+	// apply components
 	for _, resComponent := range res.Components {
 		cpm := m.createGameComponent(resComponent)
 
-		if creatingComponent, ok := cpm.(entity.ComponentCycleCreated); ok {
+		if creatingComponent, ok := cpm.(galx.ComponentCycleCreated); ok {
 			creatingComponent.OnCreated(object)
 		}
 
 		object.AddComponent(cpm)
 	}
 
+	// apply child
+	for _, resChild := range res.Child {
+		child := m.createGameObject(trackedIDs, resChild)
+		child.SetParent(object)
+		object.AddChild(child)
+	}
+
 	return object
 }
 
-func (m *Manager) createGameComponent(res ResComponent) entity.Component {
+func (m *Manager) createGameComponent(res ResComponent) galx.Component {
 	props := make(map[string]string, len(res.Props))
 	for _, resProp := range res.Props {
 		props[resProp.Name] = resProp.Value

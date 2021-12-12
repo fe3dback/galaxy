@@ -14,6 +14,7 @@ func (c *Container) ProvideEditorManager() *editor.Manager {
 	// todo auto register all editor components
 	componentList := make([]editor.Component, 0)
 	componentList = append(componentList, components.NewCamera())
+	componentList = append(componentList, components.NewGrid())
 	manager := editor.NewManager(componentList)
 
 	c.memstate.editor.manager = manager

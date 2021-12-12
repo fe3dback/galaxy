@@ -34,7 +34,7 @@ func (v *Velocity) OnDraw(r galx.Renderer) error {
 		return nil
 	}
 
-	r.DrawVector(galx.ColorYellow, 10, v.entity.Position(), v.Velocity.Direction())
+	r.DrawVector(galx.ColorYellow, 10, v.entity.AbsPosition(), v.Velocity.Direction())
 
 	return nil
 }

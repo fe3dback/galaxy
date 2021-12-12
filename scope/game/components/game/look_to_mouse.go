@@ -32,7 +32,7 @@ func (r *LookToMouse) OnUpdate(s galx.State) error {
 	mouseWorld := s.Mouse().MouseCoords().Add(s.Camera().Position())
 
 	r.entity.SetRotation(
-		r.entity.Position().AngleTo(mouseWorld),
+		r.entity.AbsPosition().AngleTo(mouseWorld),
 	)
 
 	return nil

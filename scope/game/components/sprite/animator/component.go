@@ -14,7 +14,7 @@ func (anim *Animator) OnDraw(r galx.Renderer) error {
 	seq := anim.activeSequence
 	res := seq.resource
 	frame := seq.frames[seq.currentFrame]
-	entityPos := anim.entity.Position()
+	entityPos := anim.entity.AbsPosition()
 
 	imageRect := galx.RectScreen(
 		entityPos.RoundX()+seq.offsetX-(frame.w/2),

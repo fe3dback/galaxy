@@ -43,7 +43,7 @@ func (r *CameraFollower) OnDraw(d galx.Renderer) error {
 
 func (r *CameraFollower) OnUpdate(s galx.State) error {
 	r.cam = s.Camera()
-	s.Camera().CenterOn(r.entity.Position())
+	s.Camera().CenterOn(r.entity.AbsPosition())
 
 	return nil
 }

@@ -3,7 +3,7 @@ package cfg
 import (
 	"time"
 
-	"github.com/fe3dback/galaxy/internal/engine/entity"
+	"github.com/fe3dback/galaxy/galx"
 )
 
 type (
@@ -17,7 +17,7 @@ type (
 		seed          int64
 
 		// game
-		components map[string]entity.Component
+		components map[string]galx.Component
 
 		// render
 		targetFPS    int
@@ -47,7 +47,7 @@ func NewInitFlags(modifiers ...Modifier) *InitFlags {
 		seed:          time.Now().Unix(),
 
 		// game
-		components: map[string]entity.Component{},
+		components: map[string]galx.Component{},
 
 		// render
 		targetFPS:    60,
@@ -99,6 +99,6 @@ func (f *InitFlags) IsIncludeEditor() bool {
 	return f.includeEditor
 }
 
-func (f *InitFlags) Components() map[string]entity.Component {
+func (f *InitFlags) Components() map[string]galx.Component {
 	return f.components
 }

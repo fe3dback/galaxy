@@ -1,6 +1,8 @@
 package cfg
 
-import "github.com/fe3dback/galaxy/internal/engine/entity"
+import (
+	"github.com/fe3dback/galaxy/galx"
+)
 
 type (
 	Modifier = func(*InitFlags)
@@ -44,7 +46,7 @@ func WithIncludeEditor(include bool) Modifier {
 	}
 }
 
-func WithComponent(component entity.Component) Modifier {
+func WithComponent(component galx.Component) Modifier {
 	return func(flags *InitFlags) {
 		flags.components[component.Id()] = component
 	}
