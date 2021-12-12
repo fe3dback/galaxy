@@ -17,19 +17,30 @@ const (
 type (
 	state = uint8
 
+	guiIO interface {
+		WantCaptureMouse() bool
+	}
+
 	Mouse struct {
+		guiIO guiIO
+
 		scrollPosition   float64
 		scrollLastOffset float64
 
-		leftState  state
-		rightState state
+		leftState               state
+		rightState              state
+		propagationLockPriority int
+		propagationPriority     int
 	}
 )
 
-func NewMouse(dispatcher *event.Dispatcher) *Mouse {
+func NewMouse(dispatcher *event.Dispatcher, guiIO guiIO) *Mouse {
 	m := &Mouse{
-		leftState:  stateUp,
-		rightState: stateUp,
+		guiIO:                   guiIO,
+		leftState:               stateUp,
+		rightState:              stateUp,
+		propagationLockPriority: 0,
+		propagationPriority:     0,
 	}
 	m.subscribeToMouse(dispatcher)
 	m.subscribeToMouseButton(dispatcher)
@@ -49,6 +60,11 @@ func (m *Mouse) subscribeToMouse(dispatcher *event.Dispatcher) {
 
 func (m *Mouse) subscribeToMouseButton(dispatcher *event.Dispatcher) {
 	dispatcher.OnMouseButton(func(mouseButtonEvent event.MouseButtonEvent) error {
+		if m.guiIO.WantCaptureMouse() {
+			// click consumed by GUI layer, we need stop propagate click next to engine
+			return nil
+		}
+
 		if mouseButtonEvent.IsLeft {
 			switch {
 			case mouseButtonEvent.IsPressed:
@@ -75,6 +91,7 @@ func (m *Mouse) subscribeToMouseButton(dispatcher *event.Dispatcher) {
 
 func (m *Mouse) subscribeToFrameStart(dispatcher *event.Dispatcher) {
 	dispatcher.OnFrameStart(func(_ event.FrameStartEvent) error {
+		m.propagationLockPriority = 0
 		m.scrollLastOffset = 0
 
 		if m.leftState == statePressed {
@@ -104,6 +121,22 @@ func (m *Mouse) MouseCoords() galx.Vec {
 	}
 }
 
+func (m *Mouse) SetPriority(priority int) {
+	m.propagationPriority = priority
+}
+
+func (m *Mouse) ResetPriority() {
+	m.propagationPriority = 0
+}
+
+func (m *Mouse) StopPropagation() {
+	if m.propagationLockPriority > m.propagationPriority {
+		return
+	}
+
+	m.propagationLockPriority = m.propagationPriority
+}
+
 func (m *Mouse) ScrollPosition() float64 {
 	return m.scrollPosition
 }
@@ -113,25 +146,49 @@ func (m *Mouse) ScrollLastOffset() float64 {
 }
 
 func (m *Mouse) LeftPressed() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.leftState == statePressed
 }
 
 func (m *Mouse) LeftReleased() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.leftState == stateReleased
 }
 
 func (m *Mouse) LeftDown() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.leftState == stateDown
 }
 
 func (m *Mouse) RightPressed() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.rightState == statePressed
 }
 
 func (m *Mouse) RightReleased() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.rightState == stateReleased
 }
 
 func (m *Mouse) RightDown() bool {
+	if m.propagationPriority < m.propagationLockPriority {
+		return false
+	}
+
 	return m.rightState == stateDown
 }

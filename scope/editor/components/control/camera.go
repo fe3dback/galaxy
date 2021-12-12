@@ -1,4 +1,4 @@
-package components
+package control
 
 import (
 	"github.com/fe3dback/galaxy/galx"

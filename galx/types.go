@@ -110,6 +110,7 @@ const (
 	QueryFlagExcludeRoots
 	QueryFlagExcludeLeaf
 	QueryFlagOnlyOnScreen
+	QueryFlagOnlySelected
 )
 
 type (
@@ -167,12 +168,27 @@ type (
 // Control
 // --------------------------------------------
 
+const (
+	MousePropagationPriorityGame = iota + 1
+	MousePropagationPriorityGameUI
+	MousePropagationPriorityEditor
+	MousePropagationPriorityEditorSelect
+	MousePropagationPriorityEditorGizmos
+	MousePropagationPriorityEditorHigh
+	MousePropagationPriorityHightest
+)
+
 type (
+	MousePropagationPriority = int
+
 	Mouse interface {
 		MouseCoords() Vec
 		ScrollPosition() float64
 		ScrollLastOffset() float64
 
+		SetPriority(priority int)
+		ResetPriority()
+		StopPropagation()
 		LeftPressed() bool
 		LeftReleased() bool
 		LeftDown() bool
@@ -198,6 +214,7 @@ type (
 
 		SetDrawColor(Color)
 		DrawSquare(color Color, rect Rect)
+		DrawSquareFilled(color Color, rect Rect)
 		DrawCircle(color Color, circle Circle)
 		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)

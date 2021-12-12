@@ -1,4 +1,4 @@
-package components
+package control
 
 import (
 	"github.com/fe3dback/galaxy/galx"
@@ -15,6 +15,9 @@ func NewSelect(objectQueries galx.ObjectQueries) *Select {
 }
 
 func (c *Select) OnUpdate(state galx.State) error {
+	state.Mouse().SetPriority(galx.MousePropagationPriorityEditorSelect)
+	defer state.Mouse().ResetPriority()
+
 	if !state.Mouse().LeftReleased() {
 		return nil
 	}
@@ -22,6 +25,11 @@ func (c *Select) OnUpdate(state galx.State) error {
 	// mouse just clicked
 	clickWorldPos := state.Camera().Screen2World(state.Mouse().MouseCoords())
 	foundObject := c.objectAt(clickWorldPos)
+
+	if foundObject != nil {
+		// hit mouse click, ignore another component events
+		state.Mouse().StopPropagation()
+	}
 
 	// switch object state && apply to select group
 	if state.Movement().Shift() {

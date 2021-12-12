@@ -2,7 +2,8 @@ package di
 
 import (
 	"github.com/fe3dback/galaxy/scope/editor"
-	"github.com/fe3dback/galaxy/scope/editor/components"
+	"github.com/fe3dback/galaxy/scope/editor/components/control"
+	"github.com/fe3dback/galaxy/scope/editor/components/debug"
 	"github.com/fe3dback/galaxy/scope/shared/ui"
 )
 
@@ -13,9 +14,11 @@ func (c *Container) ProvideEditorManager() *editor.Manager {
 
 	// todo auto register all editor components
 	componentList := make([]editor.Component, 0)
-	componentList = append(componentList, components.NewCamera())
-	componentList = append(componentList, components.NewGrid())
-	componentList = append(componentList, components.NewSelect(c.provideEngineNodeQuery()))
+	componentList = append(componentList, debug.NewGuiHelp())
+	componentList = append(componentList, debug.NewGrid())
+	componentList = append(componentList, control.NewCamera())
+	componentList = append(componentList, control.NewTransform())                        // control level: 1
+	componentList = append(componentList, control.NewSelect(c.provideEngineNodeQuery())) // control level: 2
 	manager := editor.NewManager(componentList)
 
 	c.memstate.editor.manager = manager

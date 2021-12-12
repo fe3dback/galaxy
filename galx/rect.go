@@ -35,6 +35,13 @@ func (r Rect) Height() float64 {
 	return r.Max.Y - r.Min.Y
 }
 
+func (r Rect) Center() Vec {
+	return Vec{
+		X: r.Min.X + ((r.Max.X - r.Min.X) / 2),
+		Y: r.Min.Y + ((r.Max.Y - r.Min.Y) / 2),
+	}
+}
+
 func (r Rect) Contains(v Vec) bool {
 	if v.X < r.Min.X {
 		return false
@@ -74,6 +81,39 @@ func (r Rect) Vertices() [4]Vec {
 		{
 			X: r.Max.X,
 			Y: r.Min.Y,
+		},
+	}
+}
+
+func SurroundRect(boxes ...Rect) Rect {
+	minX := float64(math.MaxInt32)
+	minY := float64(math.MaxInt32)
+	maxX := -float64(math.MaxInt32)
+	maxY := -float64(math.MaxInt32)
+
+	for _, box := range boxes {
+		if box.Min.X < minX {
+			minX = box.Min.X
+		}
+		if box.Min.Y < minY {
+			minY = box.Min.Y
+		}
+		if box.Max.X > maxX {
+			maxX = box.Max.X
+		}
+		if box.Max.Y > maxY {
+			maxY = box.Max.Y
+		}
+	}
+
+	return Rect{
+		Min: Vec{
+			X: minX,
+			Y: minY,
+		},
+		Max: Vec{
+			X: maxX,
+			Y: maxY,
 		},
 	}
 }

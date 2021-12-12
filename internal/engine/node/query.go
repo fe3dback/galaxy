@@ -36,6 +36,9 @@ func (o *ObjectQuery) AllIn(flag galx.QueryFlag) []galx.GameObject {
 		if flag&galx.QueryFlagOnlyOnScreen != 0 && o.isOutsideScreen(object) {
 			continue
 		}
+		if flag&galx.QueryFlagOnlySelected != 0 && !o.isSelected(object) {
+			continue
+		}
 
 		list = append(list, object)
 	}
@@ -53,6 +56,10 @@ func (o *ObjectQuery) isRoot(object galx.GameObject) bool {
 
 func (o *ObjectQuery) isLeaf(object galx.GameObject) bool {
 	return object.IsLeaf()
+}
+
+func (o *ObjectQuery) isSelected(object galx.GameObject) bool {
+	return object.IsSelected()
 }
 
 func (o *ObjectQuery) isOutsideScreen(object galx.GameObject) bool {

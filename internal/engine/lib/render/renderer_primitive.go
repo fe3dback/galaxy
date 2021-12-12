@@ -16,6 +16,14 @@ func (r *Renderer) internalDrawSquare(color galx.Color, rect sdl.Rect) {
 		{X: rect.X, Y: rect.Y + rect.H},
 		{X: rect.X, Y: rect.Y},
 	})
+
+	utils.Check("draw square", err)
+}
+
+func (r *Renderer) internalDrawSquareFilled(color galx.Color, rect sdl.Rect) {
+	r.SetDrawColor(color)
+	err := r.ref.FillRect(&rect)
+
 	utils.Check("draw square", err)
 }
 

@@ -69,7 +69,7 @@ func (n *Node) OnDraw(r galx.Renderer) error {
 
 	if r.Gizmos().Secondary() {
 		r.DrawVector(n.gizmosColor(), 10, n.AbsPosition(), n.Rotation())
-		r.DrawSquare(n.gizmosColor(), n.BoundingBox(4).MaxToSize())
+		r.DrawSquare(n.gizmosColor(), n.BoundingBox(4))
 	}
 
 	// draw child

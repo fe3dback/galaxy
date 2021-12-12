@@ -14,6 +14,7 @@ import (
 // also only this renderer should check clip rect's
 
 func (r *Renderer) transRect(rect galx.Rect) sdl.Rect {
+	rect = rect.MaxToSize()
 	return Rect{
 		X: int32(r.screenX(rect.Min.X)),
 		Y: int32(r.screenY(rect.Min.Y)),
@@ -72,8 +73,17 @@ func (r *Renderer) DrawSquare(color galx.Color, rect galx.Rect) {
 	r.internalDrawSquare(color, r.transRect(rect))
 }
 
+func (r *Renderer) DrawSquareFilled(color galx.Color, rect galx.Rect) {
+	rect = rect.Screen()
+	if !r.isRectInsideCamera(rect) {
+		return
+	}
+
+	r.internalDrawSquareFilled(color, r.transRect(rect))
+}
+
 func (r *Renderer) DrawCircle(color galx.Color, circle galx.Circle) {
-	rect := circle.BoundingBox()
+	rect := circle.BoundingBox().Screen()
 	if !r.isRectInsideCamera(rect) {
 		return
 	}
