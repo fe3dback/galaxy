@@ -34,7 +34,7 @@ type Container struct {
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos
-			appState      *engine.EngineState
+			appState      *engine.State
 			gameState     *engine.GameState
 			soundMixer    *sound.Manager
 			assetsLoader  *loader.AssetsLoader

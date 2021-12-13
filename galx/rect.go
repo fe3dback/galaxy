@@ -42,6 +42,22 @@ func (r Rect) Center() Vec {
 	}
 }
 
+func (r Rect) Scale(s float64) Rect {
+	center := r.Center()
+	wh := (r.Width() * s) / 2
+	hh := (r.Height() * s) / 2
+	return Rect{
+		Min: Vec{
+			X: center.X - wh,
+			Y: center.Y - hh,
+		},
+		Max: Vec{
+			X: center.X + wh,
+			Y: center.Y + hh,
+		},
+	}
+}
+
 func (r Rect) Contains(v Vec) bool {
 	if v.X < r.Min.X {
 		return false

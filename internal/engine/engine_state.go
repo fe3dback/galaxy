@@ -12,26 +12,26 @@ const (
 )
 
 type (
-	mode        uint8
-	EngineState struct {
+	mode  uint8
+	State struct {
 		switchQueued bool
 		mode         mode
 	}
 )
 
-func NewEngineState(dispatcher *event.Dispatcher) *EngineState {
-	as := &EngineState{
+func NewEngineState(dispatcher *event.Dispatcher, isGameMode bool) *State {
+	es := &State{
 		switchQueued: false,
-		mode:         modeGame,
+		mode:         defaultEngineMode(isGameMode),
 	}
 
-	dispatcher.OnKeyBoard(as.handleKeyboard)
-	dispatcher.OnFrameStart(as.handleFrameStart)
+	dispatcher.OnKeyBoard(es.handleKeyboard)
+	dispatcher.OnFrameStart(es.handleFrameStart)
 
-	return as
+	return es
 }
 
-func (as *EngineState) handleKeyboard(keyboard event.KeyBoardEvent) error {
+func (as *State) handleKeyboard(keyboard event.KeyBoardEvent) error {
 	if keyboard.PressType != event.KeyboardPressTypePressed {
 		return nil
 	}
@@ -44,7 +44,7 @@ func (as *EngineState) handleKeyboard(keyboard event.KeyBoardEvent) error {
 	return nil
 }
 
-func (as *EngineState) handleFrameStart(_ event.FrameStartEvent) error {
+func (as *State) handleFrameStart(_ event.FrameStartEvent) error {
 	if !as.switchQueued {
 		return nil
 	}
@@ -55,7 +55,7 @@ func (as *EngineState) handleFrameStart(_ event.FrameStartEvent) error {
 	return nil
 }
 
-func (as *EngineState) switchState() {
+func (as *State) switchState() {
 	switch as.mode {
 	case modeEditor:
 		as.mode = modeGame
@@ -66,6 +66,14 @@ func (as *EngineState) switchState() {
 	}
 }
 
-func (as *EngineState) InEditorMode() bool {
+func (as *State) InEditorMode() bool {
 	return as.mode == modeEditor
+}
+
+func defaultEngineMode(isGameMode bool) mode {
+	if isGameMode {
+		return modeGame
+	}
+
+	return modeEditor
 }

@@ -63,14 +63,7 @@ func (n *Node) OnDraw(r galx.Renderer) error {
 		}
 	}
 
-	if r.Gizmos().Primary() {
-		r.DrawCrossLines(n.gizmosColor(), 5, n.AbsPosition())
-	}
-
-	if r.Gizmos().Secondary() {
-		r.DrawVector(n.gizmosColor(), 10, n.AbsPosition(), n.Rotation())
-		r.DrawSquare(n.gizmosColor(), n.BoundingBox(4))
-	}
+	n.drawGizmos(r)
 
 	// draw child
 	for _, child := range n.child {
@@ -85,6 +78,32 @@ func (n *Node) OnDraw(r galx.Renderer) error {
 	}
 
 	return nil
+}
+
+func (n *Node) drawGizmos(r galx.Renderer) {
+	const originSize = 3
+	const arrowSize = 30
+
+	if r.Gizmos().Primary() {
+		r.DrawCrossLines(n.gizmosColor(), originSize, n.AbsPosition())
+	}
+
+	if !r.Gizmos().Secondary() {
+		return
+	}
+
+	origin := n.AbsPosition()
+
+	if n.HasChild() {
+		bbox := n.BoundingBox(0)
+		r.DrawSquare(n.gizmosColor(), bbox)
+
+		origin = bbox.Center()
+	}
+
+	if n.IsSelected() {
+		r.DrawVector(n.gizmosColor(), arrowSize, origin, n.Rotation())
+	}
 }
 
 func (n *Node) gizmosColor() galx.Color {

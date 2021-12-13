@@ -73,6 +73,8 @@ type (
 
 		IsRoot() bool
 		IsLeaf() bool
+		HasChild() bool
+		HasParent() bool
 		Child() []GameObject
 		AddChild(child GameObject)
 		RemoveChild(id string)
@@ -186,9 +188,8 @@ type (
 		ScrollPosition() float64
 		ScrollLastOffset() float64
 
-		SetPriority(priority int)
-		ResetPriority()
-		StopPropagation()
+		IsButtonsAvailable(priority int) bool
+		StopPropagation(priority int)
 		LeftPressed() bool
 		LeftReleased() bool
 		LeftDown() bool

@@ -17,7 +17,8 @@ type (
 		seed          int64
 
 		// game
-		components map[string]galx.Component
+		defaultIsGameMode bool
+		components        map[string]galx.Component
 
 		// render
 		targetFPS    int
@@ -43,8 +44,9 @@ func NewInitFlags(modifiers ...Modifier) *InitFlags {
 		profilingPort: 0,
 
 		// system
-		includeEditor: true,
-		seed:          time.Now().Unix(),
+		includeEditor:     true,
+		defaultIsGameMode: false,
+		seed:              time.Now().Unix(),
 
 		// game
 		components: map[string]galx.Component{},
@@ -97,6 +99,10 @@ func (f *InitFlags) DebugOpts() DebugOpt {
 
 func (f *InitFlags) IsIncludeEditor() bool {
 	return f.includeEditor
+}
+
+func (f *InitFlags) IsDefaultGameMode() bool {
+	return f.defaultIsGameMode
 }
 
 func (f *InitFlags) Components() map[string]galx.Component {

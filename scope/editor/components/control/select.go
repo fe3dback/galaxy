@@ -15,8 +15,9 @@ func NewSelect(objectQueries galx.ObjectQueries) *Select {
 }
 
 func (c *Select) OnUpdate(state galx.State) error {
-	state.Mouse().SetPriority(galx.MousePropagationPriorityEditorSelect)
-	defer state.Mouse().ResetPriority()
+	if !state.Mouse().IsButtonsAvailable(galx.MousePropagationPriorityEditorSelect) {
+		return nil
+	}
 
 	if !state.Mouse().LeftReleased() {
 		return nil
@@ -26,13 +27,13 @@ func (c *Select) OnUpdate(state galx.State) error {
 	clickWorldPos := state.Camera().Screen2World(state.Mouse().MouseCoords())
 	foundObject := c.objectAt(clickWorldPos)
 
-	if foundObject != nil {
-		// hit mouse click, ignore another component events
-		state.Mouse().StopPropagation()
-	}
-
 	// switch object state && apply to select group
 	if state.Movement().Shift() {
+		state.Mouse().StopPropagation(galx.MousePropagationPriorityEditorSelect)
+		if foundObject == nil {
+			return nil
+		}
+
 		if foundObject.IsSelected() {
 			foundObject.Unselect()
 		} else {
@@ -47,6 +48,7 @@ func (c *Select) OnUpdate(state galx.State) error {
 	}
 
 	if foundObject != nil {
+		state.Mouse().StopPropagation(galx.MousePropagationPriorityEditorSelect)
 		foundObject.Select()
 	}
 

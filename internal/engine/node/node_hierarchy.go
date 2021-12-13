@@ -10,6 +10,14 @@ func (n *Node) IsLeaf() bool {
 	return len(n.child) == 0
 }
 
+func (n *Node) HasChild() bool {
+	return len(n.child) > 0
+}
+
+func (n *Node) HasParent() bool {
+	return n.parent != nil
+}
+
 func (n *Node) Child() []galx.GameObject {
 	return n.child
 }

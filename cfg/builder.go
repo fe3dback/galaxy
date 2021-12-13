@@ -40,9 +40,15 @@ func WithDebugOpts(system, memory, frames, world bool) Modifier {
 	}
 }
 
-func WithIncludeEditor(include bool) Modifier {
+func WithIncludeEditor(include bool, defaultIsGameMode bool) Modifier {
 	return func(flags *InitFlags) {
 		flags.includeEditor = include
+		flags.defaultIsGameMode = defaultIsGameMode
+
+		if !flags.includeEditor {
+			// only game mode is possible, because app not bundle edit mode
+			flags.defaultIsGameMode = true
+		}
 	}
 }
 

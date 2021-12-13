@@ -30,7 +30,6 @@ type (
 		leftState               state
 		rightState              state
 		propagationLockPriority int
-		propagationPriority     int
 	}
 )
 
@@ -40,7 +39,6 @@ func NewMouse(dispatcher *event.Dispatcher, guiIO guiIO) *Mouse {
 		leftState:               stateUp,
 		rightState:              stateUp,
 		propagationLockPriority: 0,
-		propagationPriority:     0,
 	}
 	m.subscribeToMouse(dispatcher)
 	m.subscribeToMouseButton(dispatcher)
@@ -121,20 +119,16 @@ func (m *Mouse) MouseCoords() galx.Vec {
 	}
 }
 
-func (m *Mouse) SetPriority(priority int) {
-	m.propagationPriority = priority
+func (m *Mouse) IsButtonsAvailable(priority int) bool {
+	return priority >= m.propagationLockPriority
 }
 
-func (m *Mouse) ResetPriority() {
-	m.propagationPriority = 0
-}
-
-func (m *Mouse) StopPropagation() {
-	if m.propagationLockPriority > m.propagationPriority {
+func (m *Mouse) StopPropagation(priority int) {
+	if priority <= m.propagationLockPriority {
 		return
 	}
 
-	m.propagationLockPriority = m.propagationPriority
+	m.propagationLockPriority = priority
 }
 
 func (m *Mouse) ScrollPosition() float64 {
@@ -146,49 +140,25 @@ func (m *Mouse) ScrollLastOffset() float64 {
 }
 
 func (m *Mouse) LeftPressed() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.leftState == statePressed
 }
 
 func (m *Mouse) LeftReleased() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.leftState == stateReleased
 }
 
 func (m *Mouse) LeftDown() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.leftState == stateDown
 }
 
 func (m *Mouse) RightPressed() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.rightState == statePressed
 }
 
 func (m *Mouse) RightReleased() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.rightState == stateReleased
 }
 
 func (m *Mouse) RightDown() bool {
-	if m.propagationPriority < m.propagationLockPriority {
-		return false
-	}
-
 	return m.rightState == stateDown
 }

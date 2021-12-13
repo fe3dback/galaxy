@@ -28,7 +28,7 @@ type (
 		camera         *Camera
 		renderMode     galx.RenderMode
 		gizmos         galx.Gizmos
-		appState       *engine.EngineState
+		appState       *engine.State
 		renderTarget   renderTarget
 
 		textCache            map[string]*cachedText
@@ -64,7 +64,7 @@ func NewRenderer(
 	camera *Camera,
 	dispatcher *event2.Dispatcher,
 	gizmos galx.Gizmos,
-	appState *engine.EngineState,
+	appState *engine.State,
 ) *Renderer {
 	renderer := &Renderer{
 		window:         sdlWindow,

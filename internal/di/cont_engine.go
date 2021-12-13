@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/fe3dback/galaxy/consts"
-	engine2 "github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine"
 	engineeditor "github.com/fe3dback/galaxy/internal/engine/editor"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
-	render2 "github.com/fe3dback/galaxy/internal/engine/lib/render"
+	"github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
@@ -33,47 +33,48 @@ func (c *Container) provideSDL() *lib.SDLLib {
 	return c.memstate.renderer.sdl
 }
 
-func (c *Container) ProvideEngineState() *engine2.EngineState {
+func (c *Container) ProvideEngineState() *engine.State {
 	if c.memstate.engine.appState != nil {
 		return c.memstate.engine.appState
 	}
 
-	c.memstate.engine.appState = engine2.NewEngineState(
+	c.memstate.engine.appState = engine.NewEngineState(
 		c.ProvideEventDispatcher(),
+		c.flags.IsDefaultGameMode(),
 	)
 	return c.memstate.engine.appState
 }
 
-func (c *Container) provideRenderFontsManager() *render2.FontsManager {
+func (c *Container) provideRenderFontsManager() *render.FontsManager {
 	if c.memstate.renderer.fontsManager != nil {
 		return c.memstate.renderer.fontsManager
 	}
 
-	fonts := render2.NewFontsManager(c.closer())
+	fonts := render.NewFontsManager(c.closer())
 	fonts.Load(consts.AssetDefaultFont)
 
 	c.memstate.renderer.fontsManager = fonts
 	return c.memstate.renderer.fontsManager
 }
 
-func (c *Container) provideRenderTextureManager() *render2.TextureManager {
+func (c *Container) provideRenderTextureManager() *render.TextureManager {
 	if c.memstate.renderer.textureManager != nil {
 		return c.memstate.renderer.textureManager
 	}
 
-	c.memstate.renderer.textureManager = render2.NewTextureManager(
+	c.memstate.renderer.textureManager = render.NewTextureManager(
 		c.provideSDL().Renderer(),
 		c.closer(),
 	)
 	return c.memstate.renderer.textureManager
 }
 
-func (c *Container) provideRenderCamera() *render2.Camera {
+func (c *Container) provideRenderCamera() *render.Camera {
 	if c.memstate.renderer.camera != nil {
 		return c.memstate.renderer.camera
 	}
 
-	c.memstate.renderer.camera = render2.NewCamera(
+	c.memstate.renderer.camera = render.NewCamera(
 		c.ProvideEventDispatcher(),
 	)
 	return c.memstate.renderer.camera
@@ -120,12 +121,12 @@ func (c *Container) ProvideEngineScenesManager() *scene.Manager {
 	return c.memstate.engine.scenesManager
 }
 
-func (c *Container) ProvideEngineRenderer() *render2.Renderer {
+func (c *Container) ProvideEngineRenderer() *render.Renderer {
 	if c.memstate.renderer.renderer != nil {
 		return c.memstate.renderer.renderer
 	}
 
-	renderer := render2.NewRenderer(
+	renderer := render.NewRenderer(
 		c.provideSDL().Window(),
 		c.provideSDL().Renderer(),
 		c.provideSDL().GUIRenderer(),
@@ -142,12 +143,12 @@ func (c *Container) ProvideEngineRenderer() *render2.Renderer {
 	return c.memstate.renderer.renderer
 }
 
-func (c *Container) ProvideEngineGameState() *engine2.GameState {
+func (c *Container) ProvideEngineGameState() *engine.GameState {
 	if c.memstate.engine.gameState != nil {
 		return c.memstate.engine.gameState
 	}
 
-	gameState := engine2.NewGameState(
+	gameState := engine.NewGameState(
 		c.ProvideFrames(),
 		c.provideRenderCamera(),
 		c.provideEngineControlMouse(),
