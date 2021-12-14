@@ -20,7 +20,16 @@ type (
 
 func (f *frame) TextureRect() galx.Rect {
 	if f.rect == nil {
-		r := galx.RectScreen(f.x, f.y, f.w, f.h)
+		r := galx.Rect{
+			Min: galx.Vec{
+				X: float64(f.x),
+				Y: float64(f.y),
+			},
+			Max: galx.Vec{
+				X: float64(f.x + f.w),
+				Y: float64(f.y + f.h),
+			},
+		}
 		f.rect = &r
 	}
 

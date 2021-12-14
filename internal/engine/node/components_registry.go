@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/fatih/structs"
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/fe3dback/galaxy/galx"
@@ -15,6 +16,8 @@ type (
 		components map[UUID]factory
 	}
 )
+
+const componentEditableTag = "editable"
 
 func NewComponentsRegistry() *ComponentsRegistry {
 	return &ComponentsRegistry{
@@ -51,7 +54,7 @@ func (r *ComponentsRegistry) CreateComponentWithProps(id UUID, props map[string]
 		ZeroFields:       true,
 		WeaklyTypedInput: true,
 		Squash:           false,
-		TagName:          "editable",
+		TagName:          componentEditableTag,
 		Result:           &created,
 	})
 	if err != nil {
@@ -64,4 +67,20 @@ func (r *ComponentsRegistry) CreateComponentWithProps(id UUID, props map[string]
 	}
 
 	return created
+}
+
+func (r *ComponentsRegistry) ExtractComponentProps(c galx.Component) map[string]string {
+	props := make(map[string]string)
+
+	for _, field := range structs.Fields(c) {
+		serializedName := field.Tag(componentEditableTag)
+		if serializedName == "" {
+			// not public serialized prop
+			continue
+		}
+
+		props[serializedName] = fmt.Sprintf("%v", field.Value())
+	}
+
+	return props
 }

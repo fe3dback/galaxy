@@ -34,3 +34,11 @@ func (n *Node) SetRotation(rot galx.Angle) {
 func (n *Node) AddRotation(rot galx.Angle) {
 	n.SetRotation(n.Rotation().Add(rot))
 }
+
+func (n *Node) Scale() float64 {
+	return n.relativeScale
+}
+
+func (n *Node) SetScale(scale float64) {
+	n.relativeScale = scale
+}

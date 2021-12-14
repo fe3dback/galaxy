@@ -29,7 +29,6 @@ func (r *Renderer) internalDrawSquareFilled(color galx.Color, rect sdl.Rect) {
 
 func (r *Renderer) internalDrawCircle(color galx.Color, pos sdl.Point, radius float64) {
 	r.SetDrawColor(color)
-
 	diameter := int(radius * 2)
 
 	x := int32(radius - 1)
@@ -39,22 +38,19 @@ func (r *Renderer) internalDrawCircle(color galx.Color, pos sdl.Point, radius fl
 	err := tx - diameter
 
 	for {
-		if x >= y {
+		if x < y {
 			break
 		}
 
-		centreX := pos.X
-		centreY := pos.Y
-
 		//  Each of the following renders an octant of the circle
-		r.internalDrawPoint(color, sdl.Point{X: centreX + x, Y: centreY - y})
-		r.internalDrawPoint(color, sdl.Point{X: centreX + x, Y: centreY + y})
-		r.internalDrawPoint(color, sdl.Point{X: centreX - x, Y: centreY - y})
-		r.internalDrawPoint(color, sdl.Point{X: centreX - x, Y: centreY + y})
-		r.internalDrawPoint(color, sdl.Point{X: centreX + y, Y: centreY - x})
-		r.internalDrawPoint(color, sdl.Point{X: centreX + y, Y: centreY + x})
-		r.internalDrawPoint(color, sdl.Point{X: centreX - y, Y: centreY - x})
-		r.internalDrawPoint(color, sdl.Point{X: centreX - y, Y: centreY + x})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X + x, Y: pos.Y - y})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X + x, Y: pos.Y + y})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X - x, Y: pos.Y - y})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X - x, Y: pos.Y + y})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X + y, Y: pos.Y - x})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X + y, Y: pos.Y + x})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X - y, Y: pos.Y - x})
+		r.internalDrawPoint(color, sdl.Point{X: pos.X - y, Y: pos.Y + x})
 
 		if err <= 0 {
 			y++

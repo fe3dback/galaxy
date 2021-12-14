@@ -24,7 +24,14 @@ type Manager struct {
 	blueprints   blueprints
 	currentID    ID
 	currentScene *Scene
-	resetQueued  bool
+
+	snapshotScene SerializedScene
+	snapshotId    ID
+	hasSnapshot   bool
+
+	resetQueued           bool
+	snapshotQueued        bool
+	snapshotRestoreQueued bool
 }
 
 func NewManager(
@@ -41,10 +48,29 @@ func NewManager(
 
 	if includeEditor {
 		dispatcher.OnKeyBoard(manager.handleKeyboard)
-		dispatcher.OnFrameStart(manager.handleFrameStart)
 	}
 
+	dispatcher.OnFrameStart(manager.handleFrameStart)
+
 	return manager
+}
+
+func (m *Manager) SaveSnapshot(force bool) {
+	if force {
+		m.snapshot()
+		return
+	}
+
+	m.snapshotQueued = true
+}
+
+func (m *Manager) RestoreFromSnapshot(force bool) {
+	if force {
+		m.snapshotRestore()
+		return
+	}
+
+	m.snapshotRestoreQueued = true
 }
 
 func (m *Manager) CurrentSceneID() ID {
@@ -91,12 +117,21 @@ func (m *Manager) handleKeyboard(keyboard event.KeyBoardEvent) error {
 }
 
 func (m *Manager) handleFrameStart(_ event.FrameStartEvent) error {
-	if !m.resetQueued {
-		return nil
+	if m.resetQueued {
+		m.resetQueued = false
+		m.reset()
 	}
 
-	m.resetQueued = false
-	m.reset()
+	if m.snapshotQueued {
+		m.snapshotQueued = false
+		m.snapshot()
+	}
+
+	if m.snapshotRestoreQueued {
+		m.snapshotRestoreQueued = false
+		m.snapshotRestore()
+	}
+
 	return nil
 }
 
@@ -106,6 +141,45 @@ func (m *Manager) reset() {
 	// switch to same scene
 	// it will recreate it
 	m.Switch(m.currentID)
+}
+
+func (m *Manager) snapshot() {
+	log.Println(fmt.Sprintf("Snaphoting scene '%s'..", m.currentID))
+
+	serialized, err := m.marshalScene(m.currentScene)
+	if err != nil {
+		panic(fmt.Errorf("failed marshal scene for snapshot: %w", err))
+	}
+
+	m.snapshotId = m.currentID
+	m.snapshotScene = *serialized
+	m.hasSnapshot = true
+}
+
+func (m *Manager) snapshotRestore() {
+	log.Println(fmt.Sprintf("Restore scene '%s' from snapshot..", m.snapshotId))
+
+	if !m.hasSnapshot {
+		// if we not have snapshot, just rollback to last saved state on disk
+		m.reset()
+		return
+	}
+
+	if m.currentID != m.snapshotId {
+		// if scene changed during game, just rollback to last saved state on disk
+		m.reset()
+		return
+	}
+
+	scene, err := m.unmarshalScene(&m.snapshotScene)
+	if err != nil {
+		panic(fmt.Errorf("failed restore from snaphot: unmarshal: %w", err))
+	}
+
+	m.currentScene = scene
+	m.snapshotId = ""
+	m.snapshotScene = SerializedScene{}
+	m.hasSnapshot = false
 }
 
 func createSceneFromBlueprint(bp blueprint) *Scene {

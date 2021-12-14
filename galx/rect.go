@@ -14,25 +14,32 @@ func (r Rect) String() string {
 	return fmt.Sprintf("Rect{%.4f, %.4f, %.4f, %.4f}", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y)
 }
 
+func (r Rect) Valid() bool {
+	return r.Max.X >= r.Min.X && r.Max.Y >= r.Min.Y
+}
+
 func (r Rect) Normalize() Rect {
-	return Rect{
-		Min: Vec{
-			X: math.Min(r.Min.X, r.Max.X),
-			Y: math.Min(r.Min.Y, r.Max.Y),
-		},
-		Max: Vec{
-			X: math.Max(r.Min.X, r.Max.X),
-			Y: math.Max(r.Min.Y, r.Max.Y),
-		},
+	if r.Valid() {
+		return r
 	}
+
+	if r.Max.X < r.Min.X {
+		r.Min.X, r.Max.X = r.Max.X, r.Min.X
+	}
+
+	if r.Max.Y < r.Min.Y {
+		r.Min.Y, r.Max.Y = r.Max.Y, r.Min.Y
+	}
+
+	return r
 }
 
 func (r Rect) Width() float64 {
-	return r.Max.X - r.Min.X
+	return math.Abs(r.Max.X - r.Min.X)
 }
 
 func (r Rect) Height() float64 {
-	return r.Max.Y - r.Min.Y
+	return math.Abs(r.Max.Y - r.Min.Y)
 }
 
 func (r Rect) Center() Vec {
@@ -43,9 +50,12 @@ func (r Rect) Center() Vec {
 }
 
 func (r Rect) Scale(s float64) Rect {
+	r = r.Normalize()
+
 	center := r.Center()
 	wh := (r.Width() * s) / 2
 	hh := (r.Height() * s) / 2
+
 	return Rect{
 		Min: Vec{
 			X: center.X - wh,
@@ -54,6 +64,21 @@ func (r Rect) Scale(s float64) Rect {
 		Max: Vec{
 			X: center.X + wh,
 			Y: center.Y + hh,
+		},
+	}
+}
+
+func (r Rect) Increase(size float64) Rect {
+	r = r.Normalize()
+
+	return Rect{
+		Min: Vec{
+			X: r.Min.X - size,
+			Y: r.Min.Y - size,
+		},
+		Max: Vec{
+			X: r.Max.X + size,
+			Y: r.Max.Y + size,
 		},
 	}
 }
@@ -108,6 +133,8 @@ func SurroundRect(boxes ...Rect) Rect {
 	maxY := -float64(math.MaxInt32)
 
 	for _, box := range boxes {
+		box = box.Normalize()
+		
 		if box.Min.X < minX {
 			minX = box.Min.X
 		}

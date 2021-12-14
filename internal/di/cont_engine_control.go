@@ -16,6 +16,17 @@ func (c *Container) provideEngineControlMouse() *control.Mouse {
 	return c.memstate.control.mouse
 }
 
+func (c *Container) provideEngineControlKeyboard() *control.Keyboard {
+	if c.memstate.control.keyboard != nil {
+		return c.memstate.control.keyboard
+	}
+
+	c.memstate.control.keyboard = control.NewKeyboard(
+		c.ProvideEventDispatcher(),
+	)
+	return c.memstate.control.keyboard
+}
+
 func (c *Container) provideEngineControlMovement() *control.Movement {
 	if c.memstate.control.movement != nil {
 		return c.memstate.control.movement

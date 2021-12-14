@@ -35,6 +35,8 @@ type (
 	SceneManager interface {
 		Switch(nextID string)
 		Current() Scene
+		SaveSnapshot(force bool)
+		RestoreFromSnapshot(force bool)
 	}
 
 	Scene interface {
@@ -61,9 +63,12 @@ type (
 		IsSelected() bool
 
 		AbsPosition() Vec
+		RelativePosition() Vec
 		SetPosition(pos Vec)
 		AddPosition(pos Vec)
 		Rotation() Angle
+		Scale() float64
+		SetScale(scale float64)
 		SetRotation(rot Angle)
 		AddRotation(rot Angle)
 
@@ -120,6 +125,7 @@ type (
 		Camera() Camera
 		Moment() Moment
 		Mouse() Mouse
+		Keyboard() Keyboard
 		Movement() Movement
 		EngineState() EngineState
 		SoundMixer() SoundMixer
@@ -196,6 +202,12 @@ type (
 		RightPressed() bool
 		RightReleased() bool
 		RightDown() bool
+	}
+
+	Keyboard interface {
+		IsPressed(key rune) bool
+		IsReleased(key rune) bool
+		IsDown(key rune) bool
 	}
 
 	Movement interface {

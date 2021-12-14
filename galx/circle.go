@@ -22,6 +22,17 @@ func (c Circle) BoundingBox() Rect {
 	}
 }
 
+func (c Circle) Contains(p Vec) bool {
+	return c.Radius >= c.Pos.DistanceTo(p)
+}
+
+func (c Circle) IncreaseRadius(r float64) Circle {
+	return Circle{
+		Pos:    c.Pos,
+		Radius: c.Radius + r,
+	}
+}
+
 func (c Circle) DistanceTo(to Circle) float64 {
 	return c.Pos.DistanceTo(to.Pos)
 }

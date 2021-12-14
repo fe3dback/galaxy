@@ -3,6 +3,7 @@ module github.com/fe3dback/galaxy
 go 1.16
 
 require (
+	github.com/fatih/structs v1.1.0 // indirect
 	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/inkyblackness/imgui-go/v4 v4.3.0
 	github.com/mitchellh/mapstructure v1.4.3

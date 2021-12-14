@@ -50,6 +50,15 @@ func (l *AssetsLoader) LoadXML(res consts.AssetsPath, data interface{}) {
 	}
 }
 
+func (l *AssetsLoader) LoadFile(res consts.AssetsPath) []byte {
+	buffer, err := ioutil.ReadFile(res)
+	if err != nil {
+		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
+	}
+
+	return buffer
+}
+
 func (l *AssetsLoader) LoadSound(res consts.AssetsPath) {
 	l.soundManager.LoadSound(res)
 }

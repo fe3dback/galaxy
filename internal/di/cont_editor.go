@@ -17,8 +17,8 @@ func (c *Container) ProvideEditorManager() *editor.Manager {
 	componentList = append(componentList, debug.NewGuiHelp())
 	componentList = append(componentList, debug.NewGrid())
 	componentList = append(componentList, control.NewCamera())
-	componentList = append(componentList, control.NewTransform())                        // control level: 1
-	componentList = append(componentList, control.NewSelect(c.provideEngineNodeQuery())) // control level: 2
+	componentList = append(componentList, control.NewTransform(c.createEditorUILayerSettings())) // control level: 1
+	componentList = append(componentList, control.NewSelect(c.provideEngineNodeQuery()))         // control level: 2
 	manager := editor.NewManager(componentList)
 
 	c.memstate.editor.manager = manager
@@ -32,6 +32,7 @@ func (c *Container) ProvideEditorUI() *ui.UI {
 
 	c.memstate.editor.ui = ui.NewUI(
 		c.createUILayerFPS(),
+		c.createEditorUILayerSettings(),
 		c.createEditorUILayerEntities(),
 	)
 	return c.memstate.editor.ui

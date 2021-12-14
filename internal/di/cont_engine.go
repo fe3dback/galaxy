@@ -40,7 +40,9 @@ func (c *Container) ProvideEngineState() *engine.State {
 
 	c.memstate.engine.appState = engine.NewEngineState(
 		c.ProvideEventDispatcher(),
+		c.ProvideEngineScenesManager(),
 		c.flags.IsDefaultGameMode(),
+		c.flags.IsIncludeEditor(),
 	)
 	return c.memstate.engine.appState
 }
@@ -152,6 +154,7 @@ func (c *Container) ProvideEngineGameState() *engine.GameState {
 		c.ProvideFrames(),
 		c.provideRenderCamera(),
 		c.provideEngineControlMouse(),
+		c.provideEngineControlKeyboard(),
 		c.provideEngineControlMovement(),
 		c.ProvideEngineState(),
 		c.provideSoundMixer(),

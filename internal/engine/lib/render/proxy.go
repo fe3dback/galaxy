@@ -14,12 +14,16 @@ import (
 // also only this renderer should check clip rect's
 
 func (r *Renderer) transRect(rect galx.Rect) sdl.Rect {
-	rect = rect.MaxToSize()
+	if !rect.Valid() {
+		rect = rect.Normalize()
+	}
+
+	size := rect.Max.Sub(rect.Min)
 	return Rect{
 		X: int32(r.screenX(rect.Min.X)),
 		Y: int32(r.screenY(rect.Min.Y)),
-		W: int32(rect.Max.X),
-		H: int32(rect.Max.Y),
+		W: int32(size.X),
+		H: int32(size.Y),
 	}
 }
 
@@ -40,13 +44,10 @@ func (r *Renderer) transPoint(point galx.Vec) sdl.Point {
 }
 
 func (r *Renderer) transLine(line galx.Line) []sdl.Point {
+	norm := line.Normalize()
 	return []sdl.Point{
-		r.transPoint(line.A),
-		r.transPoint(line.B),
-
-		// close lines back will fix render glitches
-		r.transPoint(line.B),
-		r.transPoint(line.A),
+		r.transPoint(norm.A),
+		r.transPoint(norm.B),
 	}
 }
 
@@ -65,42 +66,42 @@ func transformColor(color galx.Color) sdl.Color {
 // ==================================================
 
 func (r *Renderer) DrawSquare(color galx.Color, rect galx.Rect) {
-	rect = rect.Screen()
-	if !r.isRectInsideCamera(rect) {
+	norm := r.transRect(rect)
+	if !r.isRectInsideCamera(norm) {
 		return
 	}
 
-	r.internalDrawSquare(color, r.transRect(rect))
+	r.internalDrawSquare(color, norm)
 }
 
 func (r *Renderer) DrawSquareFilled(color galx.Color, rect galx.Rect) {
-	rect = rect.Screen()
-	if !r.isRectInsideCamera(rect) {
+	norm := r.transRect(rect)
+	if !r.isRectInsideCamera(norm) {
 		return
 	}
 
-	r.internalDrawSquareFilled(color, r.transRect(rect))
+	r.internalDrawSquareFilled(color, norm)
 }
 
 func (r *Renderer) DrawCircle(color galx.Color, circle galx.Circle) {
-	rect := circle.BoundingBox().Screen()
-	if !r.isRectInsideCamera(rect) {
-		return
-	}
+	// norm := r.transRect(circle.BoundingBox())
+	// if !r.isRectInsideCamera(norm) {
+	// 	return
+	// } // todo
 
 	pos, radius := r.transCircle(circle)
 	r.internalDrawCircle(color, pos, radius)
 }
 
 func (r *Renderer) DrawSquareEx(color galx.Color, angle galx.Angle, rect galx.Rect) {
-	rect = rect.Screen()
-	if !r.isRectInsideCamera(rect) {
+	norm := r.transRect(rect)
+	if !r.isRectInsideCamera(norm) {
 		return
 	}
 
 	center := galx.Vec{
-		X: rect.Min.X + rect.Max.X/2,
-		Y: rect.Min.Y + rect.Max.Y/2,
+		X: float64(norm.X + norm.W/2),
+		Y: float64(norm.Y + norm.H/2),
 	}
 
 	vertices := [4]galx.Vec{
@@ -135,19 +136,21 @@ func (r *Renderer) DrawSquareEx(color galx.Color, angle galx.Angle, rect galx.Re
 }
 
 func (r *Renderer) DrawLine(color galx.Color, line galx.Line) {
-	if !r.isLineInsideCamera(line) {
+	norm := r.transLine(line)
+	if !r.isLineInsideCamera(norm) {
 		return
 	}
 
-	r.internalDrawLines(color, r.transLine(line))
+	r.internalDrawLines(color, norm)
 }
 
 func (r *Renderer) DrawPoint(color galx.Color, vec galx.Vec) {
-	if !r.isPointInsideCamera(vec) {
+	p := r.transPoint(vec)
+	if !r.isPointInsideCamera(p) {
 		return
 	}
 
-	r.internalDrawPoint(color, r.transPoint(vec))
+	r.internalDrawPoint(color, p)
 }
 
 func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec, angle galx.Angle) {
@@ -157,7 +160,8 @@ func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec, angl
 		B: target,
 	}
 
-	if !r.isLineInsideCamera(line) {
+	normLine := r.transLine(line)
+	if !r.isLineInsideCamera(normLine) {
 		return
 	}
 
@@ -172,17 +176,18 @@ func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec, angl
 		B: target.PolarOffset(6, counterDeg.Add(galx.NewAngle(+30))),
 	}
 
-	r.internalDrawLines(color, r.transLine(line))
+	r.internalDrawLines(color, normLine)
 	r.internalDrawLines(color, r.transLine(arrowLeft))
 	r.internalDrawLines(color, r.transLine(arrowRight))
 }
 
 func (r *Renderer) DrawCrossLines(color galx.Color, size int, vec galx.Vec) {
-	if !r.isPointInsideCamera(vec) {
+	p := r.transPoint(vec)
+	if !r.isPointInsideCamera(p) {
 		return
 	}
 
-	r.internalDrawCrossLines(color, int32(size), r.transPoint(vec))
+	r.internalDrawCrossLines(color, int32(size), p)
 }
 
 // ==================================================
@@ -190,27 +195,39 @@ func (r *Renderer) DrawCrossLines(color galx.Color, size int, vec galx.Vec) {
 // ==================================================
 
 func (r *Renderer) DrawSprite(res consts.AssetsPath, vec galx.Vec) {
-	r.draw(res, galx.Rect{}, galx.Rect{Min: vec}, galx.NewAngle(0))
+	r.drawTexture(
+		res,
+		Rect{},
+		Rect{X: int32(vec.X), Y: int32(vec.Y)},
+		galx.NewAngle(0),
+	)
 }
 
 func (r *Renderer) DrawSpriteAngle(res consts.AssetsPath, vec galx.Vec, angle galx.Angle) {
-	r.draw(res, galx.Rect{}, galx.Rect{Min: vec}, angle)
+	r.drawTexture(
+		res,
+		Rect{},
+		Rect{X: int32(vec.X), Y: int32(vec.Y)},
+		angle,
+	)
 }
 
 func (r *Renderer) DrawSpriteEx(res consts.AssetsPath, src, dest galx.Rect, angle galx.Angle) {
-	r.draw(res, src, dest, angle)
+	normSrc := r.transRect(src)
+	normDest := r.transRect(dest)
+	r.drawTexture(res, normSrc, normDest, angle)
 }
 
-func (r *Renderer) draw(res consts.AssetsPath, src, dest galx.Rect, angle galx.Angle) {
+func (r *Renderer) drawTexture(res consts.AssetsPath, src, dest Rect, angle galx.Angle) {
 	defer utils.CheckPanic(fmt.Sprintf("draw sprite `%s`", res))
 
 	texture := r.getTexture(res)
 
-	if dest.Max.X == 0 {
-		dest.Max.X = float64(texture.Width)
+	if dest.W == 0 {
+		dest.W = texture.Width
 	}
-	if dest.Max.Y == 0 {
-		dest.Max.Y = float64(texture.Height)
+	if dest.H == 0 {
+		dest.H = texture.Height
 	}
 
 	// check is visible
@@ -218,24 +235,14 @@ func (r *Renderer) draw(res consts.AssetsPath, src, dest galx.Rect, angle galx.A
 		return
 	}
 
-	if src.Max.X == 0 {
-		src.Max.X = float64(texture.Width)
+	if src.W == 0 {
+		src.W = texture.Width
 	}
-	if src.Max.Y == 0 {
-		src.Max.Y = float64(texture.Height)
+	if src.H == 0 {
+		src.H = texture.Height
 	}
 
-	r.internalDrawTexture(
-		texture.Tex,
-		sdl.Rect{
-			X: int32(src.Min.X),
-			Y: int32(src.Min.Y),
-			W: int32(src.Max.X),
-			H: int32(src.Max.Y),
-		},
-		r.transRect(dest),
-		angle,
-	)
+	r.internalDrawTexture(texture.Tex, src, dest, angle)
 }
 
 // ==================================================
@@ -243,13 +250,14 @@ func (r *Renderer) draw(res consts.AssetsPath, src, dest galx.Rect, angle galx.A
 // ==================================================
 
 func (r *Renderer) DrawText(fontId consts.AssetsPath, color galx.Color, text string, vec galx.Vec) {
-	if !r.isRectInsideCamera(galx.Rect{
-		Min: vec,
-		Max: galx.Vec{
-			X: avgTextWidthOptRender,  // todo magic numbers
-			Y: avgTextHeightOptRender, // todo magic numbers
-		},
-	}) {
+	norm := Rect{
+		X: int32(vec.X),
+		Y: int32(vec.Y),
+		W: avgTextWidthOptRender,  // todo magic numbers
+		H: avgTextHeightOptRender, // todo magic numbers
+	}
+
+	if !r.isRectInsideCamera(norm) {
 		return
 	}
 

@@ -1,36 +1,72 @@
 package control
 
-import "github.com/fe3dback/galaxy/galx"
+import (
+	"math"
 
-const arrowSize = 1
+	"github.com/inkyblackness/imgui-go/v4"
+
+	"github.com/fe3dback/galaxy/galx"
+)
+
+const surroundingBoxSize = 3
 const arrowLength = 40
 const circleRadius = 9
+const axisColorX = galx.ColorRed
+const axisColorY = galx.ColorGreen
+const axisAngleX = galx.Angle0
+const axisAngleY = galx.Angle90
 
 type Transform struct {
-	centroid             galx.Vec
-	selectedObjects      []galx.GameObject
-	axisX                galx.Rect
-	axisY                galx.Rect
-	axisXY               galx.Rect
+	selectedObjects []galx.GameObject
+
+	// options
+	settings    settingsPane
+	snapSize    int32
+	snapOn      bool
+	snapForceOn bool
+
+	// ctl
+	axisX  galx.Circle
+	axisY  galx.Circle
+	axisXY galx.Circle
+
+	// state
 	activeX              bool
 	activeY              bool
 	startMousePosition   galx.Vec
 	startObjectsPosition []galx.Vec
+	keyXDown             bool
+	keyYDown             bool
+	keyCtrlDown          bool
+
+	// visual
+	camera            galx.Camera
+	attachAnchor      galx.Vec
+	surroundingSelect galx.Rect
 }
 
-func NewTransform() *Transform {
-	return &Transform{}
+func NewTransform(settings settingsPane) *Transform {
+	return &Transform{
+		settings: settings,
+		snapSize: 32,
+	}
 }
 
 func (c *Transform) OnUpdate(state galx.State) error {
+	c.displaySettingsWindow()
+	c.camera = state.Camera()
+	c.keyXDown = state.Keyboard().IsDown('x')
+	c.keyYDown = state.Keyboard().IsDown('y')
+	c.snapForceOn = state.Movement().Shift()
+
 	if !state.Mouse().IsButtonsAvailable(galx.MousePropagationPriorityEditorGizmos) {
 		return nil
 	}
 
 	// disable move mode, when mouse released
-	if state.Mouse().LeftReleased() {
-		c.activeX = false
-		c.activeY = false
+	if state.Mouse().LeftReleased() && (c.activeX || c.activeY) {
+		state.Mouse().StopPropagation(galx.MousePropagationPriorityEditorGizmos)
+		c.resetState()
 	}
 
 	mousePos := state.Mouse().MouseCoords()
@@ -41,10 +77,7 @@ func (c *Transform) OnUpdate(state galx.State) error {
 	// and move objects
 	if (c.activeX || c.activeY) && state.Mouse().LeftDown() {
 		state.Mouse().StopPropagation(galx.MousePropagationPriorityEditorGizmos)
-
-		if state.Mouse().LeftDown() {
-			c.move(worldMouse)
-		}
+		c.move(worldMouse)
 		return nil
 	}
 
@@ -54,19 +87,21 @@ func (c *Transform) OnUpdate(state galx.State) error {
 		return nil
 	}
 
-	c.centroid = c.calculateCentroid()
-	c.updateAxisX()
-	c.updateAxisY()
-	c.updateAxisXY()
+	// calculate anchor/axis
+	c.calculateAnchor(worldMouse)
 
-	// if mouse not pressed, we not
-	// touch any controls on this frame
-	// so nothing to do next
-	if !state.Mouse().LeftPressed() {
-		return nil
+	// on press tick, update widget state
+	// and save it on local memory
+	// each next frame, we will work
+	// with saved state, until mouse is released
+	if state.Mouse().LeftPressed() {
+		c.saveState(worldMouse)
 	}
 
-	// turn on move mode
+	return nil
+}
+
+func (c *Transform) saveState(worldMouse galx.Vec) {
 	if c.axisXY.Contains(worldMouse) {
 		c.activeX = true
 		c.activeY = true
@@ -75,7 +110,6 @@ func (c *Transform) OnUpdate(state galx.State) error {
 		c.activeY = c.axisY.Contains(worldMouse)
 	}
 
-	// if turned, save objects state
 	if c.activeX || c.activeY {
 		c.startMousePosition = worldMouse
 		c.startObjectsPosition = make([]galx.Vec, len(c.selectedObjects))
@@ -83,71 +117,105 @@ func (c *Transform) OnUpdate(state galx.State) error {
 			c.startObjectsPosition[idx] = object.AbsPosition()
 		}
 	}
+}
 
-	return nil
+func (c *Transform) resetState() {
+	c.activeX = false
+	c.activeY = false
+	c.startMousePosition = galx.Vec{}
+	c.startObjectsPosition = nil
 }
 
 func (c *Transform) move(worldMouse galx.Vec) {
+	lockedX := !c.activeX
+	lockedY := !c.activeY
+
+	if c.keyXDown {
+		lockedY = true
+	}
+	if c.keyYDown {
+		lockedX = true
+	}
+
+	if lockedX && lockedY {
+		return
+	}
+
 	diff := worldMouse.Sub(c.startMousePosition)
 
 	for idx, object := range c.selectedObjects {
 		newPosition := c.startObjectsPosition[idx].Add(diff)
 
-		// exclude X movement
-		if !c.activeX {
+		if lockedX {
 			newPosition.X = c.startObjectsPosition[idx].X
 		}
-
-		// exclude Y movement
-		if !c.activeY {
+		if lockedY {
 			newPosition.Y = c.startObjectsPosition[idx].Y
 		}
 
-		object.SetPosition(newPosition)
+		object.SetPosition(c.snapPosition(newPosition))
 	}
 }
 
-func (c *Transform) updateAxisX() {
-	axisX := galx.Vec{
-		X: c.centroid.X + arrowLength,
-		Y: c.centroid.Y,
+func (c *Transform) snapPosition(pos galx.Vec) galx.Vec {
+	if !c.snapOn && !c.snapForceOn {
+		// both off
+		return pos
 	}
-	c.axisX = galx.Rect{
-		Min: axisX.Minus(circleRadius),
-		Max: axisX.Plus(circleRadius),
+
+	if c.snapOn && c.snapForceOn {
+		// snap on, but forced to off
+		return pos
+	}
+
+	return galx.Vec{
+		X: math.Floor(pos.X/float64(c.snapSize)) * float64(c.snapSize),
+		Y: math.Floor(pos.Y/float64(c.snapSize)) * float64(c.snapSize),
 	}
 }
 
-func (c *Transform) updateAxisY() {
-	axisY := galx.Vec{
-		X: c.centroid.X,
-		Y: c.centroid.Y - arrowLength,
-	}
-	c.axisY = galx.Rect{
-		Min: axisY.Minus(circleRadius),
-		Max: axisY.Plus(circleRadius),
-	}
-}
-
-func (c *Transform) updateAxisXY() {
-	axisXY := galx.Vec{
-		X: c.centroid.X + (circleRadius / 2),
-		Y: c.centroid.Y - (circleRadius / 2),
-	}
-	c.axisXY = galx.Rect{
-		Min: axisXY.Minus(circleRadius),
-		Max: axisXY.Plus(circleRadius),
-	}
-}
-
-func (c *Transform) calculateCentroid() galx.Vec {
+func (c *Transform) calculateAnchor(worldMouse galx.Vec) {
 	bbox := make([]galx.Rect, 0, len(c.selectedObjects))
+	closest := float64(math.MaxInt16)
 
 	for _, object := range c.selectedObjects {
-		bbox = append(bbox, object.BoundingBox(0))
+		objectBox := object.BoundingBox(0)
+		bbox = append(bbox, objectBox)
+
+		if distance := worldMouse.DistanceTo(objectBox.Center()); distance < closest {
+			// attach controls to the closest element (better UX)
+			c.attachAnchor = objectBox.Center()
+			closest = distance
+		}
 	}
 
-	return galx.SurroundRect(bbox...).Center()
+	c.surroundingSelect = galx.SurroundRect(bbox...)
+	c.axisX = c.axisOn(arrowLength, circleRadius, axisAngleX)
+	c.axisY = c.axisOn(arrowLength, circleRadius, axisAngleY)
+	c.axisXY = c.axisOn(0, arrowLength-circleRadius, axisAngleY-axisAngleX)
+}
+
+func (c *Transform) displaySettingsWindow() {
+	c.settings.Extend("Transform", 0, func() {
+		// snap to grid
+		imgui.Checkbox("Snap to grid", &c.snapOn)
+
+		// snap size
+		imgui.InputInt("Snap Size", &c.snapSize)
+		if c.snapSize < 1 {
+			c.snapSize = 1
+		}
+		if c.snapSize > 1024 {
+			c.snapSize = 1024
+		}
+	})
+}
+
+func (c *Transform) axisOn(len float64, size float64, towards galx.Angle) galx.Circle {
+	return galx.Circle{
+		Pos:    c.attachAnchor.PolarOffset(len, towards),
+		Radius: size,
+	}
 }
 
 func (c *Transform) OnDraw(r galx.Renderer) error {
@@ -155,48 +223,73 @@ func (c *Transform) OnDraw(r galx.Renderer) error {
 		return nil
 	}
 
-	// todo: select bbox (over all objects)
-	// todo: bigger select box (with negative shape)
-	// todo: do not draw controls on move
-	// todo: draw axis when excluded
-	// todo: keyboard X,Y toggle exclude mode
-	// todo: ctrl - snap to grid
-	// todo: better control UX
 	// todo: rotation square with polar coordinate line towards center
-	// todo: fix propagate ctl on mouse release
 
-	// axis X
-	r.DrawSquareFilled(galx.ColorRed, galx.Rect{
-		Min: galx.Vec{
-			X: c.centroid.X - arrowSize,
-			Y: c.centroid.Y - arrowSize,
-		},
-		Max: galx.Vec{
-			X: c.centroid.X + arrowLength,
-			Y: c.centroid.Y + arrowSize,
-		},
-	})
-	r.DrawSquare(galx.ColorRed, c.axisX)
-	if c.activeX {
-		r.DrawSquare(galx.ColorRed, c.axisX.Scale(1.05))
+	if c.activeX || c.activeY {
+		c.drawLocks(r)
+
+		// in move mode, disable controls
+		return nil
 	}
 
-	// axis Y
-	r.DrawSquareFilled(galx.ColorGreen, galx.Rect{
-		Min: galx.Vec{
-			X: c.centroid.X - arrowSize,
-			Y: c.centroid.Y + arrowSize,
-		},
-		Max: galx.Vec{
-			X: c.centroid.X + arrowSize,
-			Y: c.centroid.Y - arrowLength,
-		},
-	})
+	// axis
+	c.drawAxis(r, c.axisX, axisColorX, axisAngleX, c.activeX)
+	c.drawAxis(r, c.axisY, axisColorY, axisAngleY, c.activeY)
 
-	r.DrawSquare(galx.ColorGreen, c.axisY)
-	if c.activeY {
-		r.DrawSquare(galx.ColorGreen, c.axisY.Scale(1.05))
-	}
+	// surrounding bbox
+	r.DrawSquare(galx.ColorSelection, c.surroundingSelect.Increase(surroundingBoxSize))
 
 	return nil
+}
+
+func (c *Transform) drawLocks(r galx.Renderer) {
+	lockedX := !c.activeX
+	lockedY := !c.activeY
+
+	if c.keyXDown {
+		lockedY = true
+	}
+	if c.keyYDown {
+		lockedX = true
+	}
+
+	if lockedY {
+		r.DrawLine(axisColorX, galx.Line{
+			A: galx.Vec{
+				X: c.camera.Position().X,
+				Y: c.attachAnchor.Y,
+			},
+			B: galx.Vec{
+				X: c.camera.Position().X + float64(c.camera.Width()),
+				Y: c.attachAnchor.Y,
+			},
+		})
+	}
+
+	if lockedX {
+		r.DrawLine(axisColorY, galx.Line{
+			A: galx.Vec{
+				X: c.attachAnchor.X,
+				Y: c.camera.Position().Y,
+			},
+			B: galx.Vec{
+				X: c.attachAnchor.X,
+				Y: c.camera.Position().Y + float64(c.camera.Height()),
+			},
+		})
+	}
+}
+
+func (c *Transform) drawAxis(r galx.Renderer, axis galx.Circle, color galx.Color, angle galx.Angle, isActive bool) {
+	// draw control circle
+	r.DrawCircle(color, axis)
+	if isActive {
+		r.DrawCircle(color, axis.IncreaseRadius(1))
+	}
+
+	// draw line
+	r.DrawLine(color, galx.Line{
+		A: c.attachAnchor,
+		B: c.attachAnchor.PolarOffset(arrowLength-circleRadius, angle),
+	})
 }

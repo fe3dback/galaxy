@@ -15,6 +15,7 @@ type (
 		name             string
 		relativePosition galx.Vec
 		relativeRotation galx.Angle
+		relativeScale    float64
 		components       components
 		destroyed        bool
 		locked           bool
@@ -29,8 +30,18 @@ type (
 
 func NewNode(id UUID) *Node {
 	return &Node{
-		id:         id,
-		components: make(components, 0),
+		id:               id,
+		name:             "",
+		relativePosition: galx.Vec{},
+		relativeRotation: galx.Angle0,
+		relativeScale:    1,
+		components:       make(components, 0),
+		destroyed:        false,
+		locked:           false,
+		selected:         false,
+		hierarchyLevel:   0,
+		parent:           nil,
+		child:            nil,
 	}
 }
 

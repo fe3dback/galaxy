@@ -46,12 +46,16 @@ func (td *GridDrawer) OnDraw(r galx.Renderer) error {
 	for x := startX; x < endX; x += consts.DistanceMeter {
 		for y := startY; y < endY; y += consts.DistanceMeter {
 
-			r.DrawSquare(galx.ColorSelection, galx.RectScreen(
-				int(x),
-				int(y),
-				int(consts.DistanceMeter),
-				int(consts.DistanceMeter),
-			))
+			r.DrawSquare(galx.ColorSelection, galx.Rect{
+				Min: galx.Vec{
+					X: x,
+					Y: y,
+				},
+				Max: galx.Vec{
+					X: x + consts.DistanceMeter,
+					Y: y + consts.DistanceMeter,
+				},
+			})
 
 			if r.Gizmos().Debug() {
 				r.DrawText(

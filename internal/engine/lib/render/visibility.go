@@ -1,42 +1,75 @@
 package render
 
 import (
-	"github.com/fe3dback/galaxy/galx"
 	"github.com/fe3dback/galaxy/internal/engine"
 )
 
-func (r *Renderer) isLineInsideCamera(line galx.Line) bool {
+func (r *Renderer) isLineInsideCamera(line []Point) bool {
+	// line always have only two points (enforced by public api)
 	if r.renderMode == engine.RenderModeUI {
 		return true
 	}
 
-	return r.isRectInsideCamera(galx.Rect{
-		Min: line.A,
-		Max: line.B.Sub(line.A),
-	}.Screen())
+	return r.isRectInsideCamera(Rect{
+		X: line[0].X,
+		Y: line[0].Y,
+		W: line[1].X - line[0].X,
+		H: line[1].Y - line[0].Y,
+	})
 }
 
-func (r *Renderer) isRectInsideCamera(rect galx.Rect) bool {
+func (r *Renderer) isRectInsideCamera(rect Rect) bool {
 	if r.renderMode == engine.RenderModeUI {
 		return true
 	}
 
-	xB := rect.Min.X > r.camera.position.X+(float64(r.camera.width)/r.camera.zoom)
-	xL := rect.Min.X+rect.Max.X < r.camera.position.X
+	// [right edge] outside of camera [left edge]
+	if float64(rect.X+rect.W) < 0 {
+		return false
+	}
 
-	yB := rect.Min.Y > r.camera.position.Y+(float64(r.camera.height)/r.camera.zoom)
-	yL := rect.Min.Y+rect.Max.Y < r.camera.position.Y
+	// [bottom edge] outside of camera [top edge]
+	if float64(rect.Y+rect.H) < 0 {
+		return false
+	}
 
-	return !(xB || xL || yB || yL)
+	// [left edge] outside of camera [right edge]
+	if float64(rect.X) > float64(r.camera.width)/r.camera.zoom {
+		return false
+	}
+
+	// [top edge] outside of camera [bottom edge]
+	if float64(rect.Y) > float64(r.camera.height)/r.camera.zoom {
+		return false
+	}
+
+	return true
 }
 
-func (r *Renderer) isPointInsideCamera(vec galx.Vec) bool {
+func (r *Renderer) isPointInsideCamera(p Point) bool {
 	if r.renderMode == engine.RenderModeUI {
 		return true
 	}
 
-	return vec.X >= r.camera.position.X &&
-		vec.Y >= r.camera.position.Y &&
-		vec.X <= r.camera.position.X+(float64(r.camera.width)/r.camera.zoom) &&
-		vec.Y <= r.camera.position.Y+(float64(r.camera.height)/r.camera.zoom)
+	// outside left edge
+	if p.X < 0 {
+		return false
+	}
+
+	// outside top edge
+	if p.Y < 0 {
+		return false
+	}
+
+	// outside right edge
+	if float64(p.X) > float64(r.camera.width)/r.camera.zoom {
+		return false
+	}
+
+	// outside bottom edge
+	if float64(p.Y) > float64(r.camera.height)/r.camera.zoom {
+		return false
+	}
+
+	return true
 }

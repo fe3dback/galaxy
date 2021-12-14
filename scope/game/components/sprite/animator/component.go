@@ -16,12 +16,18 @@ func (anim *Animator) OnDraw(r galx.Renderer) error {
 	frame := seq.frames[seq.currentFrame]
 	entityPos := anim.entity.AbsPosition()
 
-	imageRect := galx.RectScreen(
-		entityPos.RoundX()+seq.offsetX-(frame.w/2),
-		entityPos.RoundY()+seq.offsetY-(frame.h/2),
-		frame.w,
-		frame.h,
-	)
+	imageRectMin := galx.Vec{
+		X: float64(entityPos.RoundX() + seq.offsetX - (frame.w / 2)),
+		Y: float64(entityPos.RoundY() + seq.offsetY - (frame.h / 2)),
+	}
+	imageRect := galx.Rect{
+		Min: imageRectMin,
+		Max: imageRectMin.Add(galx.Vec{
+			X: float64(frame.w),
+			Y: float64(frame.h),
+		}),
+	}
+
 	r.DrawSpriteEx(res, frame.TextureRect(), imageRect, anim.entity.Rotation())
 
 	if r.Gizmos().Debug() {

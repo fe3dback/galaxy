@@ -7,18 +7,18 @@ import (
 )
 
 type (
-	LayerEntities struct {
+	LayerHierarchy struct {
 		open bool
 	}
 )
 
-func NewLayerEntities() *LayerEntities {
-	return &LayerEntities{
+func NewLayerHierarchy() *LayerHierarchy {
+	return &LayerHierarchy{
 		open: true,
 	}
 }
 
-func (l *LayerEntities) OnUpdate(s galx.State) error {
+func (l *LayerHierarchy) OnUpdate(s galx.State) error {
 	imgui.BeginV("Hierarchy", &l.open, 0)
 
 	for _, gameObject := range s.Scene().Entities() {
@@ -29,7 +29,7 @@ func (l *LayerEntities) OnUpdate(s galx.State) error {
 	return nil
 }
 
-func (l *LayerEntities) renderObject(gameObject galx.GameObject) {
+func (l *LayerHierarchy) renderObject(gameObject galx.GameObject) {
 	imgui.PushID(gameObject.Id())
 
 	flags := imgui.TreeNodeFlagsNone
@@ -49,6 +49,6 @@ func (l *LayerEntities) renderObject(gameObject galx.GameObject) {
 	imgui.PopID()
 }
 
-func (l *LayerEntities) OnDraw(_ galx.Renderer) (err error) {
+func (l *LayerHierarchy) OnDraw(_ galx.Renderer) (err error) {
 	return nil
 }

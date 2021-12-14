@@ -6,6 +6,7 @@ type GameState struct {
 	moment        galx.Moment
 	camera        galx.Camera
 	mouse         galx.Mouse
+	keyboard      galx.Keyboard
 	movement      galx.Movement
 	engineState   galx.EngineState
 	soundMixer    galx.SoundMixer
@@ -17,6 +18,7 @@ func NewGameState(
 	moment galx.Moment,
 	camera galx.Camera,
 	mouse galx.Mouse,
+	keyboard galx.Keyboard,
 	movement galx.Movement,
 	appState galx.EngineState,
 	soundMixer galx.SoundMixer,
@@ -27,6 +29,7 @@ func NewGameState(
 		moment:        moment,
 		camera:        camera,
 		mouse:         mouse,
+		keyboard:      keyboard,
 		movement:      movement,
 		engineState:   appState,
 		soundMixer:    soundMixer,
@@ -45,6 +48,10 @@ func (g *GameState) Camera() galx.Camera {
 
 func (g *GameState) Mouse() galx.Mouse {
 	return g.mouse
+}
+
+func (g *GameState) Keyboard() galx.Keyboard {
+	return g.keyboard
 }
 
 func (g *GameState) Movement() galx.Movement {

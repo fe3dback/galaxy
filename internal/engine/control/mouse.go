@@ -7,16 +7,7 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/event"
 )
 
-const (
-	statePressed state = iota
-	stateReleased
-	stateDown
-	stateUp
-)
-
 type (
-	state = uint8
-
 	guiIO interface {
 		WantCaptureMouse() bool
 	}

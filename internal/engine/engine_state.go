@@ -1,8 +1,7 @@
 package engine
 
 import (
-	"fmt"
-
+	"github.com/fe3dback/galaxy/galx"
 	"github.com/fe3dback/galaxy/internal/engine/event"
 )
 
@@ -14,19 +13,28 @@ const (
 type (
 	mode  uint8
 	State struct {
+		sceneManager galx.SceneManager
 		switchQueued bool
 		mode         mode
 	}
 )
 
-func NewEngineState(dispatcher *event.Dispatcher, isGameMode bool) *State {
+func NewEngineState(
+	dispatcher *event.Dispatcher,
+	sceneManager galx.SceneManager,
+	isGameMode bool,
+	includeEditor bool,
+) *State {
 	es := &State{
+		sceneManager: sceneManager,
 		switchQueued: false,
-		mode:         defaultEngineMode(isGameMode),
+		mode:         defaultEngineMode(isGameMode, includeEditor),
 	}
 
-	dispatcher.OnKeyBoard(es.handleKeyboard)
-	dispatcher.OnFrameStart(es.handleFrameStart)
+	if includeEditor {
+		dispatcher.OnKeyBoard(es.handleKeyboard)
+		dispatcher.OnFrameStart(es.handleFrameStart)
+	}
 
 	return es
 }
@@ -56,21 +64,27 @@ func (as *State) handleFrameStart(_ event.FrameStartEvent) error {
 }
 
 func (as *State) switchState() {
-	switch as.mode {
-	case modeEditor:
-		as.mode = modeGame
-	case modeGame:
+	if as.mode == modeGame {
+		// game -> editor
+		as.sceneManager.RestoreFromSnapshot(true)
 		as.mode = modeEditor
-	default:
-		panic(fmt.Sprintf("unknown app mode `%d`", as.mode))
+		return
 	}
+
+	// editor -> game
+	as.sceneManager.SaveSnapshot(true)
+	as.mode = modeGame
 }
 
 func (as *State) InEditorMode() bool {
 	return as.mode == modeEditor
 }
 
-func defaultEngineMode(isGameMode bool) mode {
+func defaultEngineMode(isGameMode bool, includeEditor bool) mode {
+	if !includeEditor {
+		return modeGame
+	}
+
 	if isGameMode {
 		return modeGame
 	}
