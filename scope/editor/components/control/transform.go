@@ -196,7 +196,7 @@ func (c *Transform) calculateAnchor(worldMouse galx.Vec) {
 }
 
 func (c *Transform) displaySettingsWindow() {
-	c.settings.Extend("Transform", 0, func() {
+	c.settings.Extend("Transform", 100, func() {
 		// snap to grid
 		imgui.Checkbox("Snap to grid", &c.snapOn)
 

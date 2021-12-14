@@ -84,10 +84,10 @@ func (r *Renderer) DrawSquareFilled(color galx.Color, rect galx.Rect) {
 }
 
 func (r *Renderer) DrawCircle(color galx.Color, circle galx.Circle) {
-	// norm := r.transRect(circle.BoundingBox())
-	// if !r.isRectInsideCamera(norm) {
-	// 	return
-	// } // todo
+	norm := r.transRect(circle.BoundingBox())
+	if !r.isRectInsideCamera(norm) {
+		return
+	}
 
 	pos, radius := r.transCircle(circle)
 	r.internalDrawCircle(color, pos, radius)
