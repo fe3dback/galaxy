@@ -106,6 +106,14 @@ type (
 	ComponentCycleDrawer interface {
 		Drawer
 	}
+
+	EditorComponentResolver     = func(EditorComponentIdentifiable) EditorComponentIdentifiable
+	EditorComponentIdentifiable interface {
+		Id() string
+	}
+	EditorComponentCycleCreated interface {
+		OnCreated(EditorComponentResolver)
+	}
 )
 
 // --------------------------------------------
@@ -146,7 +154,7 @@ type (
 		Position() Vec
 		Width() int
 		Height() int
-		Zoom() float64
+		Scale() float64
 		MoveTo(p Vec)
 		CenterOn(p Vec)
 		Resize(width, height int)
@@ -248,7 +256,7 @@ type (
 
 		// text
 
-		DrawText(fontId consts.AssetsPath, color Color, text string, vec Vec)
+		DrawText(fontId consts.AssetsPath, color Color, vec Vec, text string)
 
 		// system
 

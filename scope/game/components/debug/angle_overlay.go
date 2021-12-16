@@ -30,17 +30,17 @@ func (td *AngleOverlay) OnCreated(entity galx.GameObject) {
 func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	// center
 	r.DrawCrossLines(galx.ColorOrange, 10, td.entity.AbsPosition())
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().String(), td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
 		X: 0,
 		Y: -20,
-	}))
+	}), td.entity.AbsPosition().String())
 
 	// direction
 	r.DrawVector(galx.ColorGreen, 300, td.entity.AbsPosition(), td.entity.Rotation())
 
 	// real data
 	direction := fmt.Sprintf("%.2f %.2f", td.entity.Rotation().Radians(), td.entity.Rotation().Degrees())
-	r.DrawText(consts.AssetDefaultFont, galx.ColorGreen, direction, td.entity.AbsPosition())
+	r.DrawText(consts.AssetDefaultFont, galx.ColorGreen, td.entity.AbsPosition(), direction)
 
 	// test vectors
 	// rotate around
@@ -50,10 +50,10 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	}).RotateAround(td.entity.AbsPosition(), td.entity.Rotation())
 	r.DrawCrossLines(galx.ColorGreen, 10, rotateAround)
 	rotateAroundText := fmt.Sprintf("ra (%s)", rotateAround)
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, rotateAroundText, td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
 		X: 0,
 		Y: 20,
-	}))
+	}), rotateAroundText)
 
 	// polar offset
 	polarOffset := td.entity.AbsPosition().PolarOffset(550, td.entity.Rotation())
@@ -67,10 +67,10 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	vec = vec.Rotate(td.entity.Rotation().Add(galx.NewAngle(90)))
 	r.DrawVector(galx.ColorOrange, 50, td.entity.AbsPosition(), vec.Direction())
 	rotateDir := fmt.Sprintf("S+90 (%.2f)", vec.Direction())
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, rotateDir, td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
 		X: -20,
 		Y: 40,
-	}))
+	}), rotateDir)
 
 	return nil
 }

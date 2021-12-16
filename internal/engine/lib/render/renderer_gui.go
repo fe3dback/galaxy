@@ -28,6 +28,8 @@ func (r *Renderer) StartGUIFrame() {
 	r.gui.SetMouseButtonDown(0, r.guiMousePressedLeft)
 	r.gui.SetMouseButtonDown(1, r.guiMousePressedRight)
 
+	// todo: mouse wheel
+
 	imgui.NewFrame()
 }
 

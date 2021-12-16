@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"fmt"
-
-	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/galx"
 )
 
@@ -18,12 +15,8 @@ const (
 	// Table Pos:
 	uiInfoX           = 5
 	uiInfoY           = 5
-	uiInfoFpsX        = uiInfoX
-	uiInfoFpsY        = uiInfoY
-	uiInfoCamX        = uiInfoX
-	uiInfoCamY        = uiInfoFpsY + 15
 	uiInfoGraphFpsX   = uiInfoX
-	uiInfoGraphFpsY   = uiInfoCamY + 20
+	uiInfoGraphFpsY   = uiInfoY
 	uiInfoGraphDeltaX = uiInfoX
 	uiInfoGraphDeltaY = uiInfoGraphFpsY + 20
 )
@@ -127,44 +120,6 @@ func (l *LayerFPS) OnUpdate(s galx.State) error {
 }
 
 func (l *LayerFPS) OnDraw(r galx.Renderer) (err error) {
-	if r.Gizmos().System() {
-		var mode string
-		if r.InEditorMode() {
-			mode = "edit"
-		} else {
-			mode = "game"
-		}
-
-		r.DrawText(
-			consts.AssetDefaultFont,
-			galx.ColorGreen,
-			fmt.Sprintf("%s :: fps: %d / %dms",
-				mode,
-				l.moment.FPS(),
-				l.moment.FrameDuration().Milliseconds(),
-			),
-			galx.Vec{
-				X: uiInfoFpsX,
-				Y: uiInfoFpsY,
-			},
-		)
-	}
-
-	if r.Gizmos().Primary() {
-		r.DrawText(
-			consts.AssetDefaultFont,
-			galx.ColorGreen,
-			fmt.Sprintf("cam: %.2f, %.2f",
-				r.Camera().Position().X,
-				r.Camera().Position().Y,
-			),
-			galx.Vec{
-				X: uiInfoCamX,
-				Y: uiInfoCamY,
-			},
-		)
-	}
-
 	if r.Gizmos().System() {
 		l.drawGraph(r, l.graphs[graphIdFps])
 		l.drawGraph(r, l.graphs[graphIdDelta])

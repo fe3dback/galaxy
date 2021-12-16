@@ -93,7 +93,6 @@ func (n *Node) drawGizmos(r galx.Renderer) {
 	}
 
 	origin := n.AbsPosition()
-
 	if n.HasChild() {
 		bbox := n.BoundingBox(0)
 		r.DrawSquare(n.gizmosColor(), bbox)

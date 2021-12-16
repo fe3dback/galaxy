@@ -17,7 +17,6 @@ import (
 	"github.com/fe3dback/galaxy/internal/frames"
 	"github.com/fe3dback/galaxy/internal/utils"
 	"github.com/fe3dback/galaxy/scope/editor"
-	editorUI "github.com/fe3dback/galaxy/scope/editor/ui"
 	"github.com/fe3dback/galaxy/scope/shared/ui"
 )
 
@@ -51,12 +50,7 @@ type Container struct {
 			query              *node.ObjectQuery
 		}
 		editor struct {
-			manager  *editor.Manager
-			ui       *ui.UI
-			uiLayers struct {
-				hierarchy *editorUI.LayerHierarchy
-				settings  *editorUI.LayerSettings
-			}
+			manager *editor.Manager
 		}
 		game struct {
 			ui *ui.UI

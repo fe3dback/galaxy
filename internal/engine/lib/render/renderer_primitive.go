@@ -24,7 +24,7 @@ func (r *Renderer) internalDrawSquareFilled(color galx.Color, rect sdl.Rect) {
 	r.SetDrawColor(color)
 	err := r.ref.FillRect(&rect)
 
-	utils.Check("draw square", err)
+	utils.Check("draw square filled", err)
 }
 
 func (r *Renderer) internalDrawCircle(color galx.Color, pos sdl.Point, radius float64) {

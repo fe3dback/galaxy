@@ -34,12 +34,12 @@ func (r *Renderer) isRectInsideCamera(rect Rect) bool {
 	}
 
 	// [left edge] outside of camera [right edge]
-	if float64(rect.X) > float64(r.camera.width)/r.camera.zoom {
+	if float64(rect.X) > float64(r.camera.width)/r.camera.scale {
 		return false
 	}
 
 	// [top edge] outside of camera [bottom edge]
-	if float64(rect.Y) > float64(r.camera.height)/r.camera.zoom {
+	if float64(rect.Y) > float64(r.camera.height)/r.camera.scale {
 		return false
 	}
 
@@ -62,12 +62,12 @@ func (r *Renderer) isPointInsideCamera(p Point) bool {
 	}
 
 	// outside right edge
-	if float64(p.X) > float64(r.camera.width)/r.camera.zoom {
+	if float64(p.X) > float64(r.camera.width)/r.camera.scale {
 		return false
 	}
 
 	// outside bottom edge
-	if float64(p.Y) > float64(r.camera.height)/r.camera.zoom {
+	if float64(p.Y) > float64(r.camera.height)/r.camera.scale {
 		return false
 	}
 

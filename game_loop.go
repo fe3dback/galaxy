@@ -31,7 +31,6 @@ func gameLoop(game *Game) error {
 
 	// editor
 	editorManager := c.ProvideEditorManager()
-	editorUI := c.ProvideEditorUI()
 
 	// clear first time screen (fix copy texture from underlying memory)
 	renderer.Clear(defaultColor)
@@ -66,14 +65,9 @@ func gameLoop(game *Game) error {
 		}
 
 		// -----------------------------------
-		// update ui
+		// update game ui
 		// -----------------------------------
-		if engineState.InEditorMode() {
-			err = editorUI.OnUpdate(gameState)
-			if err != nil {
-				return fmt.Errorf("can`t update editor ui: %w", err)
-			}
-		} else {
+		if !engineState.InEditorMode() {
 			err = gameUI.OnUpdate(gameState)
 			if err != nil {
 				return fmt.Errorf("can`t update game ui: %w", err)
@@ -86,26 +80,27 @@ func gameLoop(game *Game) error {
 		renderer.Clear(defaultColor)
 
 		renderer.SetRenderMode(engine.RenderModeWorld)
+		if engineState.InEditorMode() {
+			err = editorManager.OnBeforeDraw(renderer)
+			if err != nil {
+				return fmt.Errorf("can`t draw editor (before): %w", err)
+			}
+		}
+
 		err = scenesManager.Current().OnDraw(renderer)
 		if err != nil {
-			return fmt.Errorf("can`t draw world: %w", err)
+			return fmt.Errorf("can`t draw game world: %w", err)
 		}
 
 		if engineState.InEditorMode() {
-			err = editorManager.OnDraw(renderer)
+			err = editorManager.OnAfterDraw(renderer)
 			if err != nil {
-				return fmt.Errorf("can`t draw editor: %w", err)
+				return fmt.Errorf("can`t draw editor (after): %w", err)
 			}
 		}
 
 		renderer.SetRenderMode(engine.RenderModeUI)
-
-		if engineState.InEditorMode() {
-			err = editorUI.OnDraw(renderer)
-			if err != nil {
-				return fmt.Errorf("can`t draw editor ui: %w", err)
-			}
-		} else {
+		if !engineState.InEditorMode() {
 			err = gameUI.OnDraw(renderer)
 			if err != nil {
 				return fmt.Errorf("can`t draw game ui: %w", err)

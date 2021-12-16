@@ -8,10 +8,11 @@ import (
 
 	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/galx"
+	"github.com/fe3dback/galaxy/scope/editor/components/gui"
 )
 
 type Grid struct {
-	settings settingsPane
+	settings *gui.Settings
 	camera   galx.Camera
 
 	// settings
@@ -19,12 +20,15 @@ type Grid struct {
 	sizeY float64
 }
 
-func NewGrid(settings settingsPane) *Grid {
-	return &Grid{
-		settings: settings,
-		sizeX:    64,
-		sizeY:    64,
-	}
+func (c Grid) Id() string {
+	return "2dcb596a-d352-407a-a47e-270b4cc52275"
+}
+
+func (c *Grid) OnCreated(require galx.EditorComponentResolver) {
+	c.settings = require(c.settings).(*gui.Settings)
+
+	c.sizeX = 64
+	c.sizeY = 64
 }
 
 func (c *Grid) OnUpdate(s galx.State) error {
@@ -46,7 +50,7 @@ func (c *Grid) displaySettingsWindow() {
 	})
 }
 
-func (c *Grid) OnDraw(r galx.Renderer) error {
+func (c *Grid) OnBeforeDraw(r galx.Renderer) error {
 	if !r.Gizmos().Debug() {
 		return nil
 	}
@@ -72,7 +76,7 @@ func (c *Grid) OnDraw(r galx.Renderer) error {
 			})
 
 			if c.sizeX >= 64 && c.sizeY >= 64 {
-				r.DrawText(consts.AssetDefaultFont, galx.ColorGray1, fmt.Sprintf("%.0fx%.0f", rX, rY), galx.Vec{X: rX, Y: rY})
+				r.DrawText(consts.AssetDefaultFont, galx.ColorGray1, galx.Vec{X: rX, Y: rY}, fmt.Sprintf("%.0fx%.0f", rX, rY))
 			}
 		}
 	}

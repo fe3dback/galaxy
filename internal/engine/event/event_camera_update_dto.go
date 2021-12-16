@@ -4,6 +4,6 @@ type (
 	CameraUpdateEvent struct {
 		Width  int
 		Height int
-		Zoom   float64
+		Scale  float64
 	}
 )

@@ -6,6 +6,7 @@ import (
 	"github.com/inkyblackness/imgui-go/v4"
 
 	"github.com/fe3dback/galaxy/galx"
+	"github.com/fe3dback/galaxy/scope/editor/components/gui"
 )
 
 const surroundingBoxSize = 3
@@ -20,7 +21,7 @@ type Transform struct {
 	selectedObjects []galx.GameObject
 
 	// options
-	settings    settingsPane
+	settings    *gui.Settings
 	snapSize    int32
 	snapOn      bool
 	snapForceOn bool
@@ -45,11 +46,13 @@ type Transform struct {
 	surroundingSelect galx.Rect
 }
 
-func NewTransform(settings settingsPane) *Transform {
-	return &Transform{
-		settings: settings,
-		snapSize: 32,
-	}
+func (c Transform) Id() string {
+	return "37901d67-ffd9-4ee3-af0a-e98a5f6230cf"
+}
+
+func (c *Transform) OnCreated(require galx.EditorComponentResolver) {
+	c.settings = require(c.settings).(*gui.Settings)
+	c.snapSize = 32
 }
 
 func (c *Transform) OnUpdate(state galx.State) error {
@@ -218,7 +221,7 @@ func (c *Transform) axisOn(len float64, size float64, towards galx.Angle) galx.C
 	}
 }
 
-func (c *Transform) OnDraw(r galx.Renderer) error {
+func (c *Transform) OnAfterDraw(r galx.Renderer) error {
 	if len(c.selectedObjects) == 0 {
 		return nil
 	}

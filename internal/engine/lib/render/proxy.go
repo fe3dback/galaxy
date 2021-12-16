@@ -249,7 +249,7 @@ func (r *Renderer) drawTexture(res consts.AssetsPath, src, dest Rect, angle galx
 // Text
 // ==================================================
 
-func (r *Renderer) DrawText(fontId consts.AssetsPath, color galx.Color, text string, vec galx.Vec) {
+func (r *Renderer) DrawText(fontId consts.AssetsPath, color galx.Color, vec galx.Vec, text string) {
 	norm := Rect{
 		X: int32(vec.X),
 		Y: int32(vec.Y),

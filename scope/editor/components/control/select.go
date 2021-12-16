@@ -5,13 +5,10 @@ import (
 )
 
 type Select struct {
-	objectQueries galx.ObjectQueries
 }
 
-func NewSelect(objectQueries galx.ObjectQueries) *Select {
-	return &Select{
-		objectQueries: objectQueries,
-	}
+func (c Select) Id() string {
+	return "cd0d9fb0-3a00-4521-8ff7-3a436c317138"
 }
 
 func (c *Select) OnUpdate(state galx.State) error {
@@ -25,7 +22,7 @@ func (c *Select) OnUpdate(state galx.State) error {
 
 	// mouse just clicked
 	clickWorldPos := state.Camera().Screen2World(state.Mouse().MouseCoords())
-	foundObject := c.objectAt(clickWorldPos)
+	foundObject := c.objectAt(state, clickWorldPos)
 
 	// switch object state && apply to select group
 	if state.Movement().Shift() {
@@ -55,13 +52,13 @@ func (c *Select) OnUpdate(state galx.State) error {
 	return nil
 }
 
-func (c *Select) objectAt(clickPosition galx.Vec) galx.GameObject {
+func (c *Select) objectAt(state galx.State, clickPosition galx.Vec) galx.GameObject {
 	const selectPrecision = 4
 
 	var current galx.GameObject
 	minLevel := uint8(255)
 
-	for _, screenObject := range c.objectQueries.AllIn(galx.QueryFlagOnlyOnScreen | galx.QueryFlagExcludeLocked) {
+	for _, screenObject := range state.ObjectQueries().AllIn(galx.QueryFlagOnlyOnScreen | galx.QueryFlagExcludeLocked) {
 		bbox := screenObject.BoundingBox(selectPrecision)
 		if bbox.Contains(clickPosition) && screenObject.HierarchyLevel() < minLevel {
 			current = screenObject
@@ -70,8 +67,4 @@ func (c *Select) objectAt(clickPosition galx.Vec) galx.GameObject {
 	}
 
 	return current
-}
-
-func (c *Select) OnDraw(_ galx.Renderer) error {
-	return nil
 }

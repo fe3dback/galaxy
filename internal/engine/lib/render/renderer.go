@@ -40,6 +40,7 @@ type (
 	renderTarget struct {
 		width     int32
 		height    int32
+		scale     float32
 		primary   *sdl.Texture
 		secondary [surfacesCount]*sdl.Texture
 	}
@@ -79,6 +80,7 @@ func NewRenderer(
 		appState:       appState,
 		renderTarget: renderTarget{
 			primary: sdlRenderer.GetRenderTarget(),
+			scale:   1.0,
 		},
 		textCache: map[string]*cachedText{},
 	}
@@ -101,7 +103,7 @@ func NewRenderer(
 		renderer.onCameraUpdate(
 			int32(cameraUpdateEvent.Width),
 			int32(cameraUpdateEvent.Height),
-			float32(cameraUpdateEvent.Zoom),
+			float32(cameraUpdateEvent.Scale),
 		)
 
 		return nil
@@ -159,6 +161,17 @@ func (r *Renderer) InEditorMode() bool {
 
 func (r *Renderer) SetRenderMode(renderMode galx.RenderMode) {
 	r.renderMode = renderMode
+
+	if renderMode == engine.RenderModeWorld {
+		err := r.ref.SetScale(r.renderTarget.scale, r.renderTarget.scale)
+		utils.Check("set render camera world scale", err)
+	}
+
+	if renderMode == engine.RenderModeUI {
+		// ui scale is always 100%
+		err := r.ref.SetScale(1, 1)
+		utils.Check("set render camera UI scale", err)
+	}
 }
 
 func (r *Renderer) Origin() *sdl.Renderer {
@@ -187,15 +200,15 @@ func (r *Renderer) onMouseRight(isPressed bool) {
 	r.guiMousePressedRight = isPressed
 }
 
-func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float32) {
+func (r *Renderer) onCameraUpdate(width int32, height int32, scale float32) {
 	flags := r.window.GetFlags()
 	fullScreen := flags&sdl.WINDOW_FULLSCREEN != 0
 
-	log.Printf("Resize to [%dx%d] (fullScreen = %v, zoom = %v)\n",
+	log.Printf("Resize to [%dx%d] (fullScreen = %v, scale = %v)\n",
 		width,
 		height,
 		fullScreen,
-		zoom,
+		scale,
 	)
 
 	err := r.ref.SetLogicalSize(width, height)
@@ -217,10 +230,8 @@ func (r *Renderer) onCameraUpdate(width int32, height int32, zoom float32) {
 	})
 	utils.Check("set clip rect", err)
 
-	err = r.ref.SetScale(zoom, zoom)
-	utils.Check("scale (zoom) rect", err)
-
 	// resize all surfaces
+	r.renderTarget.scale = scale
 	r.renderTarget.width = width
 	r.renderTarget.height = height
 
