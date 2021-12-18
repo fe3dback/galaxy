@@ -1,4 +1,4 @@
-package loader
+package assets
 
 import (
 	"encoding/xml"
@@ -12,17 +12,17 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 )
 
-type AssetsLoader struct {
+type Manager struct {
 	soundManager *sound.Manager
 }
 
-func NewAssetsLoader(soundManager *sound.Manager) *AssetsLoader {
-	return &AssetsLoader{
+func NewAssetsManager(soundManager *sound.Manager) *Manager {
+	return &Manager{
 		soundManager: soundManager,
 	}
 }
 
-func (l *AssetsLoader) LoadYaml(res consts.AssetsPath, data interface{}) {
+func (l *Manager) LoadYaml(res consts.AssetsPath, data interface{}) {
 	buffer, err := ioutil.ReadFile(res)
 	if err != nil {
 		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
@@ -38,7 +38,7 @@ func (l *AssetsLoader) LoadYaml(res consts.AssetsPath, data interface{}) {
 	}
 }
 
-func (l *AssetsLoader) LoadXML(res consts.AssetsPath, data interface{}) {
+func (l *Manager) LoadXML(res consts.AssetsPath, data interface{}) {
 	buffer, err := ioutil.ReadFile(res)
 	if err != nil {
 		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
@@ -50,7 +50,7 @@ func (l *AssetsLoader) LoadXML(res consts.AssetsPath, data interface{}) {
 	}
 }
 
-func (l *AssetsLoader) LoadFile(res consts.AssetsPath) []byte {
+func (l *Manager) LoadFile(res consts.AssetsPath) []byte {
 	buffer, err := ioutil.ReadFile(res)
 	if err != nil {
 		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
@@ -59,6 +59,17 @@ func (l *AssetsLoader) LoadFile(res consts.AssetsPath) []byte {
 	return buffer
 }
 
-func (l *AssetsLoader) LoadSound(res consts.AssetsPath) {
+func (l *Manager) SaveFile(res consts.AssetsPath, data []byte) {
+	err := ioutil.WriteFile(res, data, 0755)
+	if err != nil {
+		panic(fmt.Sprintf("can`t save `%s`: %v", res, err))
+	}
+}
+
+func (l *Manager) CopyFile(src, dest consts.AssetsPath) {
+	l.SaveFile(dest, l.LoadFile(src))
+}
+
+func (l *Manager) LoadSound(res consts.AssetsPath) {
 	l.soundManager.LoadSound(res)
 }

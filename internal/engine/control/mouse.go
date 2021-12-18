@@ -8,12 +8,8 @@ import (
 )
 
 type (
-	guiIO interface {
-		WantCaptureMouse() bool
-	}
-
 	Mouse struct {
-		guiIO guiIO
+		engineGUI engineGUI
 
 		scrollPosition   float64
 		scrollLastOffset float64
@@ -21,12 +17,15 @@ type (
 		leftState               state
 		rightState              state
 		propagationLockPriority int
+
+		lastX int
+		lastY int
 	}
 )
 
-func NewMouse(dispatcher *event.Dispatcher, guiIO guiIO) *Mouse {
+func NewMouse(dispatcher *event.Dispatcher, engineGUI engineGUI) *Mouse {
 	m := &Mouse{
-		guiIO:                   guiIO,
+		engineGUI:               engineGUI,
 		leftState:               stateUp,
 		rightState:              stateUp,
 		propagationLockPriority: 0,
@@ -40,6 +39,12 @@ func NewMouse(dispatcher *event.Dispatcher, guiIO guiIO) *Mouse {
 
 func (m *Mouse) subscribeToMouse(dispatcher *event.Dispatcher) {
 	dispatcher.OnMouseWheel(func(mouseWheel event.MouseWheelEvent) error {
+		if m.engineGUI.CursorOnWindow() {
+			// ignore mouse wheel event
+			// because it already captured in engine window
+			return nil
+		}
+
 		m.scrollPosition += mouseWheel.ScrollOffset
 		m.scrollLastOffset = mouseWheel.ScrollOffset
 
@@ -49,8 +54,8 @@ func (m *Mouse) subscribeToMouse(dispatcher *event.Dispatcher) {
 
 func (m *Mouse) subscribeToMouseButton(dispatcher *event.Dispatcher) {
 	dispatcher.OnMouseButton(func(mouseButtonEvent event.MouseButtonEvent) error {
-		if m.guiIO.WantCaptureMouse() {
-			// click consumed by GUI layer, we need stop propagate click next to engine
+		if m.engineGUI.CaptureMouse() {
+			// click consumed by engine GUI layer, we need stop propagate click next to engine
 			return nil
 		}
 
@@ -80,9 +85,13 @@ func (m *Mouse) subscribeToMouseButton(dispatcher *event.Dispatcher) {
 
 func (m *Mouse) subscribeToFrameStart(dispatcher *event.Dispatcher) {
 	dispatcher.OnFrameStart(func(_ event.FrameStartEvent) error {
+		// mouse state
 		m.propagationLockPriority = 0
+
+		// mouse scroll
 		m.scrollLastOffset = 0
 
+		// mouse buttons
 		if m.leftState == statePressed {
 			m.leftState = stateDown
 		}
@@ -97,16 +106,25 @@ func (m *Mouse) subscribeToFrameStart(dispatcher *event.Dispatcher) {
 			m.rightState = stateUp
 		}
 
+		// mouse position
+		x, y, _ := sdl.GetMouseState()
+		if int32(m.lastX) != x || int32(m.lastY) != y {
+			m.lastX = int(x)
+			m.lastY = int(y)
+			dispatcher.PublishEventMouseMove(event.MouseMoveEvent{
+				X: m.lastX,
+				Y: m.lastY,
+			})
+		}
+
 		return nil
 	})
 }
 
 func (m *Mouse) MouseCoords() galx.Vec {
-	x, y, _ := sdl.GetMouseState()
-
 	return galx.Vec{
-		X: float64(x),
-		Y: float64(y),
+		X: float64(m.lastX),
+		Y: float64(m.lastY),
 	}
 }
 

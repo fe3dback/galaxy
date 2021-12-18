@@ -8,15 +8,17 @@ import (
 
 type (
 	Keyboard struct {
-		mapping keysMapping
+		engineGUI engineGUI
+		mapping   keysMapping
 	}
 
 	keysMapping = map[string]state
 )
 
-func NewKeyboard(dispatcher *event.Dispatcher) *Keyboard {
+func NewKeyboard(dispatcher *event.Dispatcher, engineGUI engineGUI) *Keyboard {
 	kb := &Keyboard{
-		mapping: make(keysMapping),
+		engineGUI: engineGUI,
+		mapping:   make(keysMapping),
 	}
 	kb.subscribeToFrameStart(dispatcher)
 	kb.subscribeToKeyboard(dispatcher)
@@ -25,6 +27,10 @@ func NewKeyboard(dispatcher *event.Dispatcher) *Keyboard {
 }
 
 func (kb *Keyboard) IsPressed(key rune) bool {
+	if kb.engineGUI.CaptureKeyboard() {
+		return false
+	}
+
 	if state, ok := kb.mapping[kb.unRune(key)]; ok {
 		return state == statePressed
 	}
@@ -33,6 +39,10 @@ func (kb *Keyboard) IsPressed(key rune) bool {
 }
 
 func (kb *Keyboard) IsReleased(key rune) bool {
+	if kb.engineGUI.CaptureKeyboard() {
+		return false
+	}
+
 	if state, ok := kb.mapping[kb.unRune(key)]; ok {
 		return state == stateReleased
 	}
@@ -41,6 +51,10 @@ func (kb *Keyboard) IsReleased(key rune) bool {
 }
 
 func (kb *Keyboard) IsDown(key rune) bool {
+	if kb.engineGUI.CaptureKeyboard() {
+		return false
+	}
+
 	if state, ok := kb.mapping[kb.unRune(key)]; ok {
 		return state == stateDown
 	}

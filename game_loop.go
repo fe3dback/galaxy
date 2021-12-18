@@ -19,9 +19,9 @@ func gameLoop(game *Game) error {
 	engineState := c.ProvideEngineState()
 	frames := c.ProvideFrames()
 	renderer := c.ProvideEngineRenderer()
+	engineGUI := c.ProvideEngineGUI()
 	dispatcher := c.ProvideEventDispatcher()
 	scenesManager := c.ProvideEngineScenesManager()
-	scenesManager.LoadScenes()
 
 	// shared
 	gameState := c.ProvideEngineGameState()
@@ -41,7 +41,7 @@ func gameLoop(game *Game) error {
 		// start frame
 		// -----------------------------------
 		frames.Begin()
-		renderer.StartGUIFrame()
+		engineGUI.StartGUIFrame()
 		dispatcher.PublishEventFrameStart(event.FrameStartEvent{})
 
 		// -----------------------------------
@@ -108,7 +108,7 @@ func gameLoop(game *Game) error {
 		}
 
 		renderer.EndEngineFrame()
-		renderer.EndGUIFrame()
+		engineGUI.EndGUIFrame()
 		renderer.UpdateGPU()
 
 		// -----------------------------------
@@ -119,7 +119,10 @@ func gameLoop(game *Game) error {
 		// -----------------------------------
 		// finalize frame
 		// -----------------------------------
-		dispatcher.PublishEventFrameEnd(event.FrameEndEvent{})
+		dispatcher.PublishEventFrameEnd(event.FrameEndEvent{
+			FrameID:   frames.FrameId(),
+			DeltaTime: frames.DeltaTime(),
+		})
 		frames.End()
 	}
 

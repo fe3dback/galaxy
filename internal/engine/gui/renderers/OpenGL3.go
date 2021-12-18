@@ -6,7 +6,7 @@ import (
 
 	"github.com/inkyblackness/imgui-go/v4"
 
-	gl2 "github.com/fe3dback/galaxy/internal/engine/lib/renderers/gl/v3.2-core/gl"
+	gl2 "github.com/fe3dback/galaxy/internal/engine/gui/renderers/gl/v3.2-core/gl"
 )
 
 //go:embed gl-shader/main.vert

@@ -7,38 +7,44 @@ import (
 )
 
 type Scene struct {
+	id         string
 	destroyed  bool
 	entities   []galx.GameObject
 	spawnQueue []galx.GameObject
 }
 
-func NewScene(entities []galx.GameObject) *Scene {
+func NewScene(id string, entities []galx.GameObject) *Scene {
 	return &Scene{
+		id:         id,
 		destroyed:  false,
 		entities:   entities,
 		spawnQueue: []galx.GameObject{},
 	}
 }
 
-func (w *Scene) Entities() []galx.GameObject {
-	return w.entities
+func (s *Scene) ID() string {
+	return s.id
 }
 
-func (w *Scene) OnUpdate(s galx.State) error {
+func (s *Scene) Entities() []galx.GameObject {
+	return s.entities
+}
+
+func (s *Scene) OnUpdate(state galx.State) error {
 	needGc := false
 
-	if w.destroyed {
+	if s.destroyed {
 		return nil
 	}
 
 	// spawn new entities
-	if len(w.spawnQueue) > 0 {
-		w.entities = append(w.entities, w.spawnQueue...)
-		w.spawnQueue = w.spawnQueue[:0]
+	if len(s.spawnQueue) > 0 {
+		s.entities = append(s.entities, s.spawnQueue...)
+		s.spawnQueue = s.spawnQueue[:0]
 	}
 
 	// update game
-	for _, e := range w.entities {
+	for _, e := range s.entities {
 		if !e.IsRoot() {
 			// scene will update only root entities
 			// all child entities will be updated from parent
@@ -50,26 +56,26 @@ func (w *Scene) OnUpdate(s galx.State) error {
 			continue
 		}
 
-		err := e.OnUpdate(s)
+		err := e.OnUpdate(state)
 		if err != nil {
 			return fmt.Errorf("can`t update world entity `%T`: %w", e, err)
 		}
 	}
 
 	if needGc {
-		w.garbageCollect()
+		s.garbageCollect()
 	}
 
 	return nil
 }
 
-func (w *Scene) OnDraw(r galx.Renderer) error {
-	if w.destroyed {
+func (s *Scene) OnDraw(r galx.Renderer) error {
+	if s.destroyed {
 		return nil
 	}
 
 	// draw world
-	for _, e := range w.entities {
+	for _, e := range s.entities {
 		if !e.IsRoot() {
 			// scene will draw only root entities
 			// all child entities will be drawn from parent
@@ -89,10 +95,10 @@ func (w *Scene) OnDraw(r galx.Renderer) error {
 	return nil
 }
 
-func (w *Scene) garbageCollect() {
-	list := make([]galx.GameObject, 0, len(w.entities))
+func (s *Scene) garbageCollect() {
+	list := make([]galx.GameObject, 0, len(s.entities))
 
-	for _, e := range w.entities {
+	for _, e := range s.entities {
 		if e.IsDestroyed() {
 			continue
 		}
@@ -100,13 +106,13 @@ func (w *Scene) garbageCollect() {
 		list = append(list, e)
 	}
 
-	w.entities = list
+	s.entities = list
 }
 
-func (w *Scene) destroy() {
-	for _, e := range w.entities {
+func (s *Scene) destroy() {
+	for _, e := range s.entities {
 		e.Destroy()
 	}
 
-	w.garbageCollect()
+	s.garbageCollect()
 }

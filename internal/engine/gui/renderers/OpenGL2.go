@@ -6,7 +6,7 @@ import (
 
 	"github.com/inkyblackness/imgui-go/v4"
 
-	"github.com/fe3dback/galaxy/internal/engine/lib/renderers/gl/v2.1/gl"
+	"github.com/fe3dback/galaxy/internal/engine/gui/renderers/gl/v2.1/gl"
 )
 
 // OpenGL2 implements a renderer based on github.com/go-gl/gl (v2.1).

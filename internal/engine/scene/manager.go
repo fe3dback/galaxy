@@ -6,101 +6,149 @@ import (
 	"runtime"
 
 	"github.com/fe3dback/galaxy/galx"
+	"github.com/fe3dback/galaxy/internal/engine/assets"
 	"github.com/fe3dback/galaxy/internal/engine/event"
-	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/node"
 )
 
+const (
+	modeEdit mode = "edit"
+	modeGame mode = "game"
+)
+
 type (
-	ID         = string
-	blueprint  = func() []galx.GameObject
-	blueprints = map[ID]blueprint
+	ID        = string
+	snapshots = map[ID]*SnapshotScene
+	mode      string
 )
 
 type Manager struct {
-	assetsLoader      *loader.AssetsLoader
+	assetsManager     *assets.Manager
 	componentRegistry *node.ComponentsRegistry
+	editorIncluded    bool
 
-	blueprints   blueprints
-	currentID    ID
-	currentScene *Scene
-
-	snapshotScene SerializedScene
-	snapshotId    ID
-	hasSnapshot   bool
-
-	resetQueued           bool
-	snapshotQueued        bool
-	snapshotRestoreQueued bool
+	mode         mode
+	snapshotID   ID
+	snapshots    snapshots
+	sceneMutable *Scene
+	queueReset   bool
+	queueSave    bool
 }
 
 func NewManager(
 	dispatcher *event.Dispatcher,
-	assetsLoader *loader.AssetsLoader,
+	assetsManager *assets.Manager,
 	componentRegistry *node.ComponentsRegistry,
-	includeEditor bool,
+	editorIncluded bool,
 ) *Manager {
 	manager := &Manager{
-		assetsLoader:      assetsLoader,
+		assetsManager:     assetsManager,
 		componentRegistry: componentRegistry,
-		blueprints:        make(blueprints),
+		snapshots:         make(snapshots),
+		editorIncluded:    editorIncluded,
 	}
 
-	if includeEditor {
+	if editorIncluded {
+		manager.mode = modeEdit
+		manager.snapshotID = ""
+	} else {
+		manager.mode = modeGame
+	}
+
+	// load initial state from assets
+	defaultSceneID, initialSnapshots := manager.loadSnapshots()
+	manager.snapshots = initialSnapshots
+	manager.Switch(defaultSceneID)
+
+	// subscribe to events
+	if editorIncluded {
 		dispatcher.OnKeyBoard(manager.handleKeyboard)
 	}
 
 	dispatcher.OnFrameStart(manager.handleFrameStart)
 
+	// return
 	return manager
 }
 
-func (m *Manager) SaveSnapshot(force bool) {
-	if force {
-		m.snapshot()
+func (m *Manager) StateToGameMode() {
+	if !m.editorIncluded {
+		// ignore in exported game
 		return
 	}
 
-	m.snapshotQueued = true
+	if m.mode == modeGame {
+		// already in game mode
+		return
+	}
+
+	if m.sceneMutable == nil {
+		panic("failed snapshot editor scene, is not initialized yet")
+	}
+
+	// save current scene to snapshot
+	m.snapshotID = m.sceneMutable.ID()
+	m.snapshots[m.snapshotID] = m.encodeScene(*m.sceneMutable)
+
+	// decode it back to game mode
+	// also test encoded changes here
+	m.sceneMutable = m.decodeScene(*m.snapshots[m.snapshotID])
+	m.mode = modeGame
 }
 
-func (m *Manager) RestoreFromSnapshot(force bool) {
-	if force {
-		m.snapshotRestore()
+func (m *Manager) StateToEditorMode() {
+	if !m.editorIncluded {
+		// ignore in exported game
 		return
 	}
 
-	m.snapshotRestoreQueued = true
+	if m.mode == modeEdit {
+		// already in edit mode
+		return
+	}
+
+	if m.snapshotID == "" {
+		panic("failed restore scene from editor snapshot, because snapshot not exist")
+	}
+
+	// delete game scene
+	m.sceneMutable.destroy()
+	m.sceneMutable = nil
+	runtime.GC()
+
+	// restore editor scene back from snapshot
+	m.sceneMutable = m.decodeScene(*m.snapshots[m.snapshotID])
+	m.snapshotID = ""
+	m.mode = modeEdit
 }
 
 func (m *Manager) CurrentSceneID() ID {
-	return m.currentID
+	return m.sceneMutable.ID()
 }
 
 func (m *Manager) Current() galx.Scene {
-	return m.currentScene
+	return m.sceneMutable
 }
 
 func (m *Manager) Switch(nextID ID) {
-	if _, ok := m.blueprints[nextID]; !ok {
-		panic(fmt.Errorf("failed switch scene from '%s' to '%s'. Next scene not exist", m.currentID, nextID))
+	currentID := "nil"
+	if m.sceneMutable != nil {
+		currentID = m.sceneMutable.ID()
 	}
 
-	previousID := m.currentID
+	if _, ok := m.snapshots[nextID]; !ok {
+		panic(fmt.Errorf("failed switch scene from '%s' to '%s'. Next scene not exist", currentID, nextID))
+	}
 
 	// destroy current
-	if m.currentScene != nil {
-		m.currentScene.destroy()
+	if m.sceneMutable != nil {
+		m.sceneMutable.destroy()
 		runtime.GC()
 	}
 
-	// create from blueprint
-	m.currentID = nextID
-	m.currentScene = createSceneFromBlueprint(
-		m.blueprints[nextID],
-	)
-
-	log.Println(fmt.Sprintf("scene switched from '%s' to '%s'", previousID, nextID))
+	// create from snapshot
+	m.sceneMutable = m.decodeScene(*m.snapshots[nextID])
+	log.Println(fmt.Sprintf("scene switched from '%s' to '%s'", currentID, nextID))
 }
 
 func (m *Manager) handleKeyboard(keyboard event.KeyBoardEvent) error {
@@ -108,80 +156,61 @@ func (m *Manager) handleKeyboard(keyboard event.KeyBoardEvent) error {
 		return nil
 	}
 
-	if keyboard.Key != event.KeyF4 {
-		return nil
+	if keyboard.Key == event.KeyF4 {
+		m.queueReset = true
 	}
 
-	m.resetQueued = true
+	if keyboard.Key == event.KeyF6 {
+		m.queueSave = true
+	}
+
 	return nil
 }
 
 func (m *Manager) handleFrameStart(_ event.FrameStartEvent) error {
-	if m.resetQueued {
-		m.resetQueued = false
+	if m.queueReset {
+		m.queueReset = false
 		m.reset()
 	}
 
-	if m.snapshotQueued {
-		m.snapshotQueued = false
-		m.snapshot()
-	}
-
-	if m.snapshotRestoreQueued {
-		m.snapshotRestoreQueued = false
-		m.snapshotRestore()
+	if m.queueSave {
+		m.queueSave = false
+		m.save()
 	}
 
 	return nil
 }
 
+func (m *Manager) guardEditor(cb func()) {
+	if !m.editorIncluded {
+		// ignore in exported game
+		return
+	}
+
+	if m.mode != modeEdit {
+		// ignore reset commands on game mode
+		return
+	}
+
+	cb()
+}
+
 func (m *Manager) reset() {
-	log.Println(fmt.Sprintf("Resetting current scene '%s'..", m.currentID))
+	m.guardEditor(func() {
+		log.Println(fmt.Sprintf("Resetting current scene '%s'..", m.sceneMutable.ID()))
 
-	// switch to same scene
-	// it will recreate it
-	m.Switch(m.currentID)
+		// switch to same scene
+		// it will recreate it
+		m.Switch(m.sceneMutable.ID())
+	})
 }
 
-func (m *Manager) snapshot() {
-	log.Println(fmt.Sprintf("Snaphoting scene '%s'..", m.currentID))
+func (m *Manager) save() {
+	m.guardEditor(func() {
+		log.Println(fmt.Sprintf("Saving current scene '%s'..", m.sceneMutable.ID()))
 
-	serialized, err := m.marshalScene(m.currentScene)
-	if err != nil {
-		panic(fmt.Errorf("failed marshal scene for snapshot: %w", err))
-	}
-
-	m.snapshotId = m.currentID
-	m.snapshotScene = *serialized
-	m.hasSnapshot = true
-}
-
-func (m *Manager) snapshotRestore() {
-	log.Println(fmt.Sprintf("Restore scene '%s' from snapshot..", m.snapshotId))
-
-	if !m.hasSnapshot {
-		// if we not have snapshot, just rollback to last saved state on disk
-		m.reset()
-		return
-	}
-
-	if m.currentID != m.snapshotId {
-		// if scene changed during game, just rollback to last saved state on disk
-		m.reset()
-		return
-	}
-
-	scene, err := m.unmarshalScene(&m.snapshotScene)
-	if err != nil {
-		panic(fmt.Errorf("failed restore from snaphot: unmarshal: %w", err))
-	}
-
-	m.currentScene = scene
-	m.snapshotId = ""
-	m.snapshotScene = SerializedScene{}
-	m.hasSnapshot = false
-}
-
-func createSceneFromBlueprint(bp blueprint) *Scene {
-	return NewScene(bp())
+		m.saveSnapshot(
+			m.encodeScene(*m.sceneMutable),
+		)
+	})
 }

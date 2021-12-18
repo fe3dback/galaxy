@@ -15,7 +15,7 @@ type Frames struct {
 	limitFps      int
 	limitDuration time.Duration
 
-	total         int
+	total         uint64
 	count         int
 	fps           int
 	gameStart     time.Time
@@ -103,7 +103,7 @@ func (f *Frames) TargetFPS() int {
 	return f.limitFps
 }
 
-func (f *Frames) FrameId() int {
+func (f *Frames) FrameId() uint64 {
 	return f.total
 }
 

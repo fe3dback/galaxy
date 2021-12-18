@@ -5,11 +5,12 @@ import (
 
 	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine/assets"
 	engineeditor "github.com/fe3dback/galaxy/internal/engine/editor"
+	"github.com/fe3dback/galaxy/internal/engine/gui"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
 	"github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
-	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 )
 
@@ -131,8 +132,6 @@ func (c *Container) ProvideEngineRenderer() *render.Renderer {
 	renderer := render.NewRenderer(
 		c.provideSDL().Window(),
 		c.provideSDL().Renderer(),
-		c.provideSDL().GUIRenderer(),
-		c.provideSDL().GUI(),
 		c.provideRenderFontsManager(),
 		c.provideRenderTextureManager(),
 		c.provideRenderCamera(),
@@ -143,6 +142,21 @@ func (c *Container) ProvideEngineRenderer() *render.Renderer {
 
 	c.memstate.renderer.renderer = renderer
 	return c.memstate.renderer.renderer
+}
+
+func (c *Container) ProvideEngineGUI() *gui.Gui {
+	if c.memstate.renderer.gui != nil {
+		return c.memstate.renderer.gui
+	}
+
+	engineGUI := gui.NewGUI(
+		c.closer(),
+		c.provideSDL().RenderTech(),
+		c.ProvideEventDispatcher(),
+	)
+
+	c.memstate.renderer.gui = engineGUI
+	return c.memstate.renderer.gui
 }
 
 func (c *Container) ProvideEngineGameState() *engine.GameState {
@@ -166,8 +180,8 @@ func (c *Container) ProvideEngineGameState() *engine.GameState {
 	return c.memstate.engine.gameState
 }
 
-func (c *Container) provideEngineAssetsLoader() *loader.AssetsLoader {
-	return loader.NewAssetsLoader(
+func (c *Container) provideEngineAssetsLoader() *assets.Manager {
+	return assets.NewAssetsManager(
 		c.provideSoundMixer(),
 	)
 }

@@ -1,4 +1,4 @@
-// This file generated at 2021-12-09 22:45:44.775357083 +0300 MSK m=+0.000630495
+// This file generated at 2021-12-18 14:07:34.18743168 +0300 MSK m=+0.001402307
 // DO NOT MODIFY
 package event
 
@@ -14,6 +14,8 @@ func (d *Dispatcher) init() {
     d.handlers[eventTypeMouseButton] = make([]handlerFn, 0)
     
     d.handlers[eventTypeMouseWheel] = make([]handlerFn, 0)
+    
+    d.handlers[eventTypeMouseMove] = make([]handlerFn, 0)
     
     d.handlers[eventTypeFrameStart] = make([]handlerFn, 0)
     

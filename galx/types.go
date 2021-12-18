@@ -35,8 +35,8 @@ type (
 	SceneManager interface {
 		Switch(nextID string)
 		Current() Scene
-		SaveSnapshot(force bool)
-		RestoreFromSnapshot(force bool)
+		StateToGameMode()
+		StateToEditorMode()
 	}
 
 	Scene interface {
@@ -172,7 +172,7 @@ type (
 	Moment interface {
 		FPS() int
 		TargetFPS() int
-		FrameId() int
+		FrameId() uint64
 		FrameDuration() time.Duration
 		LimitDuration() time.Duration
 		DeltaTime() float64
@@ -268,11 +268,6 @@ type (
 		Clear(Color)
 		EndEngineFrame()
 		UpdateGPU()
-
-		// gui
-
-		StartGUIFrame()
-		EndGUIFrame()
 	}
 
 	SoundMixer interface {

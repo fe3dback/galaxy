@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/inkyblackness/imgui-go/v4"
 	"github.com/veandco/go-sdl2/sdl"
 
 	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/galx"
 	"github.com/fe3dback/galaxy/internal/engine"
-	event2 "github.com/fe3dback/galaxy/internal/engine/event"
-	"github.com/fe3dback/galaxy/internal/engine/lib"
+	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -21,8 +19,6 @@ type (
 	Renderer struct {
 		window         *sdl.Window
 		ref            *sdl.Renderer
-		guiRenderer    lib.GUIRenderer
-		gui            imgui.IO
 		fontManager    *FontsManager
 		textureManager *TextureManager
 		camera         *Camera
@@ -31,10 +27,7 @@ type (
 		appState       *engine.State
 		renderTarget   renderTarget
 
-		textCache            map[string]*cachedText
-		guiTime              uint64
-		guiMousePressedLeft  bool
-		guiMousePressedRight bool
+		textCache map[string]*cachedText
 	}
 
 	renderTarget struct {
@@ -58,20 +51,16 @@ type Point = sdl.Point
 func NewRenderer(
 	sdlWindow *sdl.Window,
 	sdlRenderer *sdl.Renderer,
-	guiRenderer lib.GUIRenderer,
-	gui imgui.IO,
 	fontManager *FontsManager,
 	textureManager *TextureManager,
 	camera *Camera,
-	dispatcher *event2.Dispatcher,
+	dispatcher *event.Dispatcher,
 	gizmos galx.Gizmos,
 	appState *engine.State,
 ) *Renderer {
 	renderer := &Renderer{
 		window:         sdlWindow,
 		ref:            sdlRenderer,
-		guiRenderer:    guiRenderer,
-		gui:            gui,
 		fontManager:    fontManager,
 		textureManager: textureManager,
 		camera:         camera,
@@ -91,34 +80,20 @@ func NewRenderer(
 	}
 
 	// subscribe to events
-	dispatcher.OnWindow(func(window event2.WindowEvent) error {
-		if window.EventType == event2.WindowEventTypeSizeChanged {
+	dispatcher.OnWindow(func(window event.WindowEvent) error {
+		if window.EventType == event.WindowEventTypeSizeChanged {
 			renderer.onWindowResize()
 		}
 
 		return nil
 	})
 
-	dispatcher.OnCameraUpdate(func(cameraUpdateEvent event2.CameraUpdateEvent) error {
+	dispatcher.OnCameraUpdate(func(cameraUpdateEvent event.CameraUpdateEvent) error {
 		renderer.onCameraUpdate(
 			int32(cameraUpdateEvent.Width),
 			int32(cameraUpdateEvent.Height),
 			float32(cameraUpdateEvent.Scale),
 		)
-
-		return nil
-	})
-
-	dispatcher.OnMouseButton(func(mouseButtonEvent event2.MouseButtonEvent) error {
-		if mouseButtonEvent.IsLeft {
-			renderer.onMouseLeft(mouseButtonEvent.IsPressed)
-			return nil
-		}
-
-		if mouseButtonEvent.IsRight {
-			renderer.onMouseRight(mouseButtonEvent.IsPressed)
-			return nil
-		}
 
 		return nil
 	})
@@ -190,14 +165,6 @@ func (r *Renderer) TextureQuery(res consts.AssetsPath) galx.TextureInfo {
 func (r *Renderer) onWindowResize() {
 	width, height := r.window.GetSize()
 	r.Camera().Resize(int(width), int(height))
-}
-
-func (r *Renderer) onMouseLeft(isPressed bool) {
-	r.guiMousePressedLeft = isPressed
-}
-
-func (r *Renderer) onMouseRight(isPressed bool) {
-	r.guiMousePressedRight = isPressed
 }
 
 func (r *Renderer) onCameraUpdate(width int32, height int32, scale float32) {

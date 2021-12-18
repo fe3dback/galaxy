@@ -5,13 +5,14 @@ import (
 
 	"github.com/fe3dback/galaxy/cfg"
 	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine/assets"
 	"github.com/fe3dback/galaxy/internal/engine/control"
 	engineEditor "github.com/fe3dback/galaxy/internal/engine/editor"
 	"github.com/fe3dback/galaxy/internal/engine/event"
+	"github.com/fe3dback/galaxy/internal/engine/gui"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
 	"github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
-	"github.com/fe3dback/galaxy/internal/engine/loader"
 	"github.com/fe3dback/galaxy/internal/engine/node"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/frames"
@@ -31,13 +32,14 @@ type Container struct {
 			textureManager *render.TextureManager
 			camera         *render.Camera
 			renderer       *render.Renderer
+			gui            *gui.Gui
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos
 			appState      *engine.State
 			gameState     *engine.GameState
 			soundMixer    *sound.Manager
-			assetsLoader  *loader.AssetsLoader
+			assetsLoader  *assets.Manager
 			scenesManager *scene.Manager
 		}
 		control struct {

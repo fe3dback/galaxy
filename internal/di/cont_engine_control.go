@@ -11,7 +11,7 @@ func (c *Container) provideEngineControlMouse() *control.Mouse {
 
 	c.memstate.control.mouse = control.NewMouse(
 		c.ProvideEventDispatcher(),
-		c.provideSDL().GUI(),
+		c.ProvideEngineGUI(),
 	)
 	return c.memstate.control.mouse
 }
@@ -23,6 +23,7 @@ func (c *Container) provideEngineControlKeyboard() *control.Keyboard {
 
 	c.memstate.control.keyboard = control.NewKeyboard(
 		c.ProvideEventDispatcher(),
+		c.ProvideEngineGUI(),
 	)
 	return c.memstate.control.keyboard
 }

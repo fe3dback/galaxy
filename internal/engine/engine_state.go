@@ -66,13 +66,13 @@ func (as *State) handleFrameStart(_ event.FrameStartEvent) error {
 func (as *State) switchState() {
 	if as.mode == modeGame {
 		// game -> editor
-		as.sceneManager.RestoreFromSnapshot(true)
+		as.sceneManager.StateToEditorMode()
 		as.mode = modeEditor
 		return
 	}
 
 	// editor -> game
-	as.sceneManager.SaveSnapshot(true)
+	as.sceneManager.StateToGameMode()
 	as.mode = modeGame
 }
 
