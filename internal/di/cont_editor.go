@@ -2,9 +2,6 @@ package di
 
 import (
 	"github.com/fe3dback/galaxy/scope/editor"
-	"github.com/fe3dback/galaxy/scope/editor/components/control"
-	"github.com/fe3dback/galaxy/scope/editor/components/debug"
-	"github.com/fe3dback/galaxy/scope/editor/components/gui"
 )
 
 func (c *Container) ProvideEditorManager() *editor.Manager {
@@ -14,16 +11,18 @@ func (c *Container) ProvideEditorManager() *editor.Manager {
 
 	// todo auto register all editor components
 	manager := editor.NewManager(
+		// todo: turn on after new vulkan renderer
 		// gui
-		&gui.Help{},
-		&gui.Settings{},
-		&gui.Hierarchy{},
-
-		// components
-		&debug.Grid{},
-		&control.Camera{},
-		&control.Transform{}, // control level: 1
-		&control.Select{},    // control level: 2
+		// &gui.Scene{},
+		// &gui.Help{},
+		// &gui.Settings{},
+		// &gui.Hierarchy{},
+		//
+		// // components
+		// &debug.Grid{},
+		// &control.Camera{},
+		// &control.Transform{}, // control level: 1
+		// &control.Select{},    // control level: 2
 	)
 
 	c.memstate.editor.manager = manager

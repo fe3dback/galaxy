@@ -9,12 +9,34 @@ import (
 	engineeditor "github.com/fe3dback/galaxy/internal/engine/editor"
 	"github.com/fe3dback/galaxy/internal/engine/gui"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
-	"github.com/fe3dback/galaxy/internal/engine/lib/render"
+	oldRender "github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
+	"github.com/fe3dback/galaxy/internal/engine/render"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
+	"github.com/fe3dback/galaxy/internal/engine/windows"
 )
 
+func (c *Container) provideWindowsManager() *windows.Manager {
+	if c.memstate.render.windowManager != nil {
+		return c.memstate.render.windowManager
+	}
+
+	manager := windows.NewManager(
+		c.closer(),
+		engine.RenderTechVulkan,
+		c.Flags().ScreenWidth(),
+		c.Flags().ScreenHeight(),
+		c.Flags().IsFullscreen(),
+	)
+
+	c.memstate.render.windowManager = manager
+	return c.memstate.render.windowManager
+}
+
 func (c *Container) provideSDL() *lib.SDLLib {
+	// todo: remove SDL render
+	panic("sdl used")
+
 	if c.memstate.renderer.sdl != nil {
 		return c.memstate.renderer.sdl
 	}
@@ -48,36 +70,36 @@ func (c *Container) ProvideEngineState() *engine.State {
 	return c.memstate.engine.appState
 }
 
-func (c *Container) provideRenderFontsManager() *render.FontsManager {
+func (c *Container) provideRenderFontsManager() *oldRender.FontsManager {
 	if c.memstate.renderer.fontsManager != nil {
 		return c.memstate.renderer.fontsManager
 	}
 
-	fonts := render.NewFontsManager(c.closer())
+	fonts := oldRender.NewFontsManager(c.closer())
 	fonts.Load(consts.AssetDefaultFont)
 
 	c.memstate.renderer.fontsManager = fonts
 	return c.memstate.renderer.fontsManager
 }
 
-func (c *Container) provideRenderTextureManager() *render.TextureManager {
+func (c *Container) provideRenderTextureManager() *oldRender.TextureManager {
 	if c.memstate.renderer.textureManager != nil {
 		return c.memstate.renderer.textureManager
 	}
 
-	c.memstate.renderer.textureManager = render.NewTextureManager(
+	c.memstate.renderer.textureManager = oldRender.NewTextureManager(
 		c.provideSDL().Renderer(),
 		c.closer(),
 	)
 	return c.memstate.renderer.textureManager
 }
 
-func (c *Container) provideRenderCamera() *render.Camera {
+func (c *Container) provideRenderCamera() *oldRender.Camera {
 	if c.memstate.renderer.camera != nil {
 		return c.memstate.renderer.camera
 	}
 
-	c.memstate.renderer.camera = render.NewCamera(
+	c.memstate.renderer.camera = oldRender.NewCamera(
 		c.ProvideEventDispatcher(),
 	)
 	return c.memstate.renderer.camera
@@ -124,12 +146,27 @@ func (c *Container) ProvideEngineScenesManager() *scene.Manager {
 	return c.memstate.engine.scenesManager
 }
 
-func (c *Container) ProvideEngineRenderer() *render.Renderer {
+func (c *Container) ProvideEngineRenderer() *render.Render {
+	if c.memstate.render.inst != nil {
+		return c.memstate.render.inst
+	}
+
+	renderer := render.NewRender(
+		c.closer(),
+		c.provideWindowsManager().Window(),
+		c.flags.IsIncludeEditor() && c.flags.DebugOpts().Vulkan,
+	)
+
+	c.memstate.render.inst = renderer
+	return c.memstate.render.inst
+}
+
+func (c *Container) ProvideEngineRendererOLD() *oldRender.Renderer {
 	if c.memstate.renderer.renderer != nil {
 		return c.memstate.renderer.renderer
 	}
 
-	renderer := render.NewRenderer(
+	renderer := oldRender.NewRenderer(
 		c.provideSDL().Window(),
 		c.provideSDL().Renderer(),
 		c.provideRenderFontsManager(),
@@ -151,7 +188,7 @@ func (c *Container) ProvideEngineGUI() *gui.Gui {
 
 	engineGUI := gui.NewGUI(
 		c.closer(),
-		c.provideSDL().RenderTech(),
+		c.ProvideEngineRenderer(),
 		c.ProvideEventDispatcher(),
 	)
 

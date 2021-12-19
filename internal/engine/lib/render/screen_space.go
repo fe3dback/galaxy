@@ -1,11 +1,11 @@
 package render
 
 import (
-	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/galx"
 )
 
 func (r *Renderer) screenX(x float64) float64 {
-	if r.renderMode == engine.RenderModeUI {
+	if r.renderMode == galx.RenderModeUI {
 		return x
 	}
 
@@ -13,7 +13,7 @@ func (r *Renderer) screenX(x float64) float64 {
 }
 
 func (r *Renderer) screenY(y float64) float64 {
-	if r.renderMode == engine.RenderModeUI {
+	if r.renderMode == galx.RenderModeUI {
 		return y
 	}
 

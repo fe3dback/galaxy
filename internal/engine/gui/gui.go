@@ -3,25 +3,18 @@ package gui
 import (
 	"github.com/inkyblackness/imgui-go/v4"
 
-	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/event"
-	"github.com/fe3dback/galaxy/internal/engine/gui/renderers"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
 // Renderer covers rendering imgui draw data.
 type Renderer interface {
-	// PreRender causes the display buffer to be prepared for new output.
-	PreRender(clearColor [3]float32)
-	// Render draws the provided imgui draw data.
 	Render(displaySize [2]float32, framebufferSize [2]float32, drawData imgui.DrawData)
-	// Dispose close renderer
-	Dispose()
 }
 
 type Gui struct {
-	io       imgui.IO
-	renderer Renderer
+	io     imgui.IO
+	render Renderer
 
 	// engine state from updates
 	windowWidth       float32
@@ -34,16 +27,17 @@ type Gui struct {
 	mousePressedRight bool
 }
 
-func NewGUI(closer *utils.Closer, renderTech engine.RenderTech, dispatcher *event.Dispatcher) *Gui {
-	gui := createGUI(closer, renderTech)
+func NewGUI(closer *utils.Closer, render Renderer, dispatcher *event.Dispatcher) *Gui {
+	gui := createGUI(closer, render)
 	gui.subscribe(dispatcher)
 
 	return gui
 }
 
-func createGUI(closer *utils.Closer, renderTech engine.RenderTech) *Gui {
+func createGUI(closer *utils.Closer, render Renderer) *Gui {
 	// fallback settings for first frame
 	gui := &Gui{
+		render:       render,
 		windowWidth:  320,
 		windowHeight: 240,
 		deltaTime:    1 / 60.0,
@@ -52,22 +46,6 @@ func createGUI(closer *utils.Closer, renderTech engine.RenderTech) *Gui {
 	context := imgui.CreateContext(nil)
 	closer.EnqueueFree(context.Destroy)
 	gui.io = imgui.CurrentIO()
-
-	// create gui renderer
-	var renderer Renderer
-	var err error
-
-	switch renderTech {
-	case engine.RenderTechOpenGL2:
-		renderer, err = renderers.NewOpenGL2(gui.io)
-	case engine.RenderTechOpenGL3:
-		renderer, err = renderers.NewOpenGL3(gui.io)
-	}
-
-	utils.Check("create GUI renderer", err)
-	closer.EnqueueFree(renderer.Dispose)
-	gui.renderer = renderer
-
 	return gui
 }
 
@@ -140,7 +118,7 @@ func (g *Gui) StartGUIFrame() {
 
 func (g *Gui) EndGUIFrame() {
 	imgui.Render()
-	g.renderer.Render(
+	g.render.Render(
 		[2]float32{g.windowWidth, g.windowHeight},
 		[2]float32{g.windowWidth, g.windowHeight},
 		imgui.RenderedDrawData(),

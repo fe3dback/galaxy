@@ -50,9 +50,11 @@ func (m *Manager) resolveComponentDependency(slot galx.EditorComponentIdentifiab
 
 func (m *Manager) OnUpdate(s galx.State) error {
 	for _, component := range m.components {
-		err := component.OnUpdate(s)
-		if err != nil {
-			return fmt.Errorf("can`t update editor component '%T': %w", component, err)
+		if lc, ok := component.(componentLifeCycleUpdate); ok {
+			err := lc.OnUpdate(s)
+			if err != nil {
+				return fmt.Errorf("can`t update editor component '%T': %w", component, err)
+			}
 		}
 	}
 

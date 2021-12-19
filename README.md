@@ -28,6 +28,31 @@ SDL lib:
 apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev
 ```
 
+## Vulkan
+
+For working with vulkan (compiling shaders, etc..), need install vulkan SDK:
+https://vulkan.lunarg.com/
+
+(optional) Vulkan validation layers (for debug render pipeline):
+
+```
+https://github.com/KhronosGroup/Vulkan-ValidationLayers
+```
+
+Path to validation layers should be provided in app ENV:
+
+```
+VULKAN_SDK=/sdk/1.2.198.1/x86_64
+LD_LIBRARY_PATH=/sdk/1.2.198.1/x86_64/lib:/sdk/1.2.198.1/x86_64/lib/vulkan/layers
+VK_LAYER_PATH=/sdk/1.2.198.1/x86_64/lib/vulkan/layers:/ext/Vulkan-ValidationLayers/build/layers
+VK_INSTANCE_LAYERS=VK_LAYER_LUNARG_api_dump:VK_LAYER_KHRONOS_validation
+
+# here is
+# /sdk - full path to vulkan SDK
+# /ext - path to github.com/KhronosGroup/Vulkan-ValidationLayers build dir
+# /ext - need compile first, see https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/master/BUILD.md#building
+```
+
 ## How wo run
 
 Examples not included for now. Also, you need some required assets directory with scene file

@@ -56,12 +56,11 @@ func (g *Settings) OnUpdate(s galx.State) error {
 		return pI.priority >= pJ.priority
 	})
 
-	imgui.BeginV("Settings", &g.enabled, 0)
-	imgui.Text(fmt.Sprintf("fps: %d / %dms",
+	windowTitle := fmt.Sprintf("Settings [%d / %dms]",
 		s.Moment().FPS(),
 		s.Moment().FrameDuration().Milliseconds(),
-	))
-	imgui.Spacing()
+	)
+	imgui.BeginV(windowTitle+"###Settings", &g.enabled, 0)
 
 	for _, id := range sortedPanels {
 		panel := g.panels[id]

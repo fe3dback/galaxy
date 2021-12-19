@@ -11,52 +11,60 @@ func (r *Renderer) FillRect(rect galx.Rect) {
 	utils.Check("fill", r.ref.FillRect(r.transRectPtr(rect)))
 }
 
-func (r *Renderer) Clear(color galx.Color) {
+func (r *Renderer) StartEngineFrame(color galx.Color) {
 	var err error
 
-	// draw all surfaces
-	for i := 1; i <= 1; i++ { // todo: surfacesCount
-		r.SetRenderTarget(uint8(i))
-		err = r.ref.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
+	// clear all custom surfaces
+	for i := galx.RenderTarget(0); i < surfacesCount; i++ {
+		r.SetRenderTarget(i)
+		r.SetDrawColor(color)
+
+		err = r.ref.SetDrawBlendMode(sdl.BLENDMODE_NONE)
 		utils.Check("set surface clear blendMode", err)
 
-		r.SetDrawColor(0x00000050)
-		err = r.ref.FillRect(&sdl.Rect{
-			X: 0,
-			Y: 0,
-			W: r.renderTarget.width,
-			H: r.renderTarget.height,
-		})
-		utils.Check("clear surface", err)
+		err = r.ref.Clear()
+		utils.Check("clear primary surface", err)
 	}
 
-	// draw primary surface
-	r.SetRenderTarget(0)
-	r.SetDrawColor(color)
-
-	err = r.ref.SetDrawBlendMode(sdl.BLENDMODE_NONE)
-	utils.Check("reset clear blendMode", err)
-
-	err = r.ref.Clear()
-	utils.Check("clear primary surface", err)
+	// set render target to scene
+	r.SetRenderTarget(galx.RenderTargetMain)
 }
 
 func (r *Renderer) EndEngineFrame() {
-	var err error
-	r.SetRenderTarget(0)
+	// set render target to scene
+	r.SetRenderTarget(galx.RenderTargetMain)
 
-	// draw all surfaces
-	for i := 0; i < 1; i++ { // todo: surfacesCount
-		// copy to main texture
-		err = r.ref.Copy(r.renderTarget.secondary[i], nil, nil)
+	// copy other surfaces to scene
+	for i := galx.RenderTarget(1); i < surfacesCount; i++ {
+		err := r.ref.Copy(r.renderTarget.textureLayers[i], nil, nil)
 		utils.Check("copy surface to main layer", err)
 	}
+}
 
-	// draw primary
-	err = r.ref.SetDrawBlendMode(sdl.BLENDMODE_NONE)
-	utils.Check("set blendMode for present", err)
+func (r *Renderer) StartGUIFrame(color galx.Color) {
+	r.renderTo(r.renderTarget.engineGUI)
+
+	err := r.ref.SetDrawBlendMode(sdl.BLENDMODE_NONE)
+	utils.Check("set gui surface clear blendMode", err)
+
+	r.SetDrawColor(color)
+
+	err = r.ref.Clear()
+	utils.Check("clear gui surface", err)
+}
+
+func (r *Renderer) EndGUIFrame() {
+	// do nothing here
 }
 
 func (r *Renderer) UpdateGPU() {
+	// set target to screen texture
+	err := r.ref.SetRenderTarget(r.renderTarget.screenTexture)
+	utils.Check("set render target to screen texture", err)
+
+	err = r.ref.CopyEx(r.renderTarget.engineGUI, nil, nil, 0, nil, sdl.FLIP_VERTICAL)
+	utils.Check("copy GUI to main layer", err)
+
+	// render
 	r.ref.Present()
 }

@@ -1,8 +1,10 @@
 package render
 
+import "C"
 import (
 	"fmt"
 	"log"
+	"unsafe"
 
 	"github.com/veandco/go-sdl2/sdl"
 
@@ -13,7 +15,8 @@ import (
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
-const surfacesCount = 4
+// should have at least 1 surface for primary rendering
+const surfacesCount galx.RenderTarget = 8
 
 type (
 	Renderer struct {
@@ -25,17 +28,18 @@ type (
 		renderMode     galx.RenderMode
 		gizmos         galx.Gizmos
 		appState       *engine.State
-		renderTarget   renderTarget
+		renderTarget   *renderTarget
 
 		textCache map[string]*cachedText
 	}
 
 	renderTarget struct {
-		width     int32
-		height    int32
-		scale     float32
-		primary   *sdl.Texture
-		secondary [surfacesCount]*sdl.Texture
+		width         int32
+		height        int32
+		scale         float32
+		screenTexture *sdl.Texture // texture for screen draw
+		engineGUI     *sdl.Texture // texture for engine GUI
+		textureLayers [surfacesCount]*sdl.Texture
 	}
 
 	cachedText struct {
@@ -58,25 +62,31 @@ func NewRenderer(
 	gizmos galx.Gizmos,
 	appState *engine.State,
 ) *Renderer {
+	const renderTargetSize = 32
+
 	renderer := &Renderer{
 		window:         sdlWindow,
 		ref:            sdlRenderer,
 		fontManager:    fontManager,
 		textureManager: textureManager,
 		camera:         camera,
-		renderMode:     engine.RenderModeWorld,
+		renderMode:     galx.RenderModeWorld,
 		gizmos:         gizmos,
 		appState:       appState,
-		renderTarget: renderTarget{
-			primary: sdlRenderer.GetRenderTarget(),
-			scale:   1.0,
+		renderTarget: &renderTarget{
+			screenTexture: sdlRenderer.GetRenderTarget(),
+			width:         renderTargetSize,
+			height:        renderTargetSize,
+			scale:         1.0,
 		},
 		textCache: map[string]*cachedText{},
 	}
 
 	// create all render targets
-	for i := 0; i < surfacesCount; i++ {
-		renderer.renderTarget.secondary[i] = renderer.createSurfaceTexture(32, 32)
+	renderer.renderTarget.scale = 1.0
+	renderer.renderTarget.engineGUI = renderer.createSurfaceTexture(renderTargetSize, renderTargetSize)
+	for i := galx.RenderTarget(0); i < surfacesCount; i++ {
+		renderer.renderTarget.textureLayers[i] = renderer.createSurfaceTexture(renderTargetSize, renderTargetSize)
 	}
 
 	// subscribe to events
@@ -102,28 +112,26 @@ func NewRenderer(
 	return renderer
 }
 
-func (r *Renderer) SetRenderTarget(id uint8) {
-	if id == 0 {
-		r.renderTo(r.renderTarget.primary)
-		return
-	}
-
-	if id > surfacesCount {
-		panic(fmt.Sprintf("can`t draw to surface #%d, max surfaces: %d",
+func (r *Renderer) SetRenderTarget(id galx.RenderTarget) {
+	if id+1 > surfacesCount {
+		panic(fmt.Sprintf("can`t draw to surface ID#%d, max surfaces: %d (overflow)",
 			id,
 			surfacesCount,
 		))
 	}
 
-	r.renderTo(r.renderTarget.secondary[id-1])
+	r.renderTo(r.renderTarget.textureLayers[id])
+}
+
+func (r *Renderer) MainEngineTexture() uintptr {
+	// this return pointer to texture for rendering driver
+	// engine GUI will use it for scene image draw
+	// all GUI draw bindings, should use it for rendering SDL texture into GPU
+	return uintptr(unsafe.Pointer(r.renderTarget.textureLayers[0]))
 }
 
 func (r *Renderer) SetDrawColor(color galx.Color) {
 	utils.Check("set draw color", r.ref.SetDrawColor(color.Split()))
-}
-
-func (r *Renderer) Camera() galx.Camera {
-	return r.camera
 }
 
 func (r *Renderer) Gizmos() galx.Gizmos {
@@ -137,12 +145,12 @@ func (r *Renderer) InEditorMode() bool {
 func (r *Renderer) SetRenderMode(renderMode galx.RenderMode) {
 	r.renderMode = renderMode
 
-	if renderMode == engine.RenderModeWorld {
+	if renderMode == galx.RenderModeWorld {
 		err := r.ref.SetScale(r.renderTarget.scale, r.renderTarget.scale)
 		utils.Check("set render camera world scale", err)
 	}
 
-	if renderMode == engine.RenderModeUI {
+	if renderMode == galx.RenderModeUI {
 		// ui scale is always 100%
 		err := r.ref.SetScale(1, 1)
 		utils.Check("set render camera UI scale", err)
@@ -164,7 +172,7 @@ func (r *Renderer) TextureQuery(res consts.AssetsPath) galx.TextureInfo {
 
 func (r *Renderer) onWindowResize() {
 	width, height := r.window.GetSize()
-	r.Camera().Resize(int(width), int(height))
+	r.camera.Resize(int(width), int(height))
 }
 
 func (r *Renderer) onCameraUpdate(width int32, height int32, scale float32) {
@@ -202,8 +210,9 @@ func (r *Renderer) onCameraUpdate(width int32, height int32, scale float32) {
 	r.renderTarget.width = width
 	r.renderTarget.height = height
 
-	for i := 0; i < surfacesCount; i++ {
-		r.renderTarget.secondary[i] = r.resizeSurfaceTexture(r.renderTarget.secondary[i], width, height)
+	r.renderTarget.engineGUI = r.resizeSurfaceTexture(r.renderTarget.engineGUI, width, height)
+	for i := galx.RenderTarget(0); i < surfacesCount; i++ {
+		r.renderTarget.textureLayers[i] = r.resizeSurfaceTexture(r.renderTarget.textureLayers[i], width, height)
 	}
 }
 
@@ -216,7 +225,7 @@ func (r *Renderer) createSurfaceTexture(width int32, height int32) *sdl.Texture 
 	)
 	utils.Check("create surface texture", err)
 
-	err = tex.SetBlendMode(sdl.BLENDMODE_ADD)
+	err = tex.SetBlendMode(sdl.BLENDMODE_NONE)
 	utils.Check("set surface texture blend mode", err)
 
 	return tex

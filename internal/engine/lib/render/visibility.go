@@ -1,12 +1,12 @@
 package render
 
 import (
-	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/galx"
 )
 
 func (r *Renderer) isLineInsideCamera(line []Point) bool {
 	// line always have only two points (enforced by public api)
-	if r.renderMode == engine.RenderModeUI {
+	if r.renderMode == galx.RenderModeUI {
 		return true
 	}
 
@@ -19,7 +19,7 @@ func (r *Renderer) isLineInsideCamera(line []Point) bool {
 }
 
 func (r *Renderer) isRectInsideCamera(rect Rect) bool {
-	if r.renderMode == engine.RenderModeUI {
+	if r.renderMode == galx.RenderModeUI {
 		return true
 	}
 
@@ -47,7 +47,7 @@ func (r *Renderer) isRectInsideCamera(rect Rect) bool {
 }
 
 func (r *Renderer) isPointInsideCamera(p Point) bool {
-	if r.renderMode == engine.RenderModeUI {
+	if r.renderMode == galx.RenderModeUI {
 		return true
 	}
 

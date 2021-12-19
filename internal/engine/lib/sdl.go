@@ -67,6 +67,10 @@ func NewSDLLib(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen
 		winFlags |= sdl.WINDOW_OPENGL
 	}
 
+	if platform.renderTech == engine.RenderTechVulkan {
+		winFlags |= sdl.WINDOW_VULKAN
+	}
+
 	winWidth := defaultWidth
 	winHeight := defaultHeight
 

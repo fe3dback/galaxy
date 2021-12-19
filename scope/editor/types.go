@@ -5,6 +5,9 @@ import "github.com/fe3dback/galaxy/galx"
 type (
 	component interface {
 		galx.EditorComponentIdentifiable
+	}
+
+	componentLifeCycleUpdate interface {
 		OnUpdate(state galx.State) error
 	}
 

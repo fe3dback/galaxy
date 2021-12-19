@@ -29,13 +29,14 @@ func WithScreen(fullscreen bool, width int, height int) Modifier {
 	}
 }
 
-func WithDebugOpts(system, memory, frames, world bool) Modifier {
+func WithDebugOpts(system, memory, frames, world, vulkan bool) Modifier {
 	return func(flags *InitFlags) {
 		flags.debugOpt = DebugOpt{
 			System: system,
 			Memory: memory,
 			Frames: frames,
 			World:  world,
+			Vulkan: vulkan,
 		}
 	}
 }

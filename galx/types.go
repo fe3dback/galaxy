@@ -12,8 +12,6 @@ import (
 // --------------------------------------------
 
 type (
-	RenderMode = uint8
-
 	EngineState interface {
 		InEditorMode() bool
 	}
@@ -229,7 +227,19 @@ type (
 // APIs
 // --------------------------------------------
 
+const (
+	RenderTargetMain = 0
+)
+
+const (
+	RenderModeWorld RenderMode = iota
+	RenderModeUI
+)
+
 type (
+	RenderTarget = uint8
+	RenderMode   = uint8
+
 	Renderer interface {
 		// base
 
@@ -242,10 +252,6 @@ type (
 		DrawVector(color Color, dist float64, vec Vec, angle Angle)
 		DrawCrossLines(color Color, size int, vec Vec)
 		DrawPoint(color Color, vec Vec)
-
-		// camera
-
-		Camera() Camera
 
 		// sprite
 
@@ -260,14 +266,7 @@ type (
 
 		// system
 
-		InEditorMode() bool
 		Gizmos() Gizmos
-		SetRenderTarget(id uint8)
-		SetRenderMode(RenderMode)
-		FillRect(Rect)
-		Clear(Color)
-		EndEngineFrame()
-		UpdateGPU()
 	}
 
 	SoundMixer interface {

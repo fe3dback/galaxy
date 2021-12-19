@@ -11,10 +11,12 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/engine/gui"
 	"github.com/fe3dback/galaxy/internal/engine/lib"
-	"github.com/fe3dback/galaxy/internal/engine/lib/render"
+	oldRender "github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/node"
+	"github.com/fe3dback/galaxy/internal/engine/render"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
+	"github.com/fe3dback/galaxy/internal/engine/windows"
 	"github.com/fe3dback/galaxy/internal/frames"
 	"github.com/fe3dback/galaxy/internal/utils"
 	"github.com/fe3dback/galaxy/scope/editor"
@@ -28,11 +30,15 @@ type Container struct {
 		logger   *zap.SugaredLogger
 		renderer struct {
 			sdl            *lib.SDLLib
-			fontsManager   *render.FontsManager
-			textureManager *render.TextureManager
-			camera         *render.Camera
-			renderer       *render.Renderer
+			fontsManager   *oldRender.FontsManager
+			textureManager *oldRender.TextureManager
+			camera         *oldRender.Camera
+			renderer       *oldRender.Renderer
 			gui            *gui.Gui
+		}
+		render struct {
+			windowManager *windows.Manager
+			inst          *render.Render
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos

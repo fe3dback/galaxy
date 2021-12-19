@@ -3,7 +3,6 @@ package galaxy
 import (
 	"fmt"
 
-	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/event"
 )
 
@@ -19,7 +18,9 @@ func gameLoop(game *Game) error {
 	engineState := c.ProvideEngineState()
 	frames := c.ProvideFrames()
 	renderer := c.ProvideEngineRenderer()
+	_ = renderer // todo
 	engineGUI := c.ProvideEngineGUI()
+	_ = engineGUI // todo
 	dispatcher := c.ProvideEventDispatcher()
 	scenesManager := c.ProvideEngineScenesManager()
 
@@ -33,15 +34,15 @@ func gameLoop(game *Game) error {
 	editorManager := c.ProvideEditorManager()
 
 	// clear first time screen (fix copy texture from underlying memory)
-	renderer.Clear(defaultColor)
-	renderer.EndEngineFrame()
+	// renderer.StartEngineFrame(defaultColor)
+	// renderer.EndEngineFrame()
 
 	for frames.Ready() {
 		// -----------------------------------
 		// start frame
 		// -----------------------------------
 		frames.Begin()
-		engineGUI.StartGUIFrame()
+		// engineGUI.StartGUIFrame()
 		dispatcher.PublishEventFrameStart(event.FrameStartEvent{})
 
 		// -----------------------------------
@@ -77,39 +78,41 @@ func gameLoop(game *Game) error {
 		// -----------------------------------
 		// draw
 		// -----------------------------------
-		renderer.Clear(defaultColor)
-
-		renderer.SetRenderMode(engine.RenderModeWorld)
-		if engineState.InEditorMode() {
-			err = editorManager.OnBeforeDraw(renderer)
-			if err != nil {
-				return fmt.Errorf("can`t draw editor (before): %w", err)
-			}
-		}
-
-		err = scenesManager.Current().OnDraw(renderer)
-		if err != nil {
-			return fmt.Errorf("can`t draw game world: %w", err)
-		}
-
-		if engineState.InEditorMode() {
-			err = editorManager.OnAfterDraw(renderer)
-			if err != nil {
-				return fmt.Errorf("can`t draw editor (after): %w", err)
-			}
-		}
-
-		renderer.SetRenderMode(engine.RenderModeUI)
-		if !engineState.InEditorMode() {
-			err = gameUI.OnDraw(renderer)
-			if err != nil {
-				return fmt.Errorf("can`t draw game ui: %w", err)
-			}
-		}
-
-		renderer.EndEngineFrame()
-		engineGUI.EndGUIFrame()
-		renderer.UpdateGPU()
+		// renderer.StartEngineFrame(defaultColor)
+		//
+		// renderer.SetRenderMode(galx.RenderModeWorld)
+		// if engineState.InEditorMode() {
+		// 	err = editorManager.OnBeforeDraw(renderer)
+		// 	if err != nil {
+		// 		return fmt.Errorf("can`t draw editor (before): %w", err)
+		// 	}
+		// }
+		//
+		// err = scenesManager.Current().OnDraw(renderer)
+		// if err != nil {
+		// 	return fmt.Errorf("can`t draw game world: %w", err)
+		// }
+		//
+		// if engineState.InEditorMode() {
+		// 	err = editorManager.OnAfterDraw(renderer)
+		// 	if err != nil {
+		// 		return fmt.Errorf("can`t draw editor (after): %w", err)
+		// 	}
+		// }
+		//
+		// renderer.SetRenderMode(galx.RenderModeUI)
+		// if !engineState.InEditorMode() {
+		// 	err = gameUI.OnDraw(renderer)
+		// 	if err != nil {
+		// 		return fmt.Errorf("can`t draw game ui: %w", err)
+		// 	}
+		// }
+		//
+		// renderer.EndEngineFrame()
+		// renderer.StartGUIFrame(defaultColor)
+		// engineGUI.EndGUIFrame()
+		// renderer.EndGUIFrame()
+		// renderer.UpdateGPU()
 
 		// -----------------------------------
 		// debug

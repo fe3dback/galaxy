@@ -34,6 +34,7 @@ type (
 		Memory bool
 		Frames bool
 		World  bool
+		Vulkan bool
 	}
 )
 
