@@ -45,10 +45,16 @@ func vkSetupValidationLayers(opts vkCreateOptions) []string {
 	}
 
 	layersCount := uint32(0)
-	vulkan.EnumerateInstanceLayerProperties(&layersCount, nil)
+	vkAssert(
+		vulkan.EnumerateInstanceLayerProperties(&layersCount, nil),
+		fmt.Errorf("failed enumerate layer properties"),
+	)
 
 	availableLayers := make([]vulkan.LayerProperties, layersCount)
-	vulkan.EnumerateInstanceLayerProperties(&layersCount, availableLayers)
+	vkAssert(
+		vulkan.EnumerateInstanceLayerProperties(&layersCount, availableLayers),
+		fmt.Errorf("failed enumerate layer properties"),
+	)
 
 	foundLayers := make(map[string]struct{})
 	for _, layer := range availableLayers {

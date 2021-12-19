@@ -25,6 +25,14 @@ func vkMapToList(src map[string]struct{}) []string {
 	return r
 }
 
+func vkStringsToStringLabels(src []string) []string {
+	labels := make([]string, 0, len(src))
+	for _, s := range src {
+		labels = append(labels, vkLabelToString(vkStringToLabel(s)))
+	}
+	return labels
+}
+
 func vkLabelToString(src [256]byte) string {
 	r := strings.Builder{}
 
@@ -47,4 +55,16 @@ func vkStringToLabel(src string) [256]byte {
 	}
 
 	return label
+}
+
+func vkClampUint(n, min, max uint32) uint32 {
+	if n <= min {
+		return min
+	}
+
+	if n >= max {
+		return max
+	}
+
+	return n
 }

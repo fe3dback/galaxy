@@ -15,6 +15,7 @@ type (
 		surface        *vkSurface
 		physicalDevice *vkPhysicalDevice
 		logicalDevice  *vkLogicalDevice
+		swapChain      *vkSwapChain
 	}
 
 	vkCreateOptions struct {
@@ -35,11 +36,13 @@ func newVulkanApi(opts vkCreateOptions) *vk {
 
 	physicalDevice := inst.vkPickPhysicalDevice()
 	logicalDevice := physicalDevice.createLogicalDevice(opts)
+	swapChain := vkCreateSwapChain(inst, physicalDevice, logicalDevice, opts)
 
 	return &vk{
 		instance:       inst,
 		surface:        inst.surface,
 		physicalDevice: physicalDevice,
 		logicalDevice:  logicalDevice,
+		swapChain:      swapChain,
 	}
 }

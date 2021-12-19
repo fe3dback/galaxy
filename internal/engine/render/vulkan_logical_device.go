@@ -6,6 +6,9 @@ import (
 	"github.com/vulkan-go/vulkan"
 )
 
+const queueFamilyGraphics = 0
+const queueFamilyPresent = 1
+
 type (
 	vkLogicalDevice struct {
 		ref           vulkan.Device
@@ -15,9 +18,6 @@ type (
 )
 
 func (pd *vkPhysicalDevice) createLogicalDevice(opts vkCreateOptions) *vkLogicalDevice {
-	const queueFamilyGraphics = 0
-	const queueFamilyPresent = 1
-
 	queueCreateInfo := []vulkan.DeviceQueueCreateInfo{
 		{
 			SType:            vulkan.StructureTypeDeviceQueueCreateInfo,
@@ -34,10 +34,12 @@ func (pd *vkPhysicalDevice) createLogicalDevice(opts vkCreateOptions) *vkLogical
 	}
 
 	createInfo := &vulkan.DeviceCreateInfo{
-		SType:                vulkan.StructureTypeDeviceCreateInfo,
-		QueueCreateInfoCount: uint32(len(queueCreateInfo)),
-		PQueueCreateInfos:    queueCreateInfo,
-		PEnabledFeatures:     []vulkan.PhysicalDeviceFeatures{pd.features},
+		SType:                   vulkan.StructureTypeDeviceCreateInfo,
+		QueueCreateInfoCount:    uint32(len(queueCreateInfo)),
+		PQueueCreateInfos:       queueCreateInfo,
+		PEnabledFeatures:        []vulkan.PhysicalDeviceFeatures{pd.features},
+		EnabledExtensionCount:   uint32(len(requiredDeviceExtensions)),
+		PpEnabledExtensionNames: vkStringsToStringLabels(requiredDeviceExtensions),
 	}
 
 	var logicalDevice vulkan.Device
