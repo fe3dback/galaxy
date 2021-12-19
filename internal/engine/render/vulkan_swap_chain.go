@@ -10,9 +10,17 @@ import (
 type (
 	vkSwapChain struct {
 		ref        vulkan.Swapchain
-		surface    *vkPhysicalDeviceSurface
+		surface    vkPhysicalDeviceSurface
 		images     []vulkan.Image
 		imagesView []vulkan.ImageView
+		info       vkSwapChainInfo
+	}
+
+	vkSwapChainInfo struct {
+		imageFormat     vulkan.Format
+		imageColorSpace vulkan.ColorSpace
+		bufferSize      vulkan.Extent2D
+		presentMode     vulkan.PresentMode
 	}
 )
 
@@ -28,13 +36,22 @@ func vkCreateSwapChain(inst *vkInstance, pd *vkPhysicalDevice, ld *vkLogicalDevi
 		sharingMode = vulkan.SharingModeConcurrent
 	}
 
+	bufferSize := pd.surface.chooseSwapExtent(opts)
+	bufferSize.Deref()
+	swapChainInfo := vkSwapChainInfo{
+		imageFormat:     (*format).Format,
+		imageColorSpace: (*format).ColorSpace,
+		bufferSize:      bufferSize,
+		presentMode:     pd.surface.bestPresentMode(),
+	}
+
 	swapChainCreateInfo := &vulkan.SwapchainCreateInfo{
 		SType:                 vulkan.StructureTypeSwapchainCreateInfo,
 		Surface:               inst.surface.ref,
 		MinImageCount:         pd.surface.imageBuffersCount(),
-		ImageFormat:           (*format).Format,
-		ImageColorSpace:       (*format).ColorSpace,
-		ImageExtent:           pd.surface.chooseSwapExtent(opts),
+		ImageFormat:           swapChainInfo.imageFormat,
+		ImageColorSpace:       swapChainInfo.imageColorSpace,
+		ImageExtent:           swapChainInfo.bufferSize,
 		ImageArrayLayers:      1,
 		ImageUsage:            vulkan.ImageUsageFlags(vulkan.ImageUsageColorAttachmentBit),
 		ImageSharingMode:      sharingMode,
@@ -42,7 +59,7 @@ func vkCreateSwapChain(inst *vkInstance, pd *vkPhysicalDevice, ld *vkLogicalDevi
 		PQueueFamilyIndices:   families,
 		PreTransform:          pd.surface.capabilities.CurrentTransform,
 		CompositeAlpha:        vulkan.CompositeAlphaOpaqueBit,
-		PresentMode:           pd.surface.bestPresentMode(),
+		PresentMode:           swapChainInfo.presentMode,
 		Clipped:               vulkan.True,
 	}
 
@@ -75,6 +92,7 @@ func vkCreateSwapChain(inst *vkInstance, pd *vkPhysicalDevice, ld *vkLogicalDevi
 		surface:    pd.surface,
 		images:     images,
 		imagesView: vkCreateSwapChainImagesView(images, pd, ld, opts),
+		info:       swapChainInfo,
 	}
 }
 

@@ -14,8 +14,8 @@ type (
 		props      vulkan.PhysicalDeviceProperties
 		features   vulkan.PhysicalDeviceFeatures
 		extensions []vulkan.ExtensionProperties
-		family     *vkPhysicalDeviceFamily
-		surface    *vkPhysicalDeviceSurface
+		family     vkPhysicalDeviceFamily
+		surface    vkPhysicalDeviceSurface
 	}
 
 	vkPhysicalDeviceFamily struct {

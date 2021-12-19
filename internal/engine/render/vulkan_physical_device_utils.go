@@ -31,7 +31,7 @@ func (inst *vkInstance) vkPhysicalDeviceGetExtensions(refDevice vulkan.PhysicalD
 	return result
 }
 
-func (inst *vkInstance) vkPhysicalDeviceGetSurfaceCapabilities(device vulkan.PhysicalDevice) *vkPhysicalDeviceSurface {
+func (inst *vkInstance) vkPhysicalDeviceGetSurfaceCapabilities(device vulkan.PhysicalDevice) vkPhysicalDeviceSurface {
 	// Capabilities
 	var capabilities vulkan.SurfaceCapabilities
 	vkAssert(
@@ -78,25 +78,25 @@ func (inst *vkInstance) vkPhysicalDeviceGetSurfaceCapabilities(device vulkan.Phy
 	}
 
 	// return
-	return &vkPhysicalDeviceSurface{
+	return vkPhysicalDeviceSurface{
 		capabilities: capabilities,
 		formats:      resultFormats,
 		presentModes: presentModes,
 	}
 }
 
-func (inst *vkInstance) vkPhysicalDeviceQueueFamilies(device vulkan.PhysicalDevice) *vkPhysicalDeviceFamily {
+func (inst *vkInstance) vkPhysicalDeviceQueueFamilies(device vulkan.PhysicalDevice) vkPhysicalDeviceFamily {
 	count := uint32(0)
 	vulkan.GetPhysicalDeviceQueueFamilyProperties(device, &count, nil)
 
 	if count == 0 {
-		return nil
+		return vkPhysicalDeviceFamily{}
 	}
 
 	family := make([]vulkan.QueueFamilyProperties, count)
 	vulkan.GetPhysicalDeviceQueueFamilyProperties(device, &count, family)
 
-	result := &vkPhysicalDeviceFamily{}
+	result := vkPhysicalDeviceFamily{}
 
 	for _, properties := range family {
 		properties.Deref()

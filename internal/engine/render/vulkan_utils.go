@@ -3,6 +3,7 @@ package render
 import (
 	"fmt"
 	"strings"
+	"unsafe"
 
 	"github.com/vulkan-go/vulkan"
 )
@@ -67,4 +68,16 @@ func vkClampUint(n, min, max uint32) uint32 {
 	}
 
 	return n
+}
+
+type sliceHeader struct {
+	Data uintptr
+	Len  int
+	Cap  int
+}
+
+func vkTransformBytes(data []byte) []uint32 {
+	buf := make([]uint32, len(data)/4)
+	vulkan.Memcopy(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&buf)).Data), data)
+	return buf
 }

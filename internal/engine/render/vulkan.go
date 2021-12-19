@@ -38,11 +38,17 @@ func newVulkanApi(opts vkCreateOptions) *vk {
 	logicalDevice := physicalDevice.createLogicalDevice(opts)
 	swapChain := vkCreateSwapChain(inst, physicalDevice, logicalDevice, opts)
 
-	return &vk{
+	vk := &vk{
 		instance:       inst,
 		surface:        inst.surface,
 		physicalDevice: physicalDevice,
 		logicalDevice:  logicalDevice,
 		swapChain:      swapChain,
 	}
+
+	renderPass := vk.vkCreateRenderPass(opts)
+	pipeline := vk.vkCreatePipeline(opts, renderPass)
+	_ = pipeline
+
+	return vk
 }
