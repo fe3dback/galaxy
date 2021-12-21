@@ -1,4 +1,4 @@
-package render
+package vulkan
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type (
 	}
 )
 
-func (vk *vk) vkCreatePipeline(opts vkCreateOptions, renderPass vulkan.RenderPass) *vkPipeline {
+func (vk *Vk) vkCreatePipeline(opts vkCreateOptions) *vkPipeline {
 	triangleVert := vk.logicalDevice.vkCreateShaderModule(opts, "triangle.vert", vulkan.ShaderStageVertexBit, commonShaderTriangleVert)
 	triangleFrag := vk.logicalDevice.vkCreateShaderModule(opts, "triangle.frag", vulkan.ShaderStageFragmentBit, commonShaderTriangleFrag)
 
@@ -134,19 +134,21 @@ func (vk *vk) vkCreatePipeline(opts vkCreateOptions, renderPass vulkan.RenderPas
 		PMultisampleState:   multisampling,
 		PColorBlendState:    colorBlending,
 		Layout:              pipelineLayout,
-		RenderPass:          renderPass,
+		RenderPass:          vk.renderPass,
 		Subpass:             0,
 	}
 
-	var pipeline vulkan.Pipeline
+	pipelines := make([]vulkan.Pipeline, 1)
 	result := vulkan.CreateGraphicsPipelines(
 		vk.logicalDevice.ref,
 		nil,
 		1,
 		[]vulkan.GraphicsPipelineCreateInfo{pipelineCreateInfo},
 		nil,
-		[]vulkan.Pipeline{pipeline},
+		pipelines,
 	)
+	pipeline := pipelines[0]
+
 	vkAssert(result, fmt.Errorf("failed create graphics pipeline"))
 	opts.closer.EnqueueFree(func() {
 		vulkan.DestroyPipeline(vk.logicalDevice.ref, pipeline, nil)

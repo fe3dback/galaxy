@@ -1,4 +1,4 @@
-package render
+package vulkan
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/vulkan-go/vulkan"
 )
 
-func (vk *vk) vkCreateRenderPass(opts vkCreateOptions) vulkan.RenderPass {
+func (vk *Vk) vkCreateRenderPass(opts vkCreateOptions) vulkan.RenderPass {
 	colorAttachment := vulkan.AttachmentDescription{
 		Format:         vk.swapChain.info.imageFormat,
 		Samples:        vulkan.SampleCount1Bit,
@@ -35,12 +35,23 @@ func (vk *vk) vkCreateRenderPass(opts vkCreateOptions) vulkan.RenderPass {
 		PPreserveAttachments:    nil,
 	}
 
+	dependency := vulkan.SubpassDependency{
+		SrcSubpass:    vulkan.SubpassExternal,
+		DstSubpass:    0,
+		SrcStageMask:  vulkan.PipelineStageFlags(vulkan.PipelineStageColorAttachmentOutputBit),
+		DstStageMask:  vulkan.PipelineStageFlags(vulkan.PipelineStageColorAttachmentOutputBit),
+		SrcAccessMask: 0,
+		DstAccessMask: vulkan.AccessFlags(vulkan.AccessColorAttachmentWriteBit),
+	}
+
 	renderPassInfo := &vulkan.RenderPassCreateInfo{
 		SType:           vulkan.StructureTypeRenderPassCreateInfo,
 		AttachmentCount: 1,
 		PAttachments:    []vulkan.AttachmentDescription{colorAttachment},
 		SubpassCount:    1,
 		PSubpasses:      []vulkan.SubpassDescription{subpass},
+		DependencyCount: 1,
+		PDependencies:   []vulkan.SubpassDependency{dependency},
 	}
 
 	var renderPass vulkan.RenderPass

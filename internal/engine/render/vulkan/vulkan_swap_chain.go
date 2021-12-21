@@ -1,4 +1,4 @@
-package render
+package vulkan
 
 import (
 	"fmt"
@@ -30,7 +30,15 @@ func vkCreateSwapChain(inst *vkInstance, pd *vkPhysicalDevice, ld *vkLogicalDevi
 		panic(fmt.Errorf("device '%s' not support rich color space format", pd.props.DeviceName))
 	}
 
-	families := []uint32{queueFamilyGraphics, queueFamilyPresent}
+	uniqueFamilies := make(map[uint32]struct{})
+	uniqueFamilies[pd.family.graphicsFamilyId] = struct{}{}
+	uniqueFamilies[pd.family.presentFamilyId] = struct{}{}
+
+	families := make([]uint32, 0, len(uniqueFamilies))
+	for familyId := range uniqueFamilies {
+		families = append(families, familyId)
+	}
+
 	sharingMode := vulkan.SharingModeExclusive
 	if len(families) > 1 {
 		sharingMode = vulkan.SharingModeConcurrent

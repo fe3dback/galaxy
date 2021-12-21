@@ -1,4 +1,4 @@
-package render
+package vulkan
 
 import (
 	"fmt"
@@ -98,26 +98,22 @@ func (inst *vkInstance) vkPhysicalDeviceQueueFamilies(device vulkan.PhysicalDevi
 
 	result := vkPhysicalDeviceFamily{}
 
-	for _, properties := range family {
+	for familyInd, properties := range family {
 		properties.Deref()
 		if properties.QueueFlags&vulkan.QueueFlags(vulkan.QueueGraphicsBit) != 0 {
-			result.hasGraphics = true
+			result.graphicsFamilyId = uint32(familyInd)
+			result.supportGraphics = true
 		}
-		if properties.QueueFlags&vulkan.QueueFlags(vulkan.QueueComputeBit) != 0 {
-			result.hasCompute = true
-		}
-		if properties.QueueFlags&vulkan.QueueFlags(vulkan.QueueTransferBit) != 0 {
-			result.hasTransfer = true
-		}
-	}
 
-	var presentSupport vulkan.Bool32
-	vkAssert(
-		vulkan.GetPhysicalDeviceSurfaceSupport(device, 0, inst.surface.ref, &presentSupport),
-		fmt.Errorf("failed check device surface support"),
-	)
-	if presentSupport != 0 {
-		result.canWindowPresent = true
+		var presentSupport vulkan.Bool32
+		vkAssert(
+			vulkan.GetPhysicalDeviceSurfaceSupport(device, uint32(familyInd), inst.surface.ref, &presentSupport),
+			fmt.Errorf("failed check device surface support"),
+		)
+		if presentSupport != 0 {
+			result.presentFamilyId = uint32(familyInd)
+			result.supportPresent = true
+		}
 	}
 
 	return result

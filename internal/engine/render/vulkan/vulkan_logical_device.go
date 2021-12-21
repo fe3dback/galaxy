@@ -1,13 +1,10 @@
-package render
+package vulkan
 
 import (
 	"fmt"
 
 	"github.com/vulkan-go/vulkan"
 )
-
-const queueFamilyGraphics = 0
-const queueFamilyPresent = 1
 
 type (
 	vkLogicalDevice struct {
@@ -18,25 +15,29 @@ type (
 )
 
 func (pd *vkPhysicalDevice) createLogicalDevice(opts vkCreateOptions) *vkLogicalDevice {
-	queueCreateInfo := []vulkan.DeviceQueueCreateInfo{
-		{
+	queueCreateInfo := make(map[uint32]vulkan.DeviceQueueCreateInfo)
+	uniqueFamilies := make(map[uint32]struct{})
+	uniqueFamilies[pd.family.graphicsFamilyId] = struct{}{}
+	uniqueFamilies[pd.family.presentFamilyId] = struct{}{}
+
+	for uniqueFamilyId := range uniqueFamilies {
+		queueCreateInfo[uniqueFamilyId] = vulkan.DeviceQueueCreateInfo{
 			SType:            vulkan.StructureTypeDeviceQueueCreateInfo,
-			QueueFamilyIndex: queueFamilyGraphics,
+			QueueFamilyIndex: pd.family.graphicsFamilyId,
 			QueueCount:       1,
 			PQueuePriorities: []float32{1.0},
-		},
-		{
-			SType:            vulkan.StructureTypeDeviceQueueCreateInfo,
-			QueueFamilyIndex: queueFamilyPresent,
-			QueueCount:       1,
-			PQueuePriorities: []float32{1.0},
-		},
+		}
+	}
+
+	infos := make([]vulkan.DeviceQueueCreateInfo, 0, len(queueCreateInfo))
+	for _, info := range queueCreateInfo {
+		infos = append(infos, info)
 	}
 
 	createInfo := &vulkan.DeviceCreateInfo{
 		SType:                   vulkan.StructureTypeDeviceCreateInfo,
-		QueueCreateInfoCount:    uint32(len(queueCreateInfo)),
-		PQueueCreateInfos:       queueCreateInfo,
+		QueueCreateInfoCount:    uint32(len(infos)),
+		PQueueCreateInfos:       infos,
 		PEnabledFeatures:        []vulkan.PhysicalDeviceFeatures{pd.features},
 		EnabledExtensionCount:   uint32(len(requiredDeviceExtensions)),
 		PpEnabledExtensionNames: vkStringsToStringLabels(requiredDeviceExtensions),
@@ -53,8 +54,8 @@ func (pd *vkPhysicalDevice) createLogicalDevice(opts vkCreateOptions) *vkLogical
 
 	var graphicsQueue vulkan.Queue
 	var presentQueue vulkan.Queue
-	vulkan.GetDeviceQueue(logicalDevice, queueFamilyGraphics, 0, &graphicsQueue)
-	vulkan.GetDeviceQueue(logicalDevice, queueFamilyPresent, 0, &presentQueue)
+	vulkan.GetDeviceQueue(logicalDevice, pd.family.graphicsFamilyId, 0, &graphicsQueue)
+	vulkan.GetDeviceQueue(logicalDevice, pd.family.presentFamilyId, 0, &presentQueue)
 
 	return &vkLogicalDevice{
 		ref:           logicalDevice,

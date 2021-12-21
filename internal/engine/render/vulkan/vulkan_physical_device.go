@@ -1,4 +1,4 @@
-package render
+package vulkan
 
 import (
 	"fmt"
@@ -19,16 +19,17 @@ type (
 	}
 
 	vkPhysicalDeviceFamily struct {
-		hasGraphics      bool
-		hasCompute       bool
-		hasTransfer      bool
-		canWindowPresent bool
+		graphicsFamilyId uint32
+		presentFamilyId  uint32
+		supportGraphics  bool
+		supportPresent   bool
 	}
 
 	vkPhysicalDeviceSurface struct {
-		capabilities vulkan.SurfaceCapabilities
-		formats      []vulkan.SurfaceFormat
-		presentModes []vulkan.PresentMode
+		capabilities   vulkan.SurfaceCapabilities
+		formats        []vulkan.SurfaceFormat
+		presentModes   []vulkan.PresentMode
+		surfaceSupport bool
 	}
 )
 
@@ -136,10 +137,8 @@ func (inst *vkInstance) vkAssemblePhysicalDevice(refDevice vulkan.PhysicalDevice
 func (inst *vkInstance) vkPhysicalDeviceScore(device *vkPhysicalDevice) int {
 	required := map[bool]string{
 		// family
-		device.family.hasGraphics:      "graphics operations not supported",
-		device.family.hasTransfer:      "transfer operations not supported",
-		device.family.hasCompute:       "compute operations not supported",
-		device.family.canWindowPresent: "window present not supported",
+		device.family.supportGraphics: "graphics operations not supported",
+		device.family.supportPresent:  "window present not supported",
 
 		// extensions
 		device.isSupportAllRequiredExtensions(): "not all required extensions supported",

@@ -12,6 +12,7 @@ import (
 	oldRender "github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/render"
+	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/engine/windows"
 )
@@ -152,13 +153,25 @@ func (c *Container) ProvideEngineRenderer() *render.Render {
 	}
 
 	renderer := render.NewRender(
-		c.closer(),
-		c.provideWindowsManager().Window(),
-		c.flags.IsIncludeEditor() && c.flags.DebugOpts().Vulkan,
+		c.ProvideEngineRendererVulkan(),
 	)
 
 	c.memstate.render.inst = renderer
 	return c.memstate.render.inst
+}
+
+func (c *Container) ProvideEngineRendererVulkan() *vulkan.Vk {
+	if c.memstate.render.libVulkan != nil {
+		return c.memstate.render.libVulkan
+	}
+
+	vk := vulkan.NewVulkanApi(
+		c.closer(),
+		c.provideWindowsManager().Window(),
+		c.flags.IsIncludeEditor() && c.flags.DebugOpts().Vulkan,
+	)
+	c.memstate.render.libVulkan = vk
+	return c.memstate.render.libVulkan
 }
 
 func (c *Container) ProvideEngineRendererOLD() *oldRender.Renderer {

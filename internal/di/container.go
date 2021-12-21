@@ -15,6 +15,7 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/node"
 	"github.com/fe3dback/galaxy/internal/engine/render"
+	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/engine/windows"
 	"github.com/fe3dback/galaxy/internal/frames"
@@ -39,6 +40,7 @@ type Container struct {
 		render struct {
 			windowManager *windows.Manager
 			inst          *render.Render
+			libVulkan     *vulkan.Vk
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos

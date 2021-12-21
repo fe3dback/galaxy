@@ -112,7 +112,7 @@ func gameLoop(game *Game) error {
 		// renderer.StartGUIFrame(defaultColor)
 		// engineGUI.EndGUIFrame()
 		// renderer.EndGUIFrame()
-		// renderer.UpdateGPU()
+		renderer.UpdateGPU()
 
 		// -----------------------------------
 		// debug
@@ -128,6 +128,8 @@ func gameLoop(game *Game) error {
 		})
 		frames.End()
 	}
+
+	renderer.WaitGPUOperationsBeforeQuit()
 
 	return nil
 }

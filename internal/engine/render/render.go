@@ -1,25 +1,17 @@
 package render
 
 import (
-	"github.com/go-gl/glfw/v3.3/glfw"
-
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/utils"
+	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
 )
 
 type Render struct {
-	vkAPI *vk
+	vkAPI *vulkan.Vk
 }
 
-func NewRender(closer *utils.Closer, window *glfw.Window, debugVulkan bool) *Render {
-	vkApi := newVulkanApi(vkCreateOptions{
-		closer:      closer,
-		window:      window,
-		debugVulkan: debugVulkan,
-	})
-
+func NewRender(vk *vulkan.Vk) *Render {
 	return &Render{
-		vkAPI: vkApi,
+		vkAPI: vk,
 	}
 }
 
@@ -58,6 +50,9 @@ func (r *Render) EndGUIFrame() {
 }
 
 func (r *Render) UpdateGPU() {
-	// TODO implement me
-	panic("implement me")
+	r.vkAPI.Draw()
+}
+
+func (r *Render) WaitGPUOperationsBeforeQuit() {
+	r.vkAPI.Wait()
 }
