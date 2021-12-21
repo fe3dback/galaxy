@@ -165,10 +165,16 @@ func (c *Container) ProvideEngineRendererVulkan() *vulkan.Vk {
 		return c.memstate.render.libVulkan
 	}
 
+	opts := c.flags.VulkanOpts()
+	cfg := vulkan.NewConfig(
+		vulkan.WithDebug(opts.Debug),
+		vulkan.WithVSync(opts.VSync),
+	)
+
 	vk := vulkan.NewVulkanApi(
-		c.closer(),
 		c.provideWindowsManager().Window(),
-		c.flags.IsIncludeEditor() && c.flags.DebugOpts().Vulkan,
+		cfg,
+		c.closer(),
 	)
 	c.memstate.render.libVulkan = vk
 	return c.memstate.render.libVulkan

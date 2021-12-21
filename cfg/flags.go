@@ -25,6 +25,7 @@ type (
 		isFullScreen bool
 		screenWidth  int
 		screenHeight int
+		vulkanOpt    VulkanOpt
 
 		debugOpt DebugOpt
 	}
@@ -35,6 +36,11 @@ type (
 		Frames bool
 		World  bool
 		Vulkan bool
+	}
+
+	VulkanOpt struct {
+		Debug bool
+		VSync bool
 	}
 )
 
@@ -57,6 +63,10 @@ func NewInitFlags(modifiers ...Modifier) *InitFlags {
 		isFullScreen: false,
 		screenWidth:  960,
 		screenHeight: 540,
+		vulkanOpt: VulkanOpt{
+			Debug: false,
+			VSync: false,
+		},
 	}
 
 	for _, modifier := range modifiers {
@@ -92,6 +102,10 @@ func (f *InitFlags) ScreenWidth() int {
 
 func (f *InitFlags) ScreenHeight() int {
 	return f.screenHeight
+}
+
+func (f *InitFlags) VulkanOpts() VulkanOpt {
+	return f.vulkanOpt
 }
 
 func (f *InitFlags) DebugOpts() DebugOpt {

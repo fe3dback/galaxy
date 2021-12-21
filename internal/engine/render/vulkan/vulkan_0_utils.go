@@ -8,14 +8,6 @@ import (
 	"github.com/vulkan-go/vulkan"
 )
 
-func vkAssert(result vulkan.Result, err error) {
-	if result == vulkan.Success {
-		return
-	}
-
-	panic(err)
-}
-
 func vkMapToList(src map[string]struct{}) []string {
 	r := make([]string, 0, len(src))
 
@@ -24,6 +16,11 @@ func vkMapToList(src map[string]struct{}) []string {
 	}
 
 	return r
+}
+
+// string(varchar) -> [256]byte -> string(256)
+func vkRepackLabel(src string) string {
+	return vkLabelToString(vkStringToLabel(src))
 }
 
 func vkStringsToStringLabels(src []string) []string {

@@ -2,6 +2,7 @@ package vulkan
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/vulkan-go/vulkan"
@@ -11,56 +12,76 @@ import (
 
 type (
 	Vk struct {
-		instance            *vkInstance
-		physicalDevice      *vkPhysicalDevice
-		logicalDevice       *vkLogicalDevice
-		swapChain           *vkSwapChain
-		renderPass          vulkan.RenderPass
-		pipeLine            *vkPipeline
-		frameBuffers        *vkFrameBuffers
-		commandPool         *vkCommandPool
-		muxImageAvailable   vulkan.Semaphore
-		muxPresentAvailable vulkan.Semaphore
-	}
-
-	vkCreateOptions struct {
-		closer      *utils.Closer
-		window      *glfw.Window
-		debugVulkan bool
+		instance              *vkInstance
+		physicalDevice        *vkPhysicalDevice
+		logicalDevice         *vkLogicalDevice
+		swapChain             *vkSwapChain
+		swapChainFactory      *vkSwapChainFactory
+		swapChainFrameManager *vkSwapChainFrameManager
+		shaderManager         *vkShaderManager
+		pipeLine              *vkPipeline
+		frameBuffers          *vkFrameBuffers
+		commandPool           *vkCommandPool
 	}
 )
 
-func NewVulkanApi(closer *utils.Closer, window *glfw.Window, debugVulkan bool) *Vk {
+func NewVulkanApi(window *glfw.Window, cfg Config, closer *utils.Closer) *Vk {
 	err := vulkan.Init()
 	if err != nil {
 		panic(fmt.Errorf("failed init vulkan: %w", err))
 	}
 
-	opts := vkCreateOptions{
-		closer:      closer,
-		window:      window,
-		debugVulkan: debugVulkan,
+	log.Printf("vk: lib initialized: [%#v]\n", cfg)
+
+	// required ext
+	requiredExt := window.GetRequiredInstanceExtensions()
+
+	// init
+	inst := createInstance(requiredExt, cfg.debug, closer)
+	surface := inst.createSurfaceFromWindow(window, closer)
+
+	// find GPU for usage
+	physicalDeviceFinder := newPhysicalDeviceFinder(inst, surface)
+	physicalDevice := physicalDeviceFinder.physicalDevicePick()
+	logicalDevice := physicalDevice.createLogicalDevice(closer)
+
+	// create render swapChain
+	swapChainFactory := newSwapChainFactory(surface, physicalDevice, logicalDevice, createWindowSizeExtractor(window), cfg, closer)
+	swapChain := swapChainFactory.createSwapChain()
+	swapChainFrameManager := newSwapChainFrameManager(logicalDevice, closer)
+
+	// create pipeline and render staff
+	shaderManager := newShaderManager(logicalDevice, closer)
+	pipeLineCfg := newPipeLineCfg(logicalDevice, swapChain, closer)
+	renderPass := pipeLineCfg.renderPass
+
+	// pipeline (todo: dynamics)
+	inputShaders := []vulkan.PipelineShaderStageCreateInfo{
+		shaderManager.shaderModule(shaderIDTriangleVert).stageInfo,
+		shaderManager.shaderModule(shaderIDTriangleFrag).stageInfo,
 	}
+	// todo: inputRenderPass is shader params?
+	pipeLine := createPipeline(pipeLineCfg, logicalDevice, swapChain, inputShaders, closer)
+	frameBuffers := createFrameBuffers(swapChain, logicalDevice, renderPass, closer)
+	commandPool := createCommandPool(physicalDevice, logicalDevice, frameBuffers, renderPass, swapChain, pipeLine, closer)
 
-	inst := vkCreateInstance(opts)
-	inst.surface = inst.vkCreateSurface(opts)
-
-	physicalDevice := inst.vkPickPhysicalDevice()
-	logicalDevice := physicalDevice.createLogicalDevice(opts)
-	swapChain := vkCreateSwapChain(inst, physicalDevice, logicalDevice, opts)
-
-	vk := &Vk{
-		instance:       inst,
-		physicalDevice: physicalDevice,
-		logicalDevice:  logicalDevice,
-		swapChain:      swapChain,
+	return &Vk{
+		instance:              inst,
+		physicalDevice:        physicalDevice,
+		logicalDevice:         logicalDevice,
+		swapChain:             swapChain,
+		swapChainFactory:      swapChainFactory,
+		swapChainFrameManager: swapChainFrameManager,
+		shaderManager:         shaderManager,
+		pipeLine:              pipeLine,
+		frameBuffers:          frameBuffers,
+		commandPool:           commandPool,
 	}
+}
 
-	vk.muxImageAvailable, vk.muxPresentAvailable = vkCreateSemaphores(vk.logicalDevice, opts)
-	vk.renderPass = vk.vkCreateRenderPass(opts)
-	vk.pipeLine = vk.vkCreatePipeline(opts)
-	vk.frameBuffers = vk.vkCreateFrameBuffers(opts)
-	vk.commandPool = vk.vkCreateCommandPool(opts)
-
-	return vk
+func createWindowSizeExtractor(window *glfw.Window) vkScreenSizeExtractor {
+	return func() (w, h uint32) {
+		width, height := window.GetFramebufferSize()
+		return uint32(width), uint32(height)
+	}
 }

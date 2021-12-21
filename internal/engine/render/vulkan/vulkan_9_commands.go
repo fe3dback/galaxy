@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/vulkan-go/vulkan"
+
+	"github.com/fe3dback/galaxy/internal/utils"
 )
 
 type (
@@ -13,21 +15,29 @@ type (
 	}
 )
 
-func (vk *Vk) vkCreateCommandPool(opts vkCreateOptions) *vkCommandPool {
+func createCommandPool(
+	pd *vkPhysicalDevice,
+	ld *vkLogicalDevice,
+	fb *vkFrameBuffers,
+	renderPass vulkan.RenderPass,
+	swapChain *vkSwapChain,
+	pipeLine *vkPipeline,
+	closer *utils.Closer,
+) *vkCommandPool {
 	// pool
 	poolInfo := &vulkan.CommandPoolCreateInfo{
 		SType:            vulkan.StructureTypeCommandPoolCreateInfo,
-		QueueFamilyIndex: vk.physicalDevice.family.graphicsFamilyId,
+		QueueFamilyIndex: pd.families.graphicsFamilyId,
 	}
 
 	var pool vulkan.CommandPool
 	vkAssert(
-		vulkan.CreateCommandPool(vk.logicalDevice.ref, poolInfo, nil, &pool),
+		vulkan.CreateCommandPool(ld.ref, poolInfo, nil, &pool),
 		fmt.Errorf("failed create command pool"),
 	)
 
-	opts.closer.EnqueueFree(func() {
-		vulkan.DestroyCommandPool(vk.logicalDevice.ref, pool, nil)
+	closer.EnqueueFree(func() {
+		vulkan.DestroyCommandPool(ld.ref, pool, nil)
 	})
 
 	// command buffers
@@ -35,13 +45,13 @@ func (vk *Vk) vkCreateCommandPool(opts vkCreateOptions) *vkCommandPool {
 		SType:              vulkan.StructureTypeCommandBufferAllocateInfo,
 		CommandPool:        pool,
 		Level:              vulkan.CommandBufferLevelPrimary,
-		CommandBufferCount: uint32(len(vk.frameBuffers.buffers)),
+		CommandBufferCount: uint32(len(fb.buffers)),
 	}
 
-	commandBuffers := make([]vulkan.CommandBuffer, len(vk.frameBuffers.buffers))
+	commandBuffers := make([]vulkan.CommandBuffer, len(fb.buffers))
 
 	vkAssert(
-		vulkan.AllocateCommandBuffers(vk.logicalDevice.ref, allocInfo, commandBuffers),
+		vulkan.AllocateCommandBuffers(ld.ref, allocInfo, commandBuffers),
 		fmt.Errorf("failed allocate command buffers"),
 	)
 
@@ -57,16 +67,16 @@ func (vk *Vk) vkCreateCommandPool(opts vkCreateOptions) *vkCommandPool {
 
 		renderPassBeginInfo := &vulkan.RenderPassBeginInfo{
 			SType:       vulkan.StructureTypeRenderPassBeginInfo,
-			RenderPass:  vk.renderPass,
-			Framebuffer: vk.frameBuffers.buffers[ind],
+			RenderPass:  renderPass,
+			Framebuffer: fb.buffers[ind],
 			RenderArea: vulkan.Rect2D{
 				Offset: vulkan.Offset2D{
 					X: 0,
 					Y: 0,
 				},
 				Extent: vulkan.Extent2D{
-					Width:  vk.swapChain.info.bufferSize.Width,
-					Height: vk.swapChain.info.bufferSize.Height,
+					Width:  swapChain.info.bufferSize.Width,
+					Height: swapChain.info.bufferSize.Height,
 				},
 			},
 			ClearValueCount: 1,
@@ -74,7 +84,7 @@ func (vk *Vk) vkCreateCommandPool(opts vkCreateOptions) *vkCommandPool {
 		}
 
 		vulkan.CmdBeginRenderPass(buffer, renderPassBeginInfo, vulkan.SubpassContentsInline)
-		vulkan.CmdBindPipeline(buffer, vulkan.PipelineBindPointGraphics, vk.pipeLine.ref)
+		vulkan.CmdBindPipeline(buffer, vulkan.PipelineBindPointGraphics, pipeLine.ref)
 		vulkan.CmdDraw(buffer, 3, 1, 0, 0)
 		vulkan.CmdEndRenderPass(buffer)
 
