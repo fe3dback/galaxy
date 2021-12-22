@@ -90,11 +90,8 @@ func NewRenderer(
 	}
 
 	// subscribe to events
-	dispatcher.OnWindow(func(window event.WindowEvent) error {
-		if window.EventType == event.WindowEventTypeSizeChanged {
-			renderer.onWindowResize()
-		}
-
+	dispatcher.OnWindowResized(func(windowResizedEvent event.WindowResizedEvent) error {
+		renderer.onWindowResize()
 		return nil
 	})
 

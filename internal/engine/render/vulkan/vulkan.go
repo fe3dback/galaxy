@@ -7,6 +7,7 @@ import (
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/vulkan-go/vulkan"
 
+	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -22,10 +23,17 @@ type (
 		pipeLine              *vkPipeline
 		frameBuffers          *vkFrameBuffers
 		commandPool           *vkCommandPool
+
+		closer              *utils.Closer
+		isResizing          bool
+		isDrawAvailable     bool
+		windowSizeExtractor windowSizeExtractor
 	}
+
+	windowSizeExtractor = func() (width, height uint32)
 )
 
-func NewVulkanApi(window *glfw.Window, cfg Config, closer *utils.Closer) *Vk {
+func NewVulkanApi(window *glfw.Window, dispatcher *event.Dispatcher, cfg Config, closer *utils.Closer) *Vk {
 	err := vulkan.Init()
 	if err != nil {
 		panic(fmt.Errorf("failed init vulkan: %w", err))
@@ -36,7 +44,10 @@ func NewVulkanApi(window *glfw.Window, cfg Config, closer *utils.Closer) *Vk {
 	// required ext
 	requiredExt := window.GetRequiredInstanceExtensions()
 
+	// todo: debug callbacks
+
 	// init
+	vk := &Vk{}
 	inst := createInstance(requiredExt, cfg.debug, closer)
 	surface := inst.createSurfaceFromWindow(window, closer)
 
@@ -44,42 +55,46 @@ func NewVulkanApi(window *glfw.Window, cfg Config, closer *utils.Closer) *Vk {
 	physicalDeviceFinder := newPhysicalDeviceFinder(inst, surface)
 	physicalDevice := physicalDeviceFinder.physicalDevicePick()
 	logicalDevice := physicalDevice.createLogicalDevice(closer)
+	shaderManager := newShaderManager(logicalDevice, closer)
 
 	// create render swapChain
 	swapChainFactory := newSwapChainFactory(surface, physicalDevice, logicalDevice, createWindowSizeExtractor(window), cfg, closer)
-	swapChain := swapChainFactory.createSwapChain()
-	swapChainFrameManager := newSwapChainFrameManager(logicalDevice, closer)
+	swapChain, pipeLine, frameBuffers, commandPool :=
+		swapChainFactory.createAllPipeline(physicalDevice, logicalDevice, shaderManager, closer)
 
-	// create pipeline and render staff
-	shaderManager := newShaderManager(logicalDevice, closer)
-	pipeLineCfg := newPipeLineCfg(logicalDevice, swapChain, closer)
-	renderPass := pipeLineCfg.renderPass
-
-	// pipeline (todo: dynamics)
-	inputShaders := []vulkan.PipelineShaderStageCreateInfo{
-		shaderManager.shaderModule(shaderIDTriangleVert).stageInfo,
-		shaderManager.shaderModule(shaderIDTriangleFrag).stageInfo,
+	// render
+	onOutOfDate := func() {
+		vk.rebuildGraphicsPipeline()
 	}
-	// todo: inputRenderPass is shader params?
-	pipeLine := createPipeline(pipeLineCfg, logicalDevice, swapChain, inputShaders, closer)
-	frameBuffers := createFrameBuffers(swapChain, logicalDevice, renderPass, closer)
-	commandPool := createCommandPool(physicalDevice, logicalDevice, frameBuffers, renderPass, swapChain, pipeLine, closer)
+	swapChainFrameManager := newSwapChainFrameManager(logicalDevice, onOutOfDate, closer)
+	swapChainFrameManager.setSwapChain(swapChain)
+	swapChainFrameManager.setCommandPool(commandPool)
 
-	return &Vk{
-		instance:              inst,
-		physicalDevice:        physicalDevice,
-		logicalDevice:         logicalDevice,
-		swapChain:             swapChain,
-		swapChainFactory:      swapChainFactory,
-		swapChainFrameManager: swapChainFrameManager,
-		shaderManager:         shaderManager,
-		pipeLine:              pipeLine,
-		frameBuffers:          frameBuffers,
-		commandPool:           commandPool,
-	}
+	// assemble
+	vk.instance = inst
+	vk.physicalDevice = physicalDevice
+	vk.logicalDevice = logicalDevice
+	vk.swapChain = swapChain
+	vk.swapChainFactory = swapChainFactory
+	vk.swapChainFrameManager = swapChainFrameManager
+	vk.shaderManager = shaderManager
+	vk.pipeLine = pipeLine
+	vk.frameBuffers = frameBuffers
+	vk.commandPool = commandPool
+	vk.closer = closer
+	vk.windowSizeExtractor = createWindowSizeExtractor(window)
+	vk.isDrawAvailable = true
+
+	// subscribe to system events
+	dispatcher.OnWindowResized(func(windowResizedEvent event.WindowResizedEvent) error {
+		vk.onWindowResized(windowResizedEvent.NewWidth, windowResizedEvent.NewHeight)
+		return nil
+	})
+
+	return vk
 }
 
-func createWindowSizeExtractor(window *glfw.Window) vkScreenSizeExtractor {
+func createWindowSizeExtractor(window *glfw.Window) windowSizeExtractor {
 	return func() (w, h uint32) {
 		width, height := window.GetFramebufferSize()
 		return uint32(width), uint32(height)

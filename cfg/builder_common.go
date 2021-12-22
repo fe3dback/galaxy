@@ -15,14 +15,13 @@ func WithProfiling(enabled bool, port int) Modifier {
 	}
 }
 
-func WithDebugOpts(system, memory, frames, world, vulkan bool) Modifier {
+func WithDebugOpts(system, memory, frames, world bool) Modifier {
 	return func(flags *InitFlags) {
 		flags.debugOpt = DebugOpt{
 			System: system,
 			Memory: memory,
 			Frames: frames,
 			World:  world,
-			Vulkan: vulkan,
 		}
 	}
 }

@@ -11,33 +11,51 @@ import (
 
 type (
 	vkSwapChainFactory struct {
-		surface               *vkSurface
-		pd                    *vkPhysicalDevice
-		ld                    *vkLogicalDevice
-		vkScreenSizeExtractor vkScreenSizeExtractor
-		closer                *utils.Closer
-		cfg                   Config
+		surface             *vkSurface
+		pd                  *vkPhysicalDevice
+		ld                  *vkLogicalDevice
+		windowSizeExtractor windowSizeExtractor
+		closer              *utils.Closer
+		cfg                 Config
 	}
-
-	vkScreenSizeExtractor = func() (width, height uint32)
 )
 
 func newSwapChainFactory(
 	surface *vkSurface,
 	pd *vkPhysicalDevice,
 	ld *vkLogicalDevice,
-	vkScreenSizeExtractor vkScreenSizeExtractor,
+	windowSizeExtractor windowSizeExtractor,
 	cfg Config,
 	closer *utils.Closer,
 ) *vkSwapChainFactory {
 	return &vkSwapChainFactory{
-		surface:               surface,
-		pd:                    pd,
-		ld:                    ld,
-		vkScreenSizeExtractor: vkScreenSizeExtractor,
-		cfg:                   cfg,
-		closer:                closer,
+		surface:             surface,
+		pd:                  pd,
+		ld:                  ld,
+		windowSizeExtractor: windowSizeExtractor,
+		cfg:                 cfg,
+		closer:              closer,
 	}
+}
+
+func (f *vkSwapChainFactory) createAllPipeline(pd *vkPhysicalDevice, ld *vkLogicalDevice, todoShaderManager *vkShaderManager, closer *utils.Closer) (*vkSwapChain, *vkPipeline, *vkFrameBuffers, *vkCommandPool) {
+	swapChain := f.createSwapChain()
+	// create pipeline and render staff
+	pipeLineCfg := newPipeLineCfg(ld, swapChain, closer)
+	renderPass := pipeLineCfg.renderPass
+
+	// pipeline (todo: dynamics)
+	inputShaders := []vulkan.PipelineShaderStageCreateInfo{
+		todoShaderManager.shaderModule(shaderIDTriangleVert).stageInfo,
+		todoShaderManager.shaderModule(shaderIDTriangleFrag).stageInfo,
+	}
+
+	// todo: inputRenderPass is shader params?
+	pipeLine := createPipeline(pipeLineCfg, ld, swapChain, inputShaders, closer)
+	frameBuffers := createFrameBuffers(swapChain, ld, renderPass, closer)
+	commandPool := createCommandPool(pd, ld, frameBuffers, renderPass, swapChain, pipeLine, closer)
+
+	return swapChain, pipeLine, frameBuffers, commandPool
 }
 
 func (f *vkSwapChainFactory) createSwapChain() *vkSwapChain {
@@ -48,7 +66,7 @@ func (f *vkSwapChainFactory) createSwapChain() *vkSwapChain {
 	f.closer.EnqueueFree(vkSwapChain.free)
 
 	// assemble info
-	wWidth, wHeight := f.vkScreenSizeExtractor()
+	wWidth, wHeight := f.windowSizeExtractor()
 	vkSwapChain.info = vkSwapChainInfo{
 		imageFormat:     (*f.pd.surfaceProps.richColorSpaceFormat()).Format,
 		imageColorSpace: (*f.pd.surfaceProps.richColorSpaceFormat()).ColorSpace,

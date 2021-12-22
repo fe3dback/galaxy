@@ -25,7 +25,7 @@ func debugMemory() {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
-	log.Printf("memory: [alloc: %s, total: %s, sys: %s]",
+	log.Printf("memory: [size: %s, throughput: %s, reserved: %s]",
 		utils.FormatBytes(m.Alloc),
 		utils.FormatBytes(m.TotalAlloc),
 		utils.FormatBytes(m.Sys),

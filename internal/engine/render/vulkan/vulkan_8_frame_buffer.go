@@ -11,12 +11,30 @@ import (
 type (
 	vkFrameBuffers struct {
 		buffers []vulkan.Framebuffer
+
+		_free   bool
+		_freeLd *vkLogicalDevice
 	}
 )
 
-func createFrameBuffers(swapChain *vkSwapChain, ld *vkLogicalDevice, renderPass vulkan.RenderPass, closer *utils.Closer) *vkFrameBuffers {
-	buffers := make([]vulkan.Framebuffer, 0, len(swapChain.imagesView))
+func (fb *vkFrameBuffers) free() {
+	if fb._free {
+		return
+	}
 
+	fb._free = true
+	for _, buffer := range fb.buffers {
+		vulkan.DestroyFramebuffer(fb._freeLd.ref, buffer, nil)
+	}
+}
+
+func createFrameBuffers(swapChain *vkSwapChain, ld *vkLogicalDevice, renderPass vulkan.RenderPass, closer *utils.Closer) *vkFrameBuffers {
+	vkFrameBuffers := &vkFrameBuffers{
+		_freeLd: ld,
+	}
+	closer.EnqueueFree(vkFrameBuffers.free)
+
+	buffers := make([]vulkan.Framebuffer, 0, len(swapChain.imagesView))
 	for _, view := range swapChain.imagesView {
 		createInfo := &vulkan.FramebufferCreateInfo{
 			SType:           vulkan.StructureTypeFramebufferCreateInfo,
@@ -36,14 +54,9 @@ func createFrameBuffers(swapChain *vkSwapChain, ld *vkLogicalDevice, renderPass 
 			fmt.Errorf("failed create frame buffer"),
 		)
 
-		closer.EnqueueFree(func() {
-			vulkan.DestroyFramebuffer(ld.ref, buffer, nil)
-		})
-
 		buffers = append(buffers, buffer)
 	}
 
-	return &vkFrameBuffers{
-		buffers: buffers,
-	}
+	vkFrameBuffers.buffers = buffers
+	return vkFrameBuffers
 }

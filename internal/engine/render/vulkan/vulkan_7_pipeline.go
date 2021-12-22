@@ -11,8 +11,22 @@ import (
 type (
 	vkPipeline struct {
 		ref vulkan.Pipeline
+		cfg *vkPipeLineCfg
+
+		_free   bool
+		_freeLd *vkLogicalDevice
 	}
 )
+
+func (pl *vkPipeline) free() {
+	if pl._free {
+		return
+	}
+
+	pl._free = true
+	vulkan.DestroyPipeline(pl._freeLd.ref, pl.ref, nil)
+	pl.cfg.free()
+}
 
 func createPipeline(
 	cfg *vkPipeLineCfg,
@@ -21,6 +35,12 @@ func createPipeline(
 	shaderStages []vulkan.PipelineShaderStageCreateInfo,
 	closer *utils.Closer,
 ) *vkPipeline {
+	pl := &vkPipeline{
+		cfg:     cfg,
+		_freeLd: ld,
+	}
+	closer.EnqueueFree(pl.free)
+
 	// data (input)
 	inputAssemble := cfg.primitiveTopologyTriangle
 	vertexInputInfo := &vulkan.PipelineVertexInputStateCreateInfo{ // todo: shader arguments??
@@ -67,14 +87,8 @@ func createPipeline(
 		nil,
 		pipelines,
 	)
-	pipeline := pipelines[0]
 
 	vkAssert(result, fmt.Errorf("failed create graphics pipeline"))
-	closer.EnqueueFree(func() {
-		vulkan.DestroyPipeline(ld.ref, pipeline, nil)
-	})
-
-	return &vkPipeline{
-		ref: pipeline,
-	}
+	pl.ref = pipelines[0]
+	return pl
 }

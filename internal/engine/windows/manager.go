@@ -7,6 +7,7 @@ import (
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/internal/engine"
+	"github.com/fe3dback/galaxy/internal/engine/event"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -14,12 +15,12 @@ type Manager struct {
 	window *glfw.Window
 }
 
-func NewManager(closer *utils.Closer, tech engine.RenderTech, defaultWidth, defaultHeight int, fullscreen bool) *Manager {
+func NewManager(closer *utils.Closer, dispatcher *event.Dispatcher, tech engine.RenderTech, defaultWidth, defaultHeight int, fullscreen bool) *Manager {
 	var window *glfw.Window
 
 	switch tech {
 	case engine.RenderTechVulkan:
-		window = newVulkanWindow(closer, defaultWidth, defaultHeight, fullscreen)
+		window = newVulkanWindow(closer, dispatcher, defaultWidth, defaultHeight, fullscreen)
 	default:
 		panic(fmt.Errorf("failed create window: not supported render tech: %s", tech))
 	}
@@ -33,7 +34,7 @@ func (m *Manager) Window() *glfw.Window {
 	return m.window
 }
 
-func newVulkanWindow(closer *utils.Closer, defaultWidth, defaultHeight int, fullscreen bool) *glfw.Window {
+func newVulkanWindow(closer *utils.Closer, dispatcher *event.Dispatcher, defaultWidth, defaultHeight int, fullscreen bool) *glfw.Window {
 	// set vulkan address
 	procAddr := glfw.GetVulkanGetInstanceProcAddress()
 	if procAddr == nil {
@@ -62,6 +63,13 @@ func newVulkanWindow(closer *utils.Closer, defaultWidth, defaultHeight int, full
 		panic(fmt.Errorf("failed create glfw window: %w", err))
 	}
 	closer.EnqueueFree(window.Destroy)
+
+	window.SetFramebufferSizeCallback(func(w *glfw.Window, width int, height int) {
+		dispatcher.PublishEventWindowResized(event.WindowResizedEvent{
+			NewWidth:  width,
+			NewHeight: height,
+		})
+	})
 
 	// return
 	return window

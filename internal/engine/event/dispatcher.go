@@ -14,14 +14,20 @@ type (
 	}
 
 	Dispatcher struct {
-		queue    *list.List
-		handlers map[eventType][]handlerFn
+		systemPoller systemEventPoller
+		queue        *list.List
+		handlers     map[eventType][]handlerFn
+	}
+
+	systemEventPoller interface {
+		PollEvents()
 	}
 )
 
-func NewDispatcher() *Dispatcher {
+func NewDispatcher(systemPoller systemEventPoller) *Dispatcher {
 	dispatcher := &Dispatcher{
-		queue: list.New(),
+		systemPoller: systemPoller,
+		queue:        list.New(),
 	}
 
 	dispatcher.init()
@@ -29,10 +35,8 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch() {
-	// convert sdl events to local events
-	d.pullSDLEvents()
+	d.systemPoller.PollEvents()
 
-	// dispatch all events in queue
 	for d.queue.Len() > 0 {
 		elm := d.queue.Front()
 		meta := elm.Value.(meta)

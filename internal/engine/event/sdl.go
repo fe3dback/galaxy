@@ -25,8 +25,6 @@ func (d *Dispatcher) dispatchSDLEvent(ev sdl.Event) {
 		d.PublishEventQuit(assembleQuit(sdlEvent))
 	case *sdl.KeyboardEvent:
 		d.PublishEventKeyBoard(assembleKeyboard(sdlEvent))
-	case *sdl.WindowEvent:
-		d.PublishEventWindow(assembleWindow(sdlEvent))
 	case *sdl.MouseButtonEvent:
 		d.PublishEventMouseButton(assembleMouseButton(sdlEvent))
 	case *sdl.MouseWheelEvent:
@@ -65,14 +63,5 @@ func assembleMouseButton(mouseButtonEvent *sdl.MouseButtonEvent) MouseButtonEven
 		IsRight:    mouseButtonEvent.Button == sdl.BUTTON_RIGHT,
 		IsPressed:  mouseButtonEvent.State == sdl.PRESSED,
 		IsReleased: mouseButtonEvent.State == sdl.RELEASED,
-	}
-}
-
-func assembleWindow(ev *sdl.WindowEvent) WindowEvent {
-	return WindowEvent{
-		WindowID:  ev.WindowID,
-		EventType: ev.Event,
-		Data1:     ev.Data1,
-		Data2:     ev.Data2,
 	}
 }

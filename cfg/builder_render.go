@@ -16,15 +16,17 @@ func WithScreen(fullscreen bool, width int, height int) Modifier {
 
 // WithGraphicsVulkanDebug will print vulkan validation errors
 // on stdout. It require installed Vulkan SDK to work
+//  default = false
 func WithGraphicsVulkanDebug(enabled bool) Modifier {
 	return func(flags *InitFlags) {
 		flags.vulkanOpt.Debug = enabled
 	}
 }
 
-// WithGraphicsVSync will use FIFO rendering
-// true - vsync, good for mobile (small power consumption)
-// false - low latency, high power consumption
+// WithGraphicsVSync will set frames render profile
+//  true - vsync, good for mobile (small power consumption)
+//  false - low latency, high power consumption
+//  default = false
 func WithGraphicsVSync(enabled bool) Modifier {
 	return func(flags *InitFlags) {
 		flags.vulkanOpt.VSync = enabled

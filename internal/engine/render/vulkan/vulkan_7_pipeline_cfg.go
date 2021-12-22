@@ -32,60 +32,78 @@ type (
 		// ---------------------------------
 		renderPass vulkan.RenderPass
 		layout     vulkan.PipelineLayout
+
+		// system
+		_free   bool
+		_freeLd *vkLogicalDevice
 	}
 )
 
-func newPipeLineCfg(ld *vkLogicalDevice, swapChain *vkSwapChain, closer *utils.Closer) *vkPipeLineCfg {
-	return &vkPipeLineCfg{
-		// primitives: topology
-		// ---------------------------------
-		primitiveTopologyTriangle: createPipeLineAssembleState(vulkan.PrimitiveTopologyTriangleList),
-		primitiveTopologyLine:     createPipeLineAssembleState(vulkan.PrimitiveTopologyLineStrip),
-
-		// rasterizer
-		// ---------------------------------
-		rasterizerFill: createPipeLineRasterizer(vulkan.PolygonModeFill),
-		rasterizerLine: createPipeLineRasterizer(vulkan.PolygonModeLine),
-
-		// color blends
-		// ---------------------------------
-		colorBlendDefault: vulkan.PipelineColorBlendStateCreateInfo{
-			SType:           vulkan.StructureTypePipelineColorBlendStateCreateInfo,
-			LogicOpEnable:   vulkan.False,
-			LogicOp:         vulkan.LogicOpCopy,
-			AttachmentCount: 1,
-			PAttachments: []vulkan.PipelineColorBlendAttachmentState{{
-				BlendEnable:         vulkan.True,
-				SrcColorBlendFactor: vulkan.BlendFactorSrcAlpha,
-				DstColorBlendFactor: vulkan.BlendFactorOneMinusSrcAlpha,
-				ColorBlendOp:        vulkan.BlendOpAdd,
-				SrcAlphaBlendFactor: vulkan.BlendFactorOne,
-				DstAlphaBlendFactor: vulkan.BlendFactorZero,
-				AlphaBlendOp:        vulkan.BlendOpAdd,
-				ColorWriteMask: vulkan.ColorComponentFlags(
-					vulkan.ColorComponentRBit | vulkan.ColorComponentGBit | vulkan.ColorComponentBBit | vulkan.ColorComponentABit,
-				),
-			}},
-			BlendConstants: [4]float32{0, 0, 0, 0},
-		},
-
-		// other
-		// ---------------------------------
-		multisampling: vulkan.PipelineMultisampleStateCreateInfo{
-			SType:                 vulkan.StructureTypePipelineMultisampleStateCreateInfo,
-			RasterizationSamples:  vulkan.SampleCount1Bit,
-			SampleShadingEnable:   vulkan.False,
-			MinSampleShading:      1.0,
-			PSampleMask:           nil,
-			AlphaToCoverageEnable: vulkan.False,
-			AlphaToOneEnable:      vulkan.False,
-		},
-
-		// allocated
-		// ---------------------------------
-		layout:     createPipeLineLayout(ld, closer),
-		renderPass: createPipeLineRenderPass(ld, swapChain, closer),
+func (cfg *vkPipeLineCfg) free() {
+	if cfg._free {
+		return
 	}
+
+	cfg._free = true
+	vulkan.DestroyPipelineLayout(cfg._freeLd.ref, cfg.layout, nil)
+	vulkan.DestroyRenderPass(cfg._freeLd.ref, cfg.renderPass, nil)
+}
+
+func newPipeLineCfg(ld *vkLogicalDevice, swapChain *vkSwapChain, closer *utils.Closer) *vkPipeLineCfg {
+	cfg := &vkPipeLineCfg{
+		_freeLd: ld,
+	}
+
+	// primitives: topology
+	// ---------------------------------
+	cfg.primitiveTopologyTriangle = createPipeLineAssembleState(vulkan.PrimitiveTopologyTriangleList)
+	cfg.primitiveTopologyLine = createPipeLineAssembleState(vulkan.PrimitiveTopologyLineStrip)
+
+	// rasterizer
+	// ---------------------------------
+	cfg.rasterizerFill = createPipeLineRasterizer(vulkan.PolygonModeFill)
+	cfg.rasterizerLine = createPipeLineRasterizer(vulkan.PolygonModeLine)
+
+	// color blends
+	// ---------------------------------
+	cfg.colorBlendDefault = vulkan.PipelineColorBlendStateCreateInfo{
+		SType:           vulkan.StructureTypePipelineColorBlendStateCreateInfo,
+		LogicOpEnable:   vulkan.False,
+		LogicOp:         vulkan.LogicOpCopy,
+		AttachmentCount: 1,
+		PAttachments: []vulkan.PipelineColorBlendAttachmentState{{
+			BlendEnable:         vulkan.True,
+			SrcColorBlendFactor: vulkan.BlendFactorSrcAlpha,
+			DstColorBlendFactor: vulkan.BlendFactorOneMinusSrcAlpha,
+			ColorBlendOp:        vulkan.BlendOpAdd,
+			SrcAlphaBlendFactor: vulkan.BlendFactorOne,
+			DstAlphaBlendFactor: vulkan.BlendFactorZero,
+			AlphaBlendOp:        vulkan.BlendOpAdd,
+			ColorWriteMask: vulkan.ColorComponentFlags(
+				vulkan.ColorComponentRBit | vulkan.ColorComponentGBit | vulkan.ColorComponentBBit | vulkan.ColorComponentABit,
+			),
+		}},
+		BlendConstants: [4]float32{0, 0, 0, 0},
+	}
+
+	// other
+	// ---------------------------------
+	cfg.multisampling = vulkan.PipelineMultisampleStateCreateInfo{
+		SType:                 vulkan.StructureTypePipelineMultisampleStateCreateInfo,
+		RasterizationSamples:  vulkan.SampleCount1Bit,
+		SampleShadingEnable:   vulkan.False,
+		MinSampleShading:      1.0,
+		PSampleMask:           nil,
+		AlphaToCoverageEnable: vulkan.False,
+		AlphaToOneEnable:      vulkan.False,
+	}
+
+	// allocated
+	// ---------------------------------
+	cfg.layout = createPipeLineLayout(ld, closer)
+	cfg.renderPass = createPipeLineRenderPass(ld, swapChain, closer)
+
+	return cfg
 }
 
 func createPipeLineAssembleState(topology vulkan.PrimitiveTopology) vulkan.PipelineInputAssemblyStateCreateInfo {
@@ -127,9 +145,6 @@ func createPipeLineLayout(ld *vkLogicalDevice, closer *utils.Closer) vulkan.Pipe
 		vulkan.CreatePipelineLayout(ld.ref, info, nil, &pipelineLayout),
 		fmt.Errorf("failed create pipeline layout"),
 	)
-	closer.EnqueueFree(func() {
-		vulkan.DestroyPipelineLayout(ld.ref, pipelineLayout, nil)
-	})
 
 	return pipelineLayout
 }
@@ -188,9 +203,6 @@ func createPipeLineRenderPass(ld *vkLogicalDevice, swapChain *vkSwapChain, close
 		vulkan.CreateRenderPass(ld.ref, renderPassInfo, nil, &renderPass),
 		fmt.Errorf("failed create render pass"),
 	)
-	closer.EnqueueFree(func() {
-		vulkan.DestroyRenderPass(ld.ref, renderPass, nil)
-	})
 
 	return renderPass
 }

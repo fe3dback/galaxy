@@ -7,7 +7,7 @@ type eventType = uint8
 const (
 	eventTypeQuit eventType = iota
 	eventTypeKeyBoard
-	eventTypeWindow
+	eventTypeWindowResized
 	eventTypeMouseButton
 	eventTypeMouseWheel
 	eventTypeMouseMove

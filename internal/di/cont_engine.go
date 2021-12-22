@@ -24,6 +24,7 @@ func (c *Container) provideWindowsManager() *windows.Manager {
 
 	manager := windows.NewManager(
 		c.closer(),
+		c.ProvideEventDispatcher(),
 		engine.RenderTechVulkan,
 		c.Flags().ScreenWidth(),
 		c.Flags().ScreenHeight(),
@@ -173,6 +174,7 @@ func (c *Container) ProvideEngineRendererVulkan() *vulkan.Vk {
 
 	vk := vulkan.NewVulkanApi(
 		c.provideWindowsManager().Window(),
+		c.ProvideEventDispatcher(),
 		cfg,
 		c.closer(),
 	)

@@ -10,10 +10,23 @@ import (
 
 type (
 	vkCommandPool struct {
-		pool    vulkan.CommandPool
+		ref     vulkan.CommandPool
 		buffers []vulkan.CommandBuffer
+
+		_free   bool
+		_freeLd *vkLogicalDevice
 	}
 )
+
+func (pool *vkCommandPool) free() {
+	if pool._free {
+		return
+	}
+
+	pool._free = true
+	vulkan.FreeCommandBuffers(pool._freeLd.ref, pool.ref, uint32(len(pool.buffers)), pool.buffers)
+	vulkan.DestroyCommandPool(pool._freeLd.ref, pool.ref, nil)
+}
 
 func createCommandPool(
 	pd *vkPhysicalDevice,
@@ -24,6 +37,11 @@ func createCommandPool(
 	pipeLine *vkPipeline,
 	closer *utils.Closer,
 ) *vkCommandPool {
+	commandPool := &vkCommandPool{
+		_freeLd: ld,
+	}
+	closer.EnqueueFree(commandPool.free)
+
 	// pool
 	poolInfo := &vulkan.CommandPoolCreateInfo{
 		SType:            vulkan.StructureTypeCommandPoolCreateInfo,
@@ -35,10 +53,7 @@ func createCommandPool(
 		vulkan.CreateCommandPool(ld.ref, poolInfo, nil, &pool),
 		fmt.Errorf("failed create command pool"),
 	)
-
-	closer.EnqueueFree(func() {
-		vulkan.DestroyCommandPool(ld.ref, pool, nil)
-	})
+	commandPool.ref = pool
 
 	// command buffers
 	allocInfo := &vulkan.CommandBufferAllocateInfo{
@@ -94,8 +109,6 @@ func createCommandPool(
 		)
 	}
 
-	return &vkCommandPool{
-		pool:    pool,
-		buffers: commandBuffers,
-	}
+	commandPool.buffers = commandBuffers
+	return commandPool
 }

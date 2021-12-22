@@ -49,15 +49,24 @@ func (ds *vkPhysicalDeviceSurfaceProps) chooseSwapExtent(width, height uint32) v
 	// In that case we'll pick the resolution that best matches the window within the minImageExtent and maxImageExtent bounds.
 	// But we must specify the resolution in the correct unit.
 
-	if ds.capabilities.CurrentExtent.Width != calculatedMax {
-		curr := ds.capabilities.CurrentExtent
-		curr.Deref()
-		return curr
+	if width == 0 || height == 0 {
+		if ds.capabilities.CurrentExtent.Width != calculatedMax {
+			curr := ds.capabilities.CurrentExtent
+			curr.Deref()
+			return curr
+		}
 	}
 
 	actualExtent := vulkan.Extent2D{
 		Width:  width,
 		Height: height,
+	}
+
+	maxWidth := ds.capabilities.MaxImageExtent.Width
+	maxHeight := ds.capabilities.MaxImageExtent.Height
+
+	if maxWidth == 0 || maxHeight == 0 {
+		return actualExtent
 	}
 
 	actualExtent.Width = vkClampUint(
