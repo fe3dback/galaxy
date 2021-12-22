@@ -6,6 +6,8 @@ import (
 
 	"github.com/vulkan-go/vulkan"
 
+	"github.com/fe3dback/galaxy/galx"
+	"github.com/fe3dback/galaxy/internal/engine/render/vulkan/shader"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -49,11 +51,25 @@ func (f *vkSwapChainFactory) createAllPipeline(pd *vkPhysicalDevice, ld *vkLogic
 		todoShaderManager.shaderModule(shaderIDTriangleVert).stageInfo,
 		todoShaderManager.shaderModule(shaderIDTriangleFrag).stageInfo,
 	}
+	inputData := shader.VertInTriangle{
+		Position: [3]galx.Vec2{
+			{X: 0.0, Y: -0.5},
+			{X: 0.5, Y: 0.5},
+			{X: -0.5, Y: 0.5},
+		},
+		Color: [3]galx.Vec3{
+			{R: 1, G: 0, B: 0},
+			{R: 0, G: 1, B: 0},
+			{R: 0, G: 0, B: 1},
+		},
+	}
+
+	vertexData := createVertexBuffer(pd, ld, &inputData, closer)
 
 	// todo: inputRenderPass is shader params?
-	pipeLine := createPipeline(pipeLineCfg, ld, swapChain, inputShaders, closer)
+	pipeLine := createPipeline(pipeLineCfg, ld, swapChain, inputShaders, &inputData, closer)
 	frameBuffers := createFrameBuffers(swapChain, ld, renderPass, closer)
-	commandPool := createCommandPool(pd, ld, frameBuffers, renderPass, swapChain, pipeLine, closer)
+	commandPool := createCommandPool(pd, ld, frameBuffers, renderPass, swapChain, pipeLine, vertexData, closer)
 
 	return swapChain, pipeLine, frameBuffers, commandPool
 }

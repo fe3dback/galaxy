@@ -33,6 +33,7 @@ func createPipeline(
 	ld *vkLogicalDevice,
 	swapChain *vkSwapChain,
 	shaderStages []vulkan.PipelineShaderStageCreateInfo,
+	vertexData vertexData,
 	closer *utils.Closer,
 ) *vkPipeline {
 	pl := &vkPipeline{
@@ -43,12 +44,15 @@ func createPipeline(
 
 	// data (input)
 	inputAssemble := cfg.primitiveTopologyTriangle
-	vertexInputInfo := &vulkan.PipelineVertexInputStateCreateInfo{ // todo: shader arguments??
+	vertexBindings := vertexData.Bindings()
+	vertexAttributes := vertexData.Attributes()
+
+	vertexInputInfo := &vulkan.PipelineVertexInputStateCreateInfo{
 		SType:                           vulkan.StructureTypePipelineVertexInputStateCreateInfo,
-		VertexBindingDescriptionCount:   0,
-		PVertexBindingDescriptions:      nil,
-		VertexAttributeDescriptionCount: 0,
-		PVertexAttributeDescriptions:    nil,
+		VertexBindingDescriptionCount:   uint32(len(vertexBindings)),
+		PVertexBindingDescriptions:      vertexBindings,
+		VertexAttributeDescriptionCount: uint32(len(vertexAttributes)),
+		PVertexAttributeDescriptions:    vertexAttributes,
 	}
 
 	// viewport
