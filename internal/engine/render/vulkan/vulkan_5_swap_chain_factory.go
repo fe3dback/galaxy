@@ -67,8 +67,8 @@ func (f *vkSwapChainFactory) createAllPipeline(pd *vkPhysicalDevice, ld *vkLogic
 	vertexData := createVertexBuffer(pd, ld, &inputData, closer)
 
 	// todo: inputRenderPass is shader params?
-	pipeLine := createPipeline(pipeLineCfg, ld, swapChain, inputShaders, &inputData, closer)
 	frameBuffers := createFrameBuffers(swapChain, ld, renderPass, closer)
+	pipeLine := createPipeline(pipeLineCfg, ld, swapChain, inputShaders, &inputData, closer)
 	commandPool := createCommandPool(pd, ld, frameBuffers, renderPass, swapChain, pipeLine, vertexData, closer)
 
 	return swapChain, pipeLine, frameBuffers, commandPool
