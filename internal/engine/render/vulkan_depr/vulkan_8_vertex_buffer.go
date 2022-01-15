@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -9,16 +9,7 @@ import (
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
-type (
-	vertexData interface {
-		Size() uint64
-		Data() []byte
-		Bindings() []vulkan.VertexInputBindingDescription
-		Attributes() []vulkan.VertexInputAttributeDescription
-	}
-)
-
-func createVertexBuffer(pd *vkPhysicalDevice, ld *vkLogicalDevice, vertexData vertexData, closer *utils.Closer) vulkan.Buffer {
+func createVertexBuffer(pd *vkPhysicalDevice, ld *vkLogicalDevice, vertexData shaderProgram, closer *utils.Closer) vulkan.Buffer {
 	info := &vulkan.BufferCreateInfo{
 		SType:       vulkan.StructureTypeBufferCreateInfo,
 		Size:        vulkan.DeviceSize(vertexData.Size()),

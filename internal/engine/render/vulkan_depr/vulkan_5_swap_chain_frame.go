@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -135,6 +135,8 @@ func (m *vkSwapChainFrameManager) drawFrame() {
 	}
 
 	vulkan.ResetFences(m.ld.ref, 1, []vulkan.Fence{fence})
+
+	// --- DRAW ---
 
 	vkAssert(
 		vulkan.QueueSubmit(m.ld.queueGraphics, 1, []vulkan.SubmitInfo{submitInfo}, fence),

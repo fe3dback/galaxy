@@ -2,16 +2,15 @@ package render
 
 import (
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
 )
 
 type Render struct {
-	vkAPI *vulkan.Vk
+	renderer renderer
 }
 
-func NewRender(vk *vulkan.Vk) *Render {
+func NewRender(renderer renderer) *Render {
 	return &Render{
-		vkAPI: vk,
+		renderer: renderer,
 	}
 }
 
@@ -31,13 +30,12 @@ func (r *Render) SetRenderMode(mode galx.RenderMode) {
 }
 
 func (r *Render) StartEngineFrame(color galx.Color) {
-	// TODO implement me
-	panic("implement me")
+	r.renderer.FrameStart()
+	r.renderer.Clear(uint32(color))
 }
 
 func (r *Render) EndEngineFrame() {
-	// TODO implement me
-	panic("implement me")
+	r.renderer.FrameEnd()
 }
 
 func (r *Render) StartGUIFrame(color galx.Color) {
@@ -50,9 +48,9 @@ func (r *Render) EndGUIFrame() {
 }
 
 func (r *Render) UpdateGPU() {
-	r.vkAPI.Draw()
+	r.renderer.Draw()
 }
 
 func (r *Render) WaitGPUOperationsBeforeQuit() {
-	r.vkAPI.Wait()
+	r.renderer.GPUWait()
 }

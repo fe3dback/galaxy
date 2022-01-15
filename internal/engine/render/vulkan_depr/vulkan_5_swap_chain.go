@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"github.com/vulkan-go/vulkan"

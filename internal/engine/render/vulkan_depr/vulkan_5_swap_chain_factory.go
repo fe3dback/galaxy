@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/engine/render/vulkan/shader"
+	"github.com/fe3dback/galaxy/internal/engine/render/vulkan_depr/shader/shaderm"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -51,7 +51,7 @@ func (f *vkSwapChainFactory) createAllPipeline(pd *vkPhysicalDevice, ld *vkLogic
 		todoShaderManager.shaderModule(shaderIDTriangleVert).stageInfo,
 		todoShaderManager.shaderModule(shaderIDTriangleFrag).stageInfo,
 	}
-	inputData := shader.VertInTriangle{
+	inputData := shaderm.Triangle{
 		Position: [3]galx.Vec2{
 			{X: 0.0, Y: -0.5},
 			{X: 0.5, Y: 0.5},

@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -10,6 +10,8 @@ import (
 )
 
 const shaderEntryPoint = "main"
+const shaderTypeVert = ".vert"
+const shaderTypeFrag = ".frag"
 
 type (
 	shaderModuleID  = string
@@ -33,26 +35,35 @@ func newShaderManager(ld *vkLogicalDevice, closer *utils.Closer) *vkShaderManage
 	}
 }
 
+func (sm *vkShaderManager) preloadShaders() {
+	for _, shader := range shaderModules {
+		sm.modules[shader.ID()+shaderTypeFrag] = sm.allocModule(shader.ID()+shaderTypeFrag, shader.ProgramFrag(), vulkan.ShaderStageFragmentBit)
+		sm.modules[shader.ID()+shaderTypeVert] = sm.allocModule(shader.ID()+shaderTypeVert, shader.ProgramVert(), vulkan.ShaderStageVertexBit)
+	}
+}
+
+func (sm *vkShaderManager) shaderPipeline(id shaderModuleID) vulkan.GraphicsPipelineCreateInfo {
+	shaderStages := []vulkan.PipelineShaderStageCreateInfo{
+		sm.shaderModule(id + shaderTypeVert).stageInfo,
+		sm.shaderModule(id + shaderTypeFrag).stageInfo,
+	}
+
+	return vulkan.GraphicsPipelineCreateInfo{
+		SType:      vulkan.StructureTypeGraphicsPipelineCreateInfo,
+		StageCount: uint32(len(shaderStages)),
+		PStages:    shaderStages,
+	}
+}
+
 func (sm *vkShaderManager) shaderModule(id shaderModuleID) *vkShaderModule {
 	if module, exist := sm.modules[id]; exist {
 		return module
 	}
 
-	sm.modules[id] = sm.allocModule(id)
 	return sm.modules[id]
 }
 
-func (sm *vkShaderManager) allocModule(id shaderModuleID) *vkShaderModule {
-	byteCode, ok := shadersByteCode[id]
-	if !ok {
-		panic(fmt.Errorf("failed find compiled bytecode for shader '%s'", id))
-	}
-
-	stageType, ok := shadersType[id]
-	if !ok {
-		panic(fmt.Errorf("failed find shader type for shader '%s'", id))
-	}
-
+func (sm *vkShaderManager) allocModule(id shaderModuleID, byteCode []byte, stageType vulkan.ShaderStageFlagBits) *vkShaderModule {
 	createInfo := &vulkan.ShaderModuleCreateInfo{
 		SType:    vulkan.StructureTypeShaderModuleCreateInfo,
 		CodeSize: uint(len(byteCode)),

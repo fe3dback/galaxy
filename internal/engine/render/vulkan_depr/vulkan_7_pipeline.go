@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func createPipeline(
 	ld *vkLogicalDevice,
 	swapChain *vkSwapChain,
 	shaderStages []vulkan.PipelineShaderStageCreateInfo,
-	vertexData vertexData,
+	vertexData shaderProgram,
 	closer *utils.Closer,
 ) *vkPipeline {
 	pl := &vkPipeline{

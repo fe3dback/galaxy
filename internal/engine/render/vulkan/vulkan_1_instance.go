@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"github.com/vulkan-go/vulkan"
-
-	"github.com/fe3dback/galaxy/internal/utils"
 )
 
 const (
@@ -14,17 +12,11 @@ const (
 	engineName      = "Galaxy"
 )
 
-type (
-	vkInstance struct {
-		ref vulkan.Instance
-	}
-)
-
 var requiredValidationLayers = []string{
 	"VK_LAYER_KHRONOS_validation",
 }
 
-func createInstance(requiredExt []string, debugMode bool, closer *utils.Closer) *vkInstance {
+func newVkInstance(requiredExt []string, debugMode bool) *vkInstance {
 	var inst vulkan.Instance
 
 	vkAssert(
@@ -32,13 +24,13 @@ func createInstance(requiredExt []string, debugMode bool, closer *utils.Closer) 
 		fmt.Errorf("create vulkan instance failed"),
 	)
 
-	closer.EnqueueFree(func() {
-		vulkan.DestroyInstance(inst, nil)
-	})
-
 	return &vkInstance{
 		ref: inst,
 	}
+}
+
+func (inst *vkInstance) free() {
+	vulkan.DestroyInstance(inst.ref, nil)
 }
 
 func instanceCreateInfo(requiredExt []string, debugMode bool) *vulkan.InstanceCreateInfo {
@@ -107,7 +99,7 @@ func validationLayers(isDebugMode bool) []string {
 	log.Printf("vK: available layers: [%v]\n", found)
 
 	if len(notFound) > 0 {
-		log.Printf("vk: debug may not work (turn off it in game config), because some of extensions not found: %v\n",
+		log.Printf("Vk: debug may not work (turn off it in game config), because some of extensions not found: %v\n",
 			notFound,
 		)
 	}

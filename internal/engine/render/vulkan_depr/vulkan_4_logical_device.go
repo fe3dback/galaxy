@@ -1,13 +1,23 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/vulkan-go/vulkan"
+
+	"github.com/fe3dback/galaxy/internal/utils"
 )
 
-func newLogicalDevice(pd *vkPhysicalDevice) *vkLogicalDevice {
+type (
+	vkLogicalDevice struct {
+		ref           vulkan.Device
+		queueGraphics vulkan.Queue
+		queuePresent  vulkan.Queue
+	}
+)
+
+func (pd *vkPhysicalDevice) createLogicalDevice(closer *utils.Closer) *vkLogicalDevice {
 	queueCreateInfos := make([]vulkan.DeviceQueueCreateInfo, 0)
 	for _, familyId := range pd.families.uniqueIDs() {
 		queueCreateInfos = append(queueCreateInfos, vulkan.DeviceQueueCreateInfo{
@@ -32,13 +42,16 @@ func newLogicalDevice(pd *vkPhysicalDevice) *vkLogicalDevice {
 		vulkan.CreateDevice(pd.ref, deviceCreateInfo, nil, &logicalDevice),
 		fmt.Errorf("failed create logical device"),
 	)
+	closer.EnqueueFree(func() {
+		vulkan.DestroyDevice(logicalDevice, nil)
+	})
 
 	var queueGraphics vulkan.Queue
 	var queuePresent vulkan.Queue
 	vulkan.GetDeviceQueue(logicalDevice, pd.families.graphicsFamilyId, 0, &queueGraphics)
 	vulkan.GetDeviceQueue(logicalDevice, pd.families.presentFamilyId, 0, &queuePresent)
 
-	log.Printf("Vk: logical device created (graphicsQ: %d, presentQ: %d)\n",
+	log.Printf("vk: logical device created (graphicsQ: %d, presentQ: %d)\n",
 		pd.families.graphicsFamilyId,
 		pd.families.presentFamilyId,
 	)
@@ -48,8 +61,4 @@ func newLogicalDevice(pd *vkPhysicalDevice) *vkLogicalDevice {
 		queueGraphics: queueGraphics,
 		queuePresent:  queuePresent,
 	}
-}
-
-func (ld *vkLogicalDevice) free() {
-	vulkan.DestroyDevice(ld.ref, nil)
 }

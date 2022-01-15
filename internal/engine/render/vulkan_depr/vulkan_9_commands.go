@@ -1,4 +1,4 @@
-package vulkan
+package vulkan_depr
 
 import (
 	"fmt"
@@ -100,10 +100,11 @@ func createCommandPool(
 		}
 
 		vulkan.CmdBeginRenderPass(buffer, renderPassBeginInfo, vulkan.SubpassContentsInline)
+
 		vulkan.CmdBindPipeline(buffer, vulkan.PipelineBindPointGraphics, pipeLine.ref)
 		vulkan.CmdBindVertexBuffers(buffer, 0, 1, []vulkan.Buffer{vertexBuffer}, []vulkan.DeviceSize{0})
-
 		vulkan.CmdDraw(buffer, 3, 1, 0, 0)
+
 		vulkan.CmdEndRenderPass(buffer)
 
 		vkAssert(
