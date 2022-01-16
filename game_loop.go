@@ -34,8 +34,8 @@ func gameLoop(game *Game) error {
 	editorManager := c.ProvideEditorManager()
 
 	// clear first time screen (fix copy texture from underlying memory)
-	// renderer.StartEngineFrame(defaultColor)
-	// renderer.EndEngineFrame()
+	renderer.StartEngineFrame(defaultColor)
+	renderer.EndEngineFrame()
 
 	for frames.Ready() {
 		// -----------------------------------
@@ -78,7 +78,7 @@ func gameLoop(game *Game) error {
 		// -----------------------------------
 		// draw
 		// -----------------------------------
-		// renderer.StartEngineFrame(defaultColor)
+		renderer.StartEngineFrame(defaultColor)
 		//
 		// renderer.SetRenderMode(galx.RenderModeWorld)
 		// if engineState.InEditorMode() {
@@ -108,11 +108,12 @@ func gameLoop(game *Game) error {
 		// 	}
 		// }
 		//
-		// renderer.EndEngineFrame()
+
 		// renderer.StartGUIFrame(defaultColor)
 		// engineGUI.EndGUIFrame()
 		// renderer.EndGUIFrame()
-		renderer.UpdateGPU()
+		renderer.DrawTemporary() // todo: remove tmp
+		renderer.EndEngineFrame()
 
 		// -----------------------------------
 		// debug

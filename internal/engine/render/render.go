@@ -35,7 +35,13 @@ func (r *Render) StartEngineFrame(color galx.Color) {
 }
 
 func (r *Render) EndEngineFrame() {
+	r.renderer.Draw()
 	r.renderer.FrameEnd()
+}
+
+// DrawTemporary todo: remove tmp
+func (r *Render) DrawTemporary() {
+	r.renderer.DrawTriangle()
 }
 
 func (r *Render) StartGUIFrame(color galx.Color) {
@@ -45,10 +51,6 @@ func (r *Render) StartGUIFrame(color galx.Color) {
 
 func (r *Render) EndGUIFrame() {
 	// do nothing here
-}
-
-func (r *Render) UpdateGPU() {
-	r.renderer.Draw()
 }
 
 func (r *Render) WaitGPUOperationsBeforeQuit() {

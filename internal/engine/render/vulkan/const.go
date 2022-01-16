@@ -7,3 +7,9 @@ const swapChainTimeout = time.Second * 10
 
 // How many frames can be failed continuously before crash
 const maxPresetFails = 100
+
+const (
+	shaderEntryPoint = "main"
+	shaderTypeVert   = ".vert"
+	shaderTypeFrag   = ".frag"
+)

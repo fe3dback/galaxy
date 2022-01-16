@@ -71,6 +71,27 @@ func (sc *vkSwapChain) free() {
 	vulkan.DestroySwapchain(sc.ld.ref, sc.ref, nil)
 }
 
+func (sc *vkSwapChain) viewport() vulkan.Viewport {
+	return vulkan.Viewport{
+		X:        0,
+		Y:        0,
+		Width:    float32(sc.info.bufferSize.Width),
+		Height:   float32(sc.info.bufferSize.Height),
+		MinDepth: 0.0,
+		MaxDepth: 1.0,
+	}
+}
+
+func (sc *vkSwapChain) scissor() vulkan.Rect2D {
+	return vulkan.Rect2D{
+		Offset: vulkan.Offset2D{
+			X: 0,
+			Y: 0,
+		},
+		Extent: sc.info.bufferSize,
+	}
+}
+
 func createSwapChainImages(swapChain vulkan.Swapchain, ld *vkLogicalDevice) []vulkan.Image {
 	imagesCount := uint32(0)
 	vkAssert(

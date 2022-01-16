@@ -11,6 +11,7 @@ type (
 		FrameStart()
 		FrameEnd()
 		Draw()
+		DrawTriangle() // todo: tmp
 		GPUWait()
 	}
 )

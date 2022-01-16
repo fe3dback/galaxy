@@ -21,17 +21,21 @@ type (
 
 		// internal
 		vkRenderPassHandlesLazyCache map[renderPassType]vulkan.RenderPass
+		vkPipelineHandlesLazyCache   map[shaderModuleID]vulkan.Pipeline
 
 		// vk handle wrappers
-		vk               *Vk
-		vkInstance       *vkInstance
-		vkSurface        *vkSurface
-		vkPhysicalDevice *vkPhysicalDevice
-		vkLogicalDevice  *vkLogicalDevice
-		vkCommandPool    *vkCommandPool
-		vkFrameManager   *vkFrameManager
-		vkSwapChain      *vkSwapChain
-		vkFrameBuffers   *vkFrameBuffers
+		vk                *Vk
+		vkInstance        *vkInstance
+		vkSurface         *vkSurface
+		vkPhysicalDevice  *vkPhysicalDevice
+		vkLogicalDevice   *vkLogicalDevice
+		vkCommandPool     *vkCommandPool
+		vkFrameManager    *vkFrameManager
+		vkSwapChain       *vkSwapChain
+		vkFrameBuffers    *vkFrameBuffers
+		vkShaderManager   *vkShaderManager
+		vkPipelineManager *vkPipelineManager
+		vkPipelineLayout  vulkan.PipelineLayout
 	}
 )
 
@@ -44,6 +48,7 @@ func newContainer(window *glfw.Window, dispatcher *event.Dispatcher, cfg *Config
 
 		// internal
 		vkRenderPassHandlesLazyCache: map[renderPassType]vulkan.RenderPass{},
+		vkPipelineHandlesLazyCache:   map[shaderModuleID]vulkan.Pipeline{},
 	}
 }
 
@@ -72,6 +77,14 @@ func (c *container) renderer() *Vk {
 	c.vk.frameManager = c.provideFrameManager(c.vk.rebuildGraphicsPipeline)
 	c.vk.swapChain = c.provideSwapChain()
 	c.vk.frameBuffers = c.provideFrameBuffers()
+	c.vk.shaderManager = c.provideShaderManager()
+	c.vk.pipelineManager = c.providePipelineManager()
+	c.vk.pipelineLayout = c.providePipelineLayout()
+
+	for shader, pipelineFactory := range buildInShaders {
+		c.vk.shaderManager.preloadShader(shader)
+		c.vkPipelineManager.preloadPipelineFor(shader, pipelineFactory(c, shader))
+	}
 
 	// render
 
@@ -183,4 +196,37 @@ func (c *container) provideFrameBuffers() *vkFrameBuffers {
 		c.defaultRenderPass(),
 	)
 	return c.vkFrameBuffers
+}
+
+func (c *container) provideShaderManager() *vkShaderManager {
+	if c.vkShaderManager != nil {
+		return c.vkShaderManager
+	}
+
+	c.vkShaderManager = newShaderManager(
+		c.provideVkLogicalDevice(),
+	)
+	return c.vkShaderManager
+}
+
+func (c *container) providePipelineManager() *vkPipelineManager {
+	if c.vkPipelineManager != nil {
+		return c.vkPipelineManager
+	}
+
+	c.vkPipelineManager = newPipelineManager(
+		c.provideVkLogicalDevice(),
+	)
+	return c.vkPipelineManager
+}
+
+func (c *container) providePipelineLayout() vulkan.PipelineLayout {
+	if c.vkPipelineLayout != nil {
+		return c.vkPipelineLayout
+	}
+
+	c.vkPipelineLayout = newPipeLineLayout(
+		c.provideVkLogicalDevice(),
+	)
+	return c.vkPipelineLayout
 }

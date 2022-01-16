@@ -4,19 +4,23 @@ import "github.com/vulkan-go/vulkan"
 
 type (
 	Vk struct {
-		inst         *vkInstance
-		surface      *vkSurface
-		pd           *vkPhysicalDevice
-		ld           *vkLogicalDevice
-		commandPool  *vkCommandPool
-		frameManager *vkFrameManager
-		swapChain    *vkSwapChain
-		frameBuffers *vkFrameBuffers
+		inst            *vkInstance
+		surface         *vkSurface
+		pd              *vkPhysicalDevice
+		ld              *vkLogicalDevice
+		commandPool     *vkCommandPool
+		frameManager    *vkFrameManager
+		swapChain       *vkSwapChain
+		frameBuffers    *vkFrameBuffers
+		shaderManager   *vkShaderManager
+		pipelineManager *vkPipelineManager
+		pipelineLayout  vulkan.PipelineLayout
 
 		// back link to container
 		container *container
 
 		// render variables
+		renderQueue                    []shaderProgram
 		currentFrameImageID            uint32
 		currentFrameAvailableForRender bool
 		inResizing                     bool
@@ -129,4 +133,44 @@ type (
 		ld        *vkLogicalDevice
 		swapChain *vkSwapChain
 	}
+
+	vkPipelineManager struct {
+		shaderPipelines map[shaderModuleID]vulkan.Pipeline
+
+		ld *vkLogicalDevice
+	}
+
+	// --------------------------------------
+	// Shaders
+	// --------------------------------------
+
+	shaderModuleID  = string
+	vkShaderManager struct {
+		modules map[shaderModuleID]*vkShaderModule
+
+		ld *vkLogicalDevice
+	}
+
+	vkShaderModule struct {
+		module    vulkan.ShaderModule
+		stageInfo vulkan.PipelineShaderStageCreateInfo
+	}
+
+	shaderProgram interface {
+		// shaderPipelines bytecode
+
+		ID() string
+		ProgramFrag() []byte
+		ProgramVert() []byte
+
+		// attributes
+
+		Size() uint64
+		VertexCount() uint32
+		Data() []byte
+		Bindings() []vulkan.VertexInputBindingDescription
+		Attributes() []vulkan.VertexInputAttributeDescription
+	}
+
+	shaderPipelineFactory = func(c *container, sp shaderProgram) vulkan.Pipeline
 )

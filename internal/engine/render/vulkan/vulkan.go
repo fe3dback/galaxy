@@ -23,6 +23,26 @@ func NewVulkanApi(window *glfw.Window, dispatcher *event.Dispatcher, cfg *Config
 }
 
 func (vk *Vk) free() {
+	if vk.pipelineLayout != nil {
+		vulkan.DestroyPipelineLayout(vk.ld.ref, vk.pipelineLayout, nil)
+		vk.pipelineLayout = nil
+	}
+
+	if vk.pipelineManager != nil {
+		vk.pipelineManager.free()
+		vk.pipelineManager = nil
+	}
+
+	if vk.shaderManager != nil {
+		vk.shaderManager.free()
+		vk.shaderManager = nil
+	}
+
+	if vk.frameBuffers != nil {
+		vk.frameBuffers.free()
+		vk.frameBuffers = nil
+	}
+
 	if vk.swapChain != nil {
 		vk.swapChain.free()
 		vk.swapChain = nil
@@ -75,8 +95,11 @@ func (vk *Vk) rebuildGraphicsPipeline() {
 	// free all pipeline staff
 	// ----------------------------
 
-	// vk.pipeLine.free() // todo
-	// vk.container.vkPipeLine = nil // todo
+	if vk.pipelineManager != nil {
+		vk.pipelineManager.free()
+		vk.pipelineManager = nil
+		vk.container.vkPipelineManager = nil
+	}
 
 	vk.container.vkRenderPassHandlesLazyCache = make(map[renderPassType]vulkan.RenderPass)
 
@@ -118,7 +141,11 @@ func (vk *Vk) rebuildGraphicsPipeline() {
 	vk.commandPool = vk.container.provideVkCommandPool()
 	vk.swapChain = vk.container.provideSwapChain()
 	vk.frameBuffers = vk.container.provideFrameBuffers()
-	// vk.pipeline // todo
+	vk.pipelineManager = vk.container.providePipelineManager()
+
+	for shader, pipelineFactory := range buildInShaders {
+		vk.pipelineManager.preloadPipelineFor(shader, pipelineFactory(vk.container, shader))
+	}
 
 	// finalize
 	// ----------------------------
