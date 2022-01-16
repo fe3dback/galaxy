@@ -10,10 +10,17 @@ type (
 		ld           *vkLogicalDevice
 		commandPool  *vkCommandPool
 		frameManager *vkFrameManager
+		swapChain    *vkSwapChain
+		frameBuffers *vkFrameBuffers
+
+		// back link to container
+		container *container
 
 		// render variables
 		currentFrameImageID            uint32
 		currentFrameAvailableForRender bool
+		inResizing                     bool
+		isMinimized                    bool
 	}
 
 	// --------------------------------------
@@ -77,11 +84,11 @@ type (
 		ld      *vkLogicalDevice
 	}
 
-	frameID = uint8
+	frameID = uint32
 	imageID = uint32
 
 	vkFrameManager struct {
-		maxFrames         uint8
+		maxFrames         frameID
 		currentFrameID    frameID
 		currentImageID    imageID
 		presentFailsCount int
@@ -105,6 +112,8 @@ type (
 		images       []vulkan.Image
 		imagesView   []vulkan.ImageView
 		info         vkSwapChainInfo
+
+		ld *vkLogicalDevice
 	}
 
 	vkSwapChainInfo struct {
@@ -112,5 +121,12 @@ type (
 		imageColorSpace vulkan.ColorSpace
 		bufferSize      vulkan.Extent2D
 		presentMode     vulkan.PresentMode
+	}
+
+	vkFrameBuffers struct {
+		buffers []vulkan.Framebuffer
+
+		ld        *vkLogicalDevice
+		swapChain *vkSwapChain
 	}
 )

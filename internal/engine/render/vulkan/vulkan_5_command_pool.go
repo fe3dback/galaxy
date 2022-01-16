@@ -25,14 +25,15 @@ func newCommandPool(pd *vkPhysicalDevice, ld *vkLogicalDevice) *vkCommandPool {
 	commandPool.ref = pool
 
 	// command buffers
+	buffersCount := pd.surfaceProps.imageBuffersCount()
 	allocInfo := &vulkan.CommandBufferAllocateInfo{
 		SType:              vulkan.StructureTypeCommandBufferAllocateInfo,
 		CommandPool:        pool,
 		Level:              vulkan.CommandBufferLevelPrimary,
-		CommandBufferCount: uint32(swapChainBuffersCount),
+		CommandBufferCount: buffersCount,
 	}
 
-	commandBuffers := make([]vulkan.CommandBuffer, swapChainBuffersCount)
+	commandBuffers := make([]vulkan.CommandBuffer, buffersCount)
 	vkAssert(
 		vulkan.AllocateCommandBuffers(ld.ref, allocInfo, commandBuffers),
 		fmt.Errorf("failed allocate command buffers"),

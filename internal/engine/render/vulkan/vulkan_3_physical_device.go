@@ -94,21 +94,21 @@ func (f *vkPhysicalDeviceFinder) physicalDeviceAssemble(pd vulkan.PhysicalDevice
 func (f *vkPhysicalDeviceFinder) physicalDeviceScore(pd *vkPhysicalDevice) int {
 	required := map[bool]string{
 		// families
-		pd.families.supportGraphics: "graphics operations not supported",
-		pd.families.supportPresent:  "window present not supported",
+		!pd.families.supportGraphics: "graphics operations not supported",
+		!pd.families.supportPresent:  "window present not supported",
 
 		// extensions
-		pd.isSupportAllRequiredExtensions(): "not all required extensions supported",
+		!pd.isSupportAllRequiredExtensions(): "not all required extensions supported",
 
 		// swap chain
-		len(pd.surfaceProps.formats) > 0:              "not GPU",
-		len(pd.surfaceProps.presentModes) > 0:         "not GPU",
-		pd.surfaceProps.richColorSpaceFormat() != nil: "rich colorspace not supported",
+		len(pd.surfaceProps.formats) <= 0:             "not GPU",
+		len(pd.surfaceProps.presentModes) <= 0:        "not GPU",
+		pd.surfaceProps.richColorSpaceFormat() == nil: "rich colorspace not supported",
 	}
 
 	// filter
-	for passed, reason := range required {
-		if !passed {
+	for failed, reason := range required {
+		if failed {
 			log.Printf("Vk: GPU '%s' not pass check: %s\n", pd.props.DeviceName, reason)
 			return -1
 		}

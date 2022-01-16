@@ -6,9 +6,10 @@ import (
 	"github.com/vulkan-go/vulkan"
 )
 
-func newFrameManager(ld *vkLogicalDevice, onSwapOutOfDate func()) *vkFrameManager {
+func newFrameManager(ld *vkLogicalDevice, pd *vkPhysicalDevice, onSwapOutOfDate func()) *vkFrameManager {
+	maxFrames := pd.surfaceProps.imageBuffersCount()
 	frameManager := &vkFrameManager{
-		maxFrames:           swapChainBuffersCount,
+		maxFrames:           maxFrames,
 		currentFrameID:      0,
 		currentImageID:      0,
 		muxRenderAvailable:  make(map[frameID]vulkan.Semaphore),
@@ -19,7 +20,7 @@ func newFrameManager(ld *vkLogicalDevice, onSwapOutOfDate func()) *vkFrameManage
 		onSwapOutOfDate:     onSwapOutOfDate,
 	}
 
-	for i := frameID(0); i < swapChainBuffersCount; i++ {
+	for i := frameID(0); i < maxFrames; i++ {
 		frameManager.muxRenderAvailable[i] = allocateSemaphore(ld)
 		frameManager.muxPresentAvailable[i] = allocateSemaphore(ld)
 		frameManager.fence[i] = allocateFence(ld)
@@ -29,7 +30,7 @@ func newFrameManager(ld *vkLogicalDevice, onSwapOutOfDate func()) *vkFrameManage
 }
 
 func (fm *vkFrameManager) free() {
-	for i := frameID(0); i < swapChainBuffersCount; i++ {
+	for i := frameID(0); i < fm.maxFrames; i++ {
 		vulkan.DestroyFence(fm.ld.ref, fm.fence[i], nil)
 		vulkan.DestroySemaphore(fm.ld.ref, fm.muxPresentAvailable[i], nil)
 		vulkan.DestroySemaphore(fm.ld.ref, fm.muxRenderAvailable[i], nil)

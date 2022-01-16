@@ -19,6 +19,9 @@ type (
 		cfg        *Config
 		closer     *utils.Closer
 
+		// internal
+		vkRenderPassHandlesLazyCache map[renderPassType]vulkan.RenderPass
+
 		// vk handle wrappers
 		vk               *Vk
 		vkInstance       *vkInstance
@@ -27,6 +30,8 @@ type (
 		vkLogicalDevice  *vkLogicalDevice
 		vkCommandPool    *vkCommandPool
 		vkFrameManager   *vkFrameManager
+		vkSwapChain      *vkSwapChain
+		vkFrameBuffers   *vkFrameBuffers
 	}
 )
 
@@ -36,6 +41,9 @@ func newContainer(window *glfw.Window, dispatcher *event.Dispatcher, cfg *Config
 		dispatcher: dispatcher,
 		cfg:        cfg,
 		closer:     closer,
+
+		// internal
+		vkRenderPassHandlesLazyCache: map[renderPassType]vulkan.RenderPass{},
 	}
 }
 
@@ -51,13 +59,21 @@ func (c *container) renderer() *Vk {
 
 	log.Printf("Vk: lib initialized: [%#v]\n", c.cfg)
 
+	// main
 	c.vk = &Vk{}
+	c.vk.container = c
 	c.vk.inst = c.provideVkInstance()
 	c.vk.surface = c.provideVkSurface()
 	c.vk.pd = c.provideVkPhysicalDevice()
 	c.vk.ld = c.provideVkLogicalDevice()
+
+	// render utils
 	c.vk.commandPool = c.provideVkCommandPool()
 	c.vk.frameManager = c.provideFrameManager(c.vk.rebuildGraphicsPipeline)
+	c.vk.swapChain = c.provideSwapChain()
+	c.vk.frameBuffers = c.provideFrameBuffers()
+
+	// render
 
 	return c.vk
 }
@@ -133,7 +149,38 @@ func (c *container) provideFrameManager(onSwapOutOfDate func()) *vkFrameManager 
 
 	c.vkFrameManager = newFrameManager(
 		c.provideVkLogicalDevice(),
+		c.provideVkPhysicalDevice(),
 		onSwapOutOfDate,
 	)
 	return c.vkFrameManager
+}
+
+func (c *container) provideSwapChain() *vkSwapChain {
+	if c.vkSwapChain != nil {
+		return c.vkSwapChain
+	}
+
+	wWidth, wHeight := c.window.GetFramebufferSize()
+
+	c.vkSwapChain = newSwapChain(
+		uint32(wWidth), uint32(wHeight),
+		c.provideVkPhysicalDevice(),
+		c.provideVkLogicalDevice(),
+		c.provideVkSurface(),
+		c.cfg,
+	)
+	return c.vkSwapChain
+}
+
+func (c *container) provideFrameBuffers() *vkFrameBuffers {
+	if c.vkFrameBuffers != nil {
+		return c.vkFrameBuffers
+	}
+
+	c.vkFrameBuffers = newFrameBuffers(
+		c.provideVkLogicalDevice(),
+		c.provideSwapChain(),
+		c.defaultRenderPass(),
+	)
+	return c.vkFrameBuffers
 }

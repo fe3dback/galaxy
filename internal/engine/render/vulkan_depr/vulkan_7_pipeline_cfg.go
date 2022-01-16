@@ -159,7 +159,7 @@ func createPipeLineRenderPass(ld *vkLogicalDevice, swapChain *vkSwapChain, close
 	subPass := vulkan.SubpassDescription{
 		PipelineBindPoint:       vulkan.PipelineBindPointGraphics,
 		InputAttachmentCount:    0,
-		PInputAttachments:       nil, // todo: shader params?
+		PInputAttachments:       nil,
 		ColorAttachmentCount:    1,
 		PColorAttachments:       []vulkan.AttachmentReference{colorAttachmentRef},
 		PResolveAttachments:     nil,
