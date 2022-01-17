@@ -2,6 +2,7 @@ package vulkan
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/vulkan-go/vulkan"
 )
@@ -46,6 +47,8 @@ func newCommandPool(pd *vkPhysicalDevice, ld *vkLogicalDevice) *vkCommandPool {
 func (pool *vkCommandPool) free() {
 	vulkan.FreeCommandBuffers(pool.ld.ref, pool.ref, uint32(len(pool.buffers)), pool.buffers)
 	vulkan.DestroyCommandPool(pool.ld.ref, pool.ref, nil)
+
+	log.Printf("vk: freed: command pool\n")
 }
 
 func (pool *vkCommandPool) commandBufferStart(ind int) {

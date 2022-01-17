@@ -31,10 +31,12 @@ func newVkInstance(requiredExt []string, debugMode bool) *vkInstance {
 
 func (inst *vkInstance) free() {
 	vulkan.DestroyInstance(inst.ref, nil)
+
+	log.Printf("vk: freed: vulkan instance\n")
 }
 
 func instanceCreateInfo(requiredExt []string, debugMode bool) *vulkan.InstanceCreateInfo {
-	log.Printf("VK: init '%s', required extensions: [%v]\n", engineName, requiredExt)
+	log.Printf("vk: init '%s', required extensions: [%v]\n", engineName, requiredExt)
 
 	instInfo := &vulkan.InstanceCreateInfo{
 		SType: vulkan.StructureTypeInstanceCreateInfo,
@@ -96,10 +98,10 @@ func validationLayers(isDebugMode bool) []string {
 		found = append(found, layerLabel)
 	}
 
-	log.Printf("vK: available layers: [%v]\n", found)
+	log.Printf("vk: available layers: [%v]\n", found)
 
 	if len(notFound) > 0 {
-		log.Printf("Vk: debug may not work (turn off it in game config), because some of extensions not found: %v\n",
+		log.Printf("vk: debug may not work (turn off it in game config), because some of extensions not found: %v\n",
 			notFound,
 		)
 	}

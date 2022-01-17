@@ -43,13 +43,17 @@ func (g *Game) run() int {
 	rand.Seed(g.container.Flags().Seed())
 
 	// run game loop
-	err := gameLoop(g)
+	successfulExited := gameLoop(g)
+	err := g.container.Closer().Close()
 	if err != nil {
-		log.Println(fmt.Errorf("game loop exited with error: %w", err))
+		log.Println(fmt.Errorf("graceful shutdown error: %w", err))
+	}
+
+	// exit code
+	if !successfulExited {
 		return 1
 	}
 
-	log.Printf("game loop sucessfully ended")
 	return 0
 }
 

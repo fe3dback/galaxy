@@ -2,6 +2,7 @@ package vulkan
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/vulkan-go/vulkan"
 )
@@ -43,6 +44,8 @@ func (fb *vkFrameBuffers) free() {
 	for _, buffer := range fb.buffers {
 		vulkan.DestroyFramebuffer(fb.ld.ref, buffer, nil)
 	}
+
+	log.Printf("vk: freed: frame buffers\n")
 }
 
 func (fb *vkFrameBuffers) renderPassStart(ind int, commandBuffer vulkan.CommandBuffer, renderPass vulkan.RenderPass) {

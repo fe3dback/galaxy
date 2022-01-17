@@ -31,10 +31,11 @@ func (c *Closer) EnqueueFree(fn FreeFn) {
 }
 
 func (c *Closer) Close() error {
-	for _, closeFn := range c.queue {
+	for i := len(c.queue) - 1; i >= 0; i-- {
+		closeFn := c.queue[i]
 		err := closeFn()
 		if err != nil {
-			log.Printf("close error: %v", err)
+			log.Printf("close err #%d: %v\n", i, err)
 		}
 	}
 

@@ -30,7 +30,7 @@ func (f *vkPhysicalDeviceFinder) physicalDevicePick() *vkPhysicalDevice {
 			continue
 		}
 
-		log.Printf("Vk: GPU '%s' is suitable for use, score = %d\n", pd.props.DeviceName, score)
+		log.Printf("vk: GPU '%s' is suitable for use, score = %d\n", pd.props.DeviceName, score)
 		if score > bestScore {
 			bestScore = score
 			bestDevice = pd
@@ -41,7 +41,7 @@ func (f *vkPhysicalDeviceFinder) physicalDevicePick() *vkPhysicalDevice {
 		panic(fmt.Errorf("not found suitable vulkan GPU for rendering"))
 	}
 
-	log.Printf("Vk: using GPU: %s\n", bestDevice.props.DeviceName)
+	log.Printf("vk: using GPU: %s\n", bestDevice.props.DeviceName)
 	return bestDevice
 }
 
@@ -109,7 +109,7 @@ func (f *vkPhysicalDeviceFinder) physicalDeviceScore(pd *vkPhysicalDevice) int {
 	// filter
 	for failed, reason := range required {
 		if failed {
-			log.Printf("Vk: GPU '%s' not pass check: %s\n", pd.props.DeviceName, reason)
+			log.Printf("vk: GPU '%s' not pass check: %s\n", pd.props.DeviceName, reason)
 			return -1
 		}
 	}
@@ -139,7 +139,7 @@ func (pd *vkPhysicalDevice) isSupportAllRequiredExtensions() bool {
 	}
 
 	if len(notSupported) > 0 {
-		log.Printf("Vk: GPU '%s' not support all required extensions: [%s]\n", pd.props.DeviceName, strings.Join(notSupported, ", "))
+		log.Printf("vk: GPU '%s' not support all required extensions: [%s]\n", pd.props.DeviceName, strings.Join(notSupported, ", "))
 		return false
 	}
 

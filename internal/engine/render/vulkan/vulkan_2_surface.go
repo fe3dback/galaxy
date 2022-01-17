@@ -2,6 +2,7 @@ package vulkan
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/vulkan-go/vulkan"
@@ -21,4 +22,6 @@ func newSurfaceFromWindow(inst *vkInstance, window *glfw.Window) *vkSurface {
 
 func (surf *vkSurface) free() {
 	vulkan.DestroySurface(surf.inst.ref, surf.ref, nil)
+
+	log.Printf("vk: freed: window surface\n")
 }

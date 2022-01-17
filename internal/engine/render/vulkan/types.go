@@ -1,26 +1,31 @@
 package vulkan
 
-import "github.com/vulkan-go/vulkan"
+import (
+	"unsafe"
+
+	"github.com/vulkan-go/vulkan"
+)
 
 type (
 	Vk struct {
-		inst            *vkInstance
-		surface         *vkSurface
-		pd              *vkPhysicalDevice
-		ld              *vkLogicalDevice
-		commandPool     *vkCommandPool
-		frameManager    *vkFrameManager
-		swapChain       *vkSwapChain
-		frameBuffers    *vkFrameBuffers
-		shaderManager   *vkShaderManager
-		pipelineManager *vkPipelineManager
-		pipelineLayout  vulkan.PipelineLayout
+		inst               *vkInstance
+		surface            *vkSurface
+		pd                 *vkPhysicalDevice
+		ld                 *vkLogicalDevice
+		commandPool        *vkCommandPool
+		frameManager       *vkFrameManager
+		swapChain          *vkSwapChain
+		frameBuffers       *vkFrameBuffers
+		dataBuffersManager *vkDataBuffersManager
+		shaderManager      *vkShaderManager
+		pipelineManager    *vkPipelineManager
+		pipelineLayout     vulkan.PipelineLayout
 
 		// back link to container
 		container *container
 
 		// render variables
-		renderQueue                    []shaderProgram
+		renderQueue                    map[string][]shaderProgram
 		currentFrameImageID            uint32
 		currentFrameAvailableForRender bool
 		inResizing                     bool
@@ -132,6 +137,31 @@ type (
 
 		ld        *vkLogicalDevice
 		swapChain *vkSwapChain
+	}
+
+	vkDataBuffersManager struct {
+		residentVertex vkBufferTable
+
+		ld *vkLogicalDevice
+		pd *vkPhysicalDevice
+	}
+
+	vkBufferTable struct {
+		totalCapacity     uint64
+		buffers           []vkBuffer
+		framePageID       int16
+		framePageCapacity uint64
+		frameStagedData   [][]byte
+		frameInstances    uint32
+	}
+
+	vkBuffer struct {
+		capacity vulkan.DeviceSize
+		dataPtr  unsafe.Pointer
+		handle   vulkan.Buffer
+		memory   vulkan.DeviceMemory
+
+		// todo: writeAt (time) - clear unused memory buffers, if not used > 1m
 	}
 
 	vkPipelineManager struct {

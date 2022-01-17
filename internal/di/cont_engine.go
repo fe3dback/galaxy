@@ -23,7 +23,7 @@ func (c *Container) provideWindowsManager() *windows.Manager {
 	}
 
 	manager := windows.NewManager(
-		c.closer(),
+		c.Closer(),
 		c.ProvideEventDispatcher(),
 		engine.RenderTechVulkan,
 		c.Flags().ScreenWidth(),
@@ -44,7 +44,7 @@ func (c *Container) provideSDL() *lib.SDLLib {
 	}
 
 	sdlLib, err := lib.NewSDLLib(
-		c.closer(),
+		c.Closer(),
 		c.Flags().ScreenWidth(),
 		c.Flags().ScreenHeight(),
 		c.Flags().IsFullscreen(),
@@ -77,7 +77,7 @@ func (c *Container) provideRenderFontsManager() *oldRender.FontsManager {
 		return c.memstate.renderer.fontsManager
 	}
 
-	fonts := oldRender.NewFontsManager(c.closer())
+	fonts := oldRender.NewFontsManager(c.Closer())
 	fonts.Load(consts.AssetDefaultFont)
 
 	c.memstate.renderer.fontsManager = fonts
@@ -91,7 +91,7 @@ func (c *Container) provideRenderTextureManager() *oldRender.TextureManager {
 
 	c.memstate.renderer.textureManager = oldRender.NewTextureManager(
 		c.provideSDL().Renderer(),
-		c.closer(),
+		c.Closer(),
 	)
 	return c.memstate.renderer.textureManager
 }
@@ -126,7 +126,7 @@ func (c *Container) provideSoundMixer() *sound.Manager {
 		return c.memstate.engine.soundMixer
 	}
 
-	soundMixer := sound.NewManager(c.closer())
+	soundMixer := sound.NewManager(c.Closer())
 
 	c.memstate.engine.soundMixer = soundMixer
 	return c.memstate.engine.soundMixer
@@ -176,7 +176,7 @@ func (c *Container) ProvideEngineRendererVulkan() *vulkan.Vk {
 		c.provideWindowsManager().Window(),
 		c.ProvideEventDispatcher(),
 		cfg,
-		c.closer(),
+		c.Closer(),
 	)
 	c.memstate.render.libVulkan = vk
 	return c.memstate.render.libVulkan
@@ -208,7 +208,7 @@ func (c *Container) ProvideEngineGUI() *gui.Gui {
 	}
 
 	engineGUI := gui.NewGUI(
-		c.closer(),
+		c.Closer(),
 		c.ProvideEngineRenderer(),
 		c.ProvideEventDispatcher(),
 	)

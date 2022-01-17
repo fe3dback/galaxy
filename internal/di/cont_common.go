@@ -8,7 +8,7 @@ import (
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
-func (c *Container) closer() *utils.Closer {
+func (c *Container) Closer() *utils.Closer {
 	if c.memstate.closer != nil {
 		return c.memstate.closer
 	}
@@ -49,8 +49,8 @@ func (c *Container) logger() *zap.SugaredLogger {
 	closedStd := zap.RedirectStdLog(logger)
 	restoreLogger := zap.ReplaceGlobals(logger)
 
-	closer := c.closer()
-	closer.EnqueueClose(logger.Sync)
+	closer := c.Closer()
+	// closer.EnqueueClose(logger.Sync) // todo
 	closer.EnqueueFree(closedStd)
 	closer.EnqueueFree(restoreLogger)
 

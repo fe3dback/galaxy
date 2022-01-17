@@ -2,6 +2,7 @@ package vulkan
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/vulkan-go/vulkan"
 )
@@ -35,6 +36,8 @@ func (fm *vkFrameManager) free() {
 		vulkan.DestroySemaphore(fm.ld.ref, fm.muxPresentAvailable[i], nil)
 		vulkan.DestroySemaphore(fm.ld.ref, fm.muxRenderAvailable[i], nil)
 	}
+
+	log.Printf("vk: freed: frame manager\n")
 }
 
 func allocateSemaphore(ld *vkLogicalDevice) vulkan.Semaphore {

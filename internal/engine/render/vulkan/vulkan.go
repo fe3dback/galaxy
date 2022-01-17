@@ -1,6 +1,8 @@
 package vulkan
 
 import (
+	"log"
+
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/vulkan-go/vulkan"
 
@@ -26,6 +28,7 @@ func (vk *Vk) free() {
 	if vk.pipelineLayout != nil {
 		vulkan.DestroyPipelineLayout(vk.ld.ref, vk.pipelineLayout, nil)
 		vk.pipelineLayout = nil
+		log.Printf("vk: freed: pipeline layout\n")
 	}
 
 	if vk.pipelineManager != nil {
@@ -36,6 +39,11 @@ func (vk *Vk) free() {
 	if vk.shaderManager != nil {
 		vk.shaderManager.free()
 		vk.shaderManager = nil
+	}
+
+	if vk.dataBuffersManager != nil {
+		vk.dataBuffersManager.free()
+		vk.dataBuffersManager = nil
 	}
 
 	if vk.frameBuffers != nil {
@@ -64,6 +72,7 @@ func (vk *Vk) free() {
 	}
 
 	vk.pd = nil
+	log.Printf("vk: freed: physical device\n")
 
 	if vk.surface != nil {
 		vk.surface.free()
@@ -74,6 +83,8 @@ func (vk *Vk) free() {
 		vk.inst.free()
 		vk.inst = nil
 	}
+
+	log.Printf("vk: freed: renderer complete freed\n")
 }
 
 func (vk *Vk) rebuildGraphicsPipeline() {

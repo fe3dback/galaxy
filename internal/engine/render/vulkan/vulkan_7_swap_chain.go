@@ -51,7 +51,7 @@ func newSwapChain(width, height uint32, pd *vkPhysicalDevice, ld *vkLogicalDevic
 	images := createSwapChainImages(swapChain, ld)
 	imagesView := createSwapChainImageViews(images, ld, pd)
 
-	log.Printf("VK: swapchain created, images=%d, info=(%s)\n", len(images), info.String())
+	log.Printf("vk: swapchain created, images=%d, info=(%s)\n", len(images), info.String())
 
 	return &vkSwapChain{
 		ld:           ld,
@@ -69,6 +69,7 @@ func (sc *vkSwapChain) free() {
 	}
 
 	vulkan.DestroySwapchain(sc.ld.ref, sc.ref, nil)
+	log.Printf("vk: freed: swapchain\n")
 }
 
 func (sc *vkSwapChain) viewport() vulkan.Viewport {

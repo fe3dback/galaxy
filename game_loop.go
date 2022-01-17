@@ -2,6 +2,7 @@ package galaxy
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/fe3dback/galaxy/internal/engine/event"
 )
@@ -10,7 +11,7 @@ const (
 	defaultColor = 0x282A36FF
 )
 
-func gameLoop(game *Game) error {
+func gameLoop(game *Game) bool {
 	var err error
 	c := game.container
 
@@ -56,12 +57,14 @@ func gameLoop(game *Game) error {
 		if engineState.InEditorMode() {
 			err = editorManager.OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update editor: %w", err)
+				err = fmt.Errorf("can`t update editor: %w", err)
+				break
 			}
 		} else {
 			err = scenesManager.Current().OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update game scene: %w", err)
+				err = fmt.Errorf("can`t update game scene: %w", err)
+				break
 			}
 		}
 
@@ -71,7 +74,8 @@ func gameLoop(game *Game) error {
 		if !engineState.InEditorMode() {
 			err = gameUI.OnUpdate(gameState)
 			if err != nil {
-				return fmt.Errorf("can`t update game ui: %w", err)
+				err = fmt.Errorf("can`t update game ui: %w", err)
+				break
 			}
 		}
 
@@ -132,5 +136,10 @@ func gameLoop(game *Game) error {
 
 	renderer.WaitGPUOperationsBeforeQuit()
 
-	return nil
+	if err != nil {
+		log.Println(fmt.Errorf("game loop ended with error: %w", err))
+		return false
+	}
+
+	return true
 }

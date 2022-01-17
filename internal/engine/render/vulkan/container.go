@@ -33,6 +33,7 @@ type (
 		vkFrameManager    *vkFrameManager
 		vkSwapChain       *vkSwapChain
 		vkFrameBuffers    *vkFrameBuffers
+		vkVertexBuffers   *vkDataBuffersManager
 		vkShaderManager   *vkShaderManager
 		vkPipelineManager *vkPipelineManager
 		vkPipelineLayout  vulkan.PipelineLayout
@@ -62,10 +63,12 @@ func (c *container) renderer() *Vk {
 		panic(fmt.Errorf("failed init vulkan: %w", err))
 	}
 
-	log.Printf("Vk: lib initialized: [%#v]\n", c.cfg)
+	log.Printf("vk: lib initialized: [%#v]\n", c.cfg)
 
 	// main
-	c.vk = &Vk{}
+	c.vk = &Vk{
+		renderQueue: make(map[string][]shaderProgram),
+	}
 	c.vk.container = c
 	c.vk.inst = c.provideVkInstance()
 	c.vk.surface = c.provideVkSurface()
@@ -77,6 +80,7 @@ func (c *container) renderer() *Vk {
 	c.vk.frameManager = c.provideFrameManager(c.vk.rebuildGraphicsPipeline)
 	c.vk.swapChain = c.provideSwapChain()
 	c.vk.frameBuffers = c.provideFrameBuffers()
+	c.vk.dataBuffersManager = c.provideDataBuffersManager()
 	c.vk.shaderManager = c.provideShaderManager()
 	c.vk.pipelineManager = c.providePipelineManager()
 	c.vk.pipelineLayout = c.providePipelineLayout()
@@ -196,6 +200,18 @@ func (c *container) provideFrameBuffers() *vkFrameBuffers {
 		c.defaultRenderPass(),
 	)
 	return c.vkFrameBuffers
+}
+
+func (c *container) provideDataBuffersManager() *vkDataBuffersManager {
+	if c.vkVertexBuffers != nil {
+		return c.vkVertexBuffers
+	}
+
+	c.vkVertexBuffers = newDataBuffersManager(
+		c.provideVkLogicalDevice(),
+		c.provideVkPhysicalDevice(),
+	)
+	return c.vkVertexBuffers
 }
 
 func (c *container) provideShaderManager() *vkShaderManager {

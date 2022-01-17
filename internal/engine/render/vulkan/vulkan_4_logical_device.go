@@ -38,7 +38,7 @@ func newLogicalDevice(pd *vkPhysicalDevice) *vkLogicalDevice {
 	vulkan.GetDeviceQueue(logicalDevice, pd.families.graphicsFamilyId, 0, &queueGraphics)
 	vulkan.GetDeviceQueue(logicalDevice, pd.families.presentFamilyId, 0, &queuePresent)
 
-	log.Printf("Vk: logical device created (graphicsQ: %d, presentQ: %d)\n",
+	log.Printf("vk: logical device created (graphicsQ: %d, presentQ: %d)\n",
 		pd.families.graphicsFamilyId,
 		pd.families.presentFamilyId,
 	)
@@ -52,4 +52,6 @@ func newLogicalDevice(pd *vkPhysicalDevice) *vkLogicalDevice {
 
 func (ld *vkLogicalDevice) free() {
 	vulkan.DestroyDevice(ld.ref, nil)
+
+	log.Printf("vk: freed: logical device\n")
 }
