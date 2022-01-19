@@ -63,7 +63,7 @@ func (vk *Vk) FrameEnd() {
 }
 
 func (vk *Vk) DrawTriangle() {
-	for i := float32(-1); i < 1; i += 0.01 {
+	for i := float32(-1); i < 1; i += 0.005 {
 		vk.appendToRenderQueue(&shaderm.Triangle{
 			Position: [3]galx.Vec2{
 				{X: i, Y: -0.5},
@@ -84,38 +84,39 @@ func (vk *Vk) Draw() {
 		return
 	}
 
+	// todo: uniform buffers for per instance data (transform, rotation, scale)
+	// todo: global uniform buffer for mat4 (projection, view) - single frame buffer for all objects
+
 	// reset
 	drawCalls := 0
+	drawInstances := 0
 	commandBuffer := vk.commandPool.commandBuffer(int(vk.currentFrameImageID))
-	vertexBuffersStats := vk.dataBuffersManager.resetVertexBuffers()
-
-	// todo:  uint32(1) - what is bindingCount?
-	vulkan.CmdBindVertexBuffers(commandBuffer, 0, uint32(1), vertexBuffersStats.buffers, vertexBuffersStats.offsets)
 
 	// draw all shaders
 	for pipelineID, instances := range vk.renderQueue {
 		// bind pipeline for this group of shaders
+		vertCount := instances[0].VertexCount()
 		pipeline := vk.pipelineManager.pipeline(pipelineID)
 		vulkan.CmdBindPipeline(commandBuffer, vulkan.PipelineBindPointGraphics, pipeline)
 
-		// copy vertex data to buffers
-		for i, instance := range instances {
-			vk.dataBuffersManager.writeToVertexBuffers(instance)
+		vk.dataBuffersManager.resetVertexBuffers()
 
-			// todo: split draw calls (for test only):
-			vulkan.CmdDraw(commandBuffer, instances[0].VertexCount(), uint32(1), uint32(i)*3, 0)
-			drawCalls++
+		// copy vertex data to buffers
+		for _, instance := range instances {
+			vk.dataBuffersManager.writeToVertexBuffers(instance)
+			drawInstances++
 		}
 
-		// draw all instances of this shader
-		// todo: vulkan.CmdDraw
-		// drawCalls++ // todo
+		// flush vertex buffers
+		batches := vk.dataBuffersManager.flushVertexBuffers()
+		for _, batch := range batches {
+			vulkan.CmdBindVertexBuffers(commandBuffer, 0, uint32(1), batch.buffers, batch.offsets)
+			vulkan.CmdDraw(commandBuffer, batch.instanceCount*vertCount, batch.instanceCount, 0, 0)
+			drawCalls++
+		}
 	}
 
-	// flush vertex buffers
-	vk.dataBuffersManager.flushVertexBuffers()
-
-	log.Printf("draw calls: %d\n", drawCalls)
+	log.Printf("draw calls=%d, instances=%d\n", drawCalls, drawInstances)
 }
 
 func (vk *Vk) GPUWait() {

@@ -14,8 +14,9 @@ type (
 	}
 
 	bindStats struct {
-		buffers []vulkan.Buffer
-		offsets []vulkan.DeviceSize
+		instanceCount uint32
+		buffers       []vulkan.Buffer
+		offsets       []vulkan.DeviceSize
 	}
 )
 
@@ -42,35 +43,33 @@ func (vb *vkDataBuffersManager) free() {
 	log.Printf("vk: freed: vertex buffers\n")
 }
 
-func (vb *vkDataBuffersManager) resetVertexBuffers() bindStats {
+func (vb *vkDataBuffersManager) resetVertexBuffers() {
 	vb.residentVertex.framePageID = -1
 	vb.residentVertex.framePageCapacity = 0
-	vb.residentVertex.frameInstances = 0
+	vb.residentVertex.frameInstanceCounts = []uint32{}
 	vb.residentVertex.frameStagedData = [][]byte{}
 
-	usedBuffers := make([]vulkan.Buffer, 0)
-	offsets := make([]vulkan.DeviceSize, 0)
-	currentOffset := vulkan.DeviceSize(0)
-
-	for _, buff := range vb.residentVertex.buffers {
+	for range vb.residentVertex.buffers {
 		vb.residentVertex.frameStagedData = append(vb.residentVertex.frameStagedData, []byte{})
-
-		usedBuffers = append(usedBuffers, buff.handle)
-		offsets = append(offsets, currentOffset)
-		currentOffset += buff.capacity
-	}
-
-	return bindStats{
-		buffers: usedBuffers,
-		offsets: offsets,
+		vb.residentVertex.frameInstanceCounts = append(vb.residentVertex.frameInstanceCounts, 0)
 	}
 }
 
-func (vb *vkDataBuffersManager) flushVertexBuffers() {
+func (vb *vkDataBuffersManager) flushVertexBuffers() []bindStats {
+	stats := make([]bindStats, 0)
+
 	for pageID, stagedData := range vb.residentVertex.frameStagedData {
 		buff := vb.residentVertex.buffers[pageID]
 		vulkan.Memcopy(buff.dataPtr, stagedData)
+
+		stats = append(stats, bindStats{
+			instanceCount: vb.residentVertex.frameInstanceCounts[pageID],
+			buffers:       []vulkan.Buffer{buff.handle},
+			offsets:       []vulkan.DeviceSize{0},
+		})
 	}
+
+	return stats
 }
 
 func (vb *vkDataBuffersManager) writeToVertexBuffers(instance dataInstance) {
@@ -89,7 +88,7 @@ func (vb *vkDataBuffersManager) writeToVertexBuffers(instance dataInstance) {
 	}
 
 	// write to buffer
-	vb.residentVertex.frameInstances++
+	vb.residentVertex.frameInstanceCounts[vb.residentVertex.framePageID]++
 	stageData := &(vb.residentVertex.frameStagedData[vb.residentVertex.framePageID])
 	*stageData = append(*stageData, data...)
 	vb.residentVertex.framePageCapacity -= size
@@ -99,6 +98,7 @@ func (vb *vkDataBuffersManager) allocateNewVertexBuffer() {
 	buff := allocatePersistBuffer(vb.ld, vb.pd)
 	vb.residentVertex.buffers = append(vb.residentVertex.buffers, buff)
 	vb.residentVertex.frameStagedData = append(vb.residentVertex.frameStagedData, []byte{})
+	vb.residentVertex.frameInstanceCounts = append(vb.residentVertex.frameInstanceCounts, 0)
 	vb.residentVertex.totalCapacity += uint64(buff.capacity)
 }
 

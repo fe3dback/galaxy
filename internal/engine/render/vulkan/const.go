@@ -9,7 +9,7 @@ const swapChainTimeout = time.Second * 10
 const maxPresetFails = 100
 
 // Capacity of each vertex buffer page
-const vertexBufferSize = 1 * 1024 // 1 MB
+const vertexBufferSize = 512 // 512 Bytes
 
 const (
 	shaderEntryPoint = "main"

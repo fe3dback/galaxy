@@ -147,12 +147,12 @@ type (
 	}
 
 	vkBufferTable struct {
-		totalCapacity     uint64
-		buffers           []vkBuffer
-		framePageID       int16
-		framePageCapacity uint64
-		frameStagedData   [][]byte
-		frameInstances    uint32
+		totalCapacity       uint64
+		buffers             []vkBuffer
+		framePageID         int16
+		framePageCapacity   uint64
+		frameStagedData     [][]byte
+		frameInstanceCounts []uint32
 	}
 
 	vkBuffer struct {
