@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/vulkan-go/vulkan"
+
+	"github.com/fe3dback/galaxy/galx"
 )
 
 func newFrameBuffers(ld *vkLogicalDevice, swapChain *vkSwapChain, renderPass vulkan.RenderPass) *vkFrameBuffers {
@@ -64,7 +66,7 @@ func (fb *vkFrameBuffers) renderPassStart(ind int, commandBuffer vulkan.CommandB
 			},
 		},
 		ClearValueCount: 1,
-		PClearValues:    []vulkan.ClearValue{{0.0, 0.0, 0.0, 1.0}},
+		PClearValues:    fb.getClearColor(),
 	}
 
 	vulkan.CmdBeginRenderPass(commandBuffer, renderPassBeginInfo, vulkan.SubpassContentsInline)
@@ -72,4 +74,13 @@ func (fb *vkFrameBuffers) renderPassStart(ind int, commandBuffer vulkan.CommandB
 
 func (fb *vkFrameBuffers) renderPassEnd(commandBuffer vulkan.CommandBuffer) {
 	vulkan.CmdEndRenderPass(commandBuffer)
+}
+
+func (fb *vkFrameBuffers) setClearColor(color galx.Color) {
+	r, g, b, a := color.Split()
+	fb.clearColor = vulkan.ClearValue{r, g, b, a}
+}
+
+func (fb *vkFrameBuffers) getClearColor() []vulkan.ClearValue {
+	return []vulkan.ClearValue{fb.clearColor}
 }

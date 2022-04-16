@@ -6,7 +6,6 @@ import (
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/galx"
-	"github.com/fe3dback/galaxy/internal/engine/render/vulkan/shader/shaderm"
 )
 
 func (vk *Vk) appendToRenderQueue(sp shaderProgram) {
@@ -18,9 +17,8 @@ func (vk *Vk) appendToRenderQueue(sp shaderProgram) {
 	vk.renderQueue[sp.ID()] = []shaderProgram{sp}
 }
 
-func (vk *Vk) Clear(color uint32) {
-	// todo: implement
-	// todo: save color to ctx
+func (vk *Vk) Clear(color galx.Color) {
+	vk.frameBuffers.setClearColor(color)
 }
 
 func (vk *Vk) FrameStart() {
@@ -62,23 +60,6 @@ func (vk *Vk) FrameEnd() {
 	vk.frameManager.frameEnd(vk.swapChain, commandBuffer)
 }
 
-func (vk *Vk) DrawTriangle() {
-	for i := float32(-1); i < 1; i += 0.005 {
-		vk.appendToRenderQueue(&shaderm.Triangle{
-			Position: [3]galx.Vec2{
-				{X: i, Y: -0.5},
-				{X: 0.5, Y: 0.5},
-				{X: -0.5, Y: 0.5},
-			},
-			Color: [3]galx.Vec3{
-				{R: (i + 1) / 2, G: 0, B: 0},
-				{R: 0, G: 1, B: 0},
-				{R: 0, G: 0, B: 1},
-			},
-		})
-	}
-}
-
 func (vk *Vk) Draw() {
 	if !vk.currentFrameAvailableForRender {
 		return
@@ -95,7 +76,7 @@ func (vk *Vk) Draw() {
 	// draw all shaders
 	for pipelineID, instances := range vk.renderQueue {
 		// bind pipeline for this group of shaders
-		vertCount := instances[0].VertexCount()
+		triangleCount := instances[0].TriangleCount()
 		pipeline := vk.pipelineManager.pipeline(pipelineID)
 		vulkan.CmdBindPipeline(commandBuffer, vulkan.PipelineBindPointGraphics, pipeline)
 
@@ -111,7 +92,10 @@ func (vk *Vk) Draw() {
 		batches := vk.dataBuffersManager.flushVertexBuffers()
 		for _, batch := range batches {
 			vulkan.CmdBindVertexBuffers(commandBuffer, 0, uint32(1), batch.buffers, batch.offsets)
-			vulkan.CmdDraw(commandBuffer, batch.instanceCount*vertCount, batch.instanceCount, 0, 0)
+			totalTriangles := batch.instanceCount * triangleCount
+			totalVertexes := totalTriangles * 3
+
+			vulkan.CmdDraw(commandBuffer, totalVertexes, totalTriangles, 0, 0)
 			drawCalls++
 		}
 	}

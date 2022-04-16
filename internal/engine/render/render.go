@@ -6,11 +6,15 @@ import (
 
 type Render struct {
 	renderer renderer
+
+	renderMode galx.RenderMode
+	camera     *Camera
 }
 
-func NewRender(renderer renderer) *Render {
+func NewRender(renderer renderer, camera *Camera) *Render {
 	return &Render{
 		renderer: renderer,
+		camera:   camera,
 	}
 }
 
@@ -24,14 +28,10 @@ func (r *Render) SetRenderTarget(id galx.RenderTarget) {
 	panic("implement me")
 }
 
-func (r *Render) SetRenderMode(mode galx.RenderMode) {
-	// TODO implement me
-	panic("implement me")
-}
-
 func (r *Render) StartEngineFrame(color galx.Color) {
+	r.renderMode = galx.RenderModeWorld
+	r.renderer.Clear(color)
 	r.renderer.FrameStart()
-	r.renderer.Clear(uint32(color))
 }
 
 func (r *Render) EndEngineFrame() {
@@ -41,10 +41,28 @@ func (r *Render) EndEngineFrame() {
 
 // DrawTemporary todo: remove tmp
 func (r *Render) DrawTemporary() {
-	r.renderer.DrawTriangle()
+	// r.renderer.DrawTmpTriangle()
+
+	for x := 50; x < 1000; x += 50 {
+		for y := 50; y < 720; y += 50 {
+			r.DrawSquare(galx.ColorCyan, galx.Rect{
+				Min: galx.Vec{
+					X: float64(x),
+					Y: float64(y),
+				},
+				Max: galx.Vec{
+					X: float64(x + 25),
+					Y: float64(y + 40),
+				},
+			})
+		}
+	}
+
+	// r.renderer.DrawTmpTriangle()
 }
 
 func (r *Render) StartGUIFrame(color galx.Color) {
+	r.renderMode = galx.RenderModeUI
 	// TODO implement me
 	panic("implement me")
 }

@@ -33,7 +33,7 @@ type Container struct {
 			sdl            *lib.SDLLib
 			fontsManager   *oldRender.FontsManager
 			textureManager *oldRender.TextureManager
-			camera         *oldRender.Camera
+			oldCamera      *oldRender.Camera
 			renderer       *oldRender.Renderer
 			gui            *gui.Gui
 		}
@@ -41,6 +41,7 @@ type Container struct {
 			windowManager *windows.Manager
 			inst          *render.Render
 			libVulkan     *vulkan.Vk
+			camera        *render.Camera
 		}
 		engine struct {
 			editorGizmos  *engineEditor.DrawGizmos

@@ -3,8 +3,25 @@ package render
 import "github.com/fe3dback/galaxy/galx"
 
 func (r *Render) DrawSquare(color galx.Color, rect galx.Rect) {
-	// TODO implement me
-	panic("implement me")
+	var vertPos [4]galx.Vec2
+
+	for ind, vec := range rect.Vertices() {
+		transform := r.project(r.cam(vec))
+		vertPos[ind] = galx.Vec2{
+			X: float32(transform.X),
+			Y: float32(transform.Y),
+		}
+	}
+
+	r.renderer.DrawRect(
+		vertPos,
+		[4]galx.Vec3{
+			{1, 0, 0},
+			{0, 1, 0},
+			{0, 0, 1},
+			{1, 0, 1},
+		},
+	)
 }
 
 func (r *Render) DrawSquareFilled(color galx.Color, rect galx.Rect) {

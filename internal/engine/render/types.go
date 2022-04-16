@@ -1,17 +1,20 @@
 package render
 
+import "github.com/fe3dback/galaxy/galx"
+
 type (
 	renderer interface {
 		// Draw calls
 
-		Clear(color uint32)
+		Clear(color galx.Color)
 
 		// System
 
 		FrameStart()
 		FrameEnd()
 		Draw()
-		DrawTriangle() // todo: tmp
+		DrawTmpTriangle() // todo: tmp
+		DrawRect(vertexPos [4]galx.Vec2, vertexColor [4]galx.Vec3)
 		GPUWait()
 	}
 )

@@ -31,6 +31,8 @@ github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJy
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/veandco/go-sdl2 v0.4.10 h1:8QoD2bhWl7SbQDflIAUYWfl9Vq+mT8/boJFAUzAScgY=
 github.com/veandco/go-sdl2 v0.4.10/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
+github.com/veandco/go-sdl2 v0.5.0-alpha.3.0.20220411044530-e2d8a19aa6da h1:/cMlN+BwhXUshoh8h8gRB2srPzAwtjESlF8YePpG/dA=
+github.com/veandco/go-sdl2 v0.5.0-alpha.3.0.20220411044530-e2d8a19aa6da/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/vulkan-go/vulkan v0.0.0-20210402152248-956e3850d8f9 h1:WFujQpkMAAd8dqccEm10n8dly4yQ/R5d2+Us7GutowA=
 github.com/vulkan-go/vulkan v0.0.0-20210402152248-956e3850d8f9/go.mod h1:Y5Ti1uUBdKDsb0W8aPtIo9krs+29Y7p6Bc9yyy4AM6g=
 go.uber.org/atomic v1.6.0 h1:Ezj3JGmsOnG1MoRWQkPBsKLe9DwWD9QeXzTRzzldNVk=

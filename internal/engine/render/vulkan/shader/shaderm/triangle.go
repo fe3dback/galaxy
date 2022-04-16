@@ -8,6 +8,7 @@ import (
 	"github.com/fe3dback/galaxy/galx"
 )
 
+const pTriangleTriangleCount = 1
 const pTriangleVertexCount = 3
 const pTriangleSizePos = galx.SizeOfVec2
 const pTriangleSizeColor = galx.SizeOfVec3
@@ -43,6 +44,10 @@ func (x *Triangle) ProgramVert() []byte {
 
 func (x *Triangle) Size() uint64 {
 	return pTriangleSizeTotal
+}
+
+func (x *Triangle) TriangleCount() uint32 {
+	return pTriangleTriangleCount
 }
 
 func (x *Triangle) VertexCount() uint32 {

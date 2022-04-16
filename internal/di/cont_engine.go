@@ -96,15 +96,29 @@ func (c *Container) provideRenderTextureManager() *oldRender.TextureManager {
 	return c.memstate.renderer.textureManager
 }
 
-func (c *Container) provideRenderCamera() *oldRender.Camera {
-	if c.memstate.renderer.camera != nil {
-		return c.memstate.renderer.camera
+func (c *Container) provideRenderCamera() *render.Camera {
+	if c.memstate.render.camera != nil {
+		return c.memstate.render.camera
 	}
 
-	c.memstate.renderer.camera = oldRender.NewCamera(
+	c.memstate.render.camera = render.NewCamera(
+		c.ProvideEventDispatcher(),
+		c.flags.ScreenWidth(),
+		c.flags.ScreenHeight(),
+	)
+	return c.memstate.render.camera
+}
+
+// todo: remove
+func (c *Container) provideRenderCameraOLD() *oldRender.Camera {
+	if c.memstate.renderer.oldCamera != nil {
+		return c.memstate.renderer.oldCamera
+	}
+
+	c.memstate.renderer.oldCamera = oldRender.NewCamera(
 		c.ProvideEventDispatcher(),
 	)
-	return c.memstate.renderer.camera
+	return c.memstate.renderer.oldCamera
 }
 
 func (c *Container) provideEditorGizmos() *engineeditor.DrawGizmos {
@@ -155,6 +169,7 @@ func (c *Container) ProvideEngineRenderer() *render.Render {
 
 	renderer := render.NewRender(
 		c.ProvideEngineRendererVulkan(),
+		c.provideRenderCamera(),
 	)
 
 	c.memstate.render.inst = renderer
@@ -192,7 +207,7 @@ func (c *Container) ProvideEngineRendererOLD() *oldRender.Renderer {
 		c.provideSDL().Renderer(),
 		c.provideRenderFontsManager(),
 		c.provideRenderTextureManager(),
-		c.provideRenderCamera(),
+		c.provideRenderCameraOLD(),
 		c.ProvideEventDispatcher(),
 		c.provideEditorGizmos(),
 		c.ProvideEngineState(),
@@ -224,7 +239,7 @@ func (c *Container) ProvideEngineGameState() *engine.GameState {
 
 	gameState := engine.NewGameState(
 		c.ProvideFrames(),
-		c.provideRenderCamera(),
+		c.provideRenderCameraOLD(),
 		c.provideEngineControlMouse(),
 		c.provideEngineControlKeyboard(),
 		c.provideEngineControlMovement(),

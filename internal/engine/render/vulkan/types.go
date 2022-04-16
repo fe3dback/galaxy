@@ -135,8 +135,9 @@ type (
 	vkFrameBuffers struct {
 		buffers []vulkan.Framebuffer
 
-		ld        *vkLogicalDevice
-		swapChain *vkSwapChain
+		clearColor vulkan.ClearValue
+		ld         *vkLogicalDevice
+		swapChain  *vkSwapChain
 	}
 
 	vkDataBuffersManager struct {
@@ -196,6 +197,7 @@ type (
 		// attributes
 
 		Size() uint64
+		TriangleCount() uint32
 		VertexCount() uint32
 		Data() []byte
 		Bindings() []vulkan.VertexInputBindingDescription

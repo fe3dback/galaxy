@@ -25,7 +25,7 @@ func (c *Container) provideEngineNodeQuery() *node.ObjectQuery {
 
 	c.memstate.node.query = node.NewObjectQuery(
 		c.ProvideEngineScenesManager(),
-		c.provideRenderCamera(),
+		c.provideRenderCameraOLD(),
 	)
 	return c.memstate.node.query
 }

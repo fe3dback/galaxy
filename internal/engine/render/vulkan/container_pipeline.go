@@ -10,11 +10,14 @@ import (
 
 var buildInShaders = map[shaderProgram]shaderPipelineFactory{
 	&shaderm.Triangle{}: func(c *container, sp shaderProgram) vulkan.Pipeline {
-		return c.createShaderPipelineTriangle(sp)
+		return c.createShaderPipelineUniversalTriangleList(sp)
+	},
+	&shaderm.Rect{}: func(c *container, sp shaderProgram) vulkan.Pipeline {
+		return c.createShaderPipelineUniversalTriangleList(sp)
 	},
 }
 
-func (c *container) createShaderPipelineTriangle(sp shaderProgram) vulkan.Pipeline {
+func (c *container) createShaderPipelineUniversalTriangleList(sp shaderProgram) vulkan.Pipeline {
 	shaderModuleFrag := c.provideShaderManager().shaderModule(sp.ID() + shaderTypeFrag)
 	shaderModuleVert := c.provideShaderManager().shaderModule(sp.ID() + shaderTypeVert)
 	shaderStages := []vulkan.PipelineShaderStageCreateInfo{
@@ -22,7 +25,7 @@ func (c *container) createShaderPipelineTriangle(sp shaderProgram) vulkan.Pipeli
 		shaderModuleVert.stageInfo,
 	}
 
-	inputAssemble := c.createPipeLineAssembleStateTopologyTriangle()
+	inputAssemble := c.createPipeLineAssembleStateTopologyTriangleList()
 	vertexInputInfo := c.createVertexInputInfo(sp)
 	viewPortStage := c.createPipelineViewPortState()
 	rasterizer := c.createPipeLineRasterizerLine()
@@ -60,7 +63,7 @@ func (c *container) createShaderPipelineTriangle(sp shaderProgram) vulkan.Pipeli
 	return pipelines[0]
 }
 
-func (c *container) createPipeLineAssembleStateTopologyTriangle() vulkan.PipelineInputAssemblyStateCreateInfo {
+func (c *container) createPipeLineAssembleStateTopologyTriangleList() vulkan.PipelineInputAssemblyStateCreateInfo {
 	return c.createPipeLineAssembleState(vulkan.PrimitiveTopologyTriangleList)
 }
 
