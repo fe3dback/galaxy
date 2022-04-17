@@ -24,11 +24,13 @@ func (c *Container) provideWindowsManager() *windows.Manager {
 
 	manager := windows.NewManager(
 		c.Closer(),
+		c.ProvideFrames(),
 		c.ProvideEventDispatcher(),
 		engine.RenderTechVulkan,
 		c.Flags().ScreenWidth(),
 		c.Flags().ScreenHeight(),
 		c.Flags().IsFullscreen(),
+		c.Flags().DebugOpts().System,
 	)
 
 	c.memstate.render.windowManager = manager

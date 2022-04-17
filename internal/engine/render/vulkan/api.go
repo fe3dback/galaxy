@@ -1,8 +1,6 @@
 package vulkan
 
 import (
-	"log"
-
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/galx"
@@ -103,7 +101,7 @@ func (vk *Vk) Draw() {
 		}
 	}
 
-	log.Printf("draw calls=%d, instances=%d\n", drawCalls, drawInstances)
+	// log.Printf("draw calls=%d, instances=%d\n", drawCalls, drawInstances)
 }
 
 func (vk *Vk) GPUWait() {

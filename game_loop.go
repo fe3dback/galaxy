@@ -116,7 +116,7 @@ func gameLoop(game *Game) bool {
 		// renderer.StartGUIFrame(defaultColor)
 		// engineGUI.EndGUIFrame()
 		// renderer.EndGUIFrame()
-		renderer.DrawTemporary() // todo: remove tmp
+		// renderer.DrawTemporary() // todo: remove tmp
 		renderer.EndEngineFrame()
 
 		// -----------------------------------

@@ -23,12 +23,9 @@ func NewAssetsManager(soundManager *sound.Manager) *Manager {
 }
 
 func (l *Manager) LoadYaml(res consts.AssetsPath, data interface{}) {
-	buffer, err := ioutil.ReadFile(res)
-	if err != nil {
-		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
-	}
+	buffer := l.LoadFile(res)
 
-	err = yaml.Unmarshal(buffer, data)
+	err := yaml.Unmarshal(buffer, data)
 	if err != nil {
 		panic(fmt.Sprintf("can`t parse `%s`: %v", res, err))
 	}
@@ -39,12 +36,9 @@ func (l *Manager) LoadYaml(res consts.AssetsPath, data interface{}) {
 }
 
 func (l *Manager) LoadXML(res consts.AssetsPath, data interface{}) {
-	buffer, err := ioutil.ReadFile(res)
-	if err != nil {
-		panic(fmt.Sprintf("can`t open `%s`: %v", res, err))
-	}
+	buffer := l.LoadFile(res)
 
-	err = xml.Unmarshal(buffer, data)
+	err := xml.Unmarshal(buffer, data)
 	if err != nil {
 		panic(fmt.Sprintf("can`t parse `%s`: %v", res, err))
 	}

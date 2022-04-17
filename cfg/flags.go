@@ -53,12 +53,18 @@ func NewInitFlags(modifiers ...Modifier) *InitFlags {
 		includeEditor:     true,
 		defaultIsGameMode: false,
 		seed:              time.Now().Unix(),
+		debugOpt: DebugOpt{
+			System: false,
+			Memory: false,
+			Frames: false,
+			World:  false,
+		},
 
 		// game
 		components: map[string]galx.Component{},
 
 		// render
-		targetFPS:    60,
+		targetFPS:    120,
 		isFullScreen: false,
 		screenWidth:  960,
 		screenHeight: 540,

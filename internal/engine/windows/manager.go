@@ -2,12 +2,14 @@ package windows
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/event"
+	"github.com/fe3dback/galaxy/internal/frames"
 	"github.com/fe3dback/galaxy/internal/utils"
 )
 
@@ -15,12 +17,20 @@ type Manager struct {
 	window *glfw.Window
 }
 
-func NewManager(closer *utils.Closer, dispatcher *event.Dispatcher, tech engine.RenderTech, defaultWidth, defaultHeight int, fullscreen bool) *Manager {
+func NewManager(
+	closer *utils.Closer,
+	frames *frames.Frames,
+	dispatcher *event.Dispatcher,
+	tech engine.RenderTech,
+	defaultWidth, defaultHeight int,
+	fullscreen bool,
+	debug bool,
+) *Manager {
 	var window *glfw.Window
 
 	switch tech {
 	case engine.RenderTechVulkan:
-		window = newVulkanWindow(closer, dispatcher, defaultWidth, defaultHeight, fullscreen)
+		window = newVulkanWindow(closer, frames, dispatcher, defaultWidth, defaultHeight, fullscreen, debug)
 	default:
 		panic(fmt.Errorf("failed create window: not supported render tech: %s", tech))
 	}
@@ -34,7 +44,14 @@ func (m *Manager) Window() *glfw.Window {
 	return m.window
 }
 
-func newVulkanWindow(closer *utils.Closer, dispatcher *event.Dispatcher, defaultWidth, defaultHeight int, fullscreen bool) *glfw.Window {
+func newVulkanWindow(
+	closer *utils.Closer,
+	frames *frames.Frames,
+	dispatcher *event.Dispatcher,
+	defaultWidth, defaultHeight int,
+	fullscreen bool,
+	debug bool,
+) *glfw.Window {
 	// set vulkan address
 	procAddr := glfw.GetVulkanGetInstanceProcAddress()
 	if procAddr == nil {
@@ -71,6 +88,35 @@ func newVulkanWindow(closer *utils.Closer, dispatcher *event.Dispatcher, default
 		})
 	})
 
+	if debug {
+		startUpdateDebugWindowTitle(window, closer, frames)
+	}
+
 	// return
 	return window
+}
+
+func startUpdateDebugWindowTitle(window *glfw.Window, closer *utils.Closer, frames *frames.Frames) {
+	const interval = time.Millisecond * 100
+
+	exited := false
+	closer.EnqueueFree(func() {
+		exited = true
+	})
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		for range ticker.C {
+			if exited {
+				break
+			}
+
+			window.SetTitle(fmt.Sprintf("Galaxy :: FPS=%d/%d (%dms/%dms)",
+				frames.FPS(),
+				frames.TargetFPS(),
+				frames.FrameDuration().Milliseconds(),
+				frames.LimitDuration().Milliseconds(),
+			))
+		}
+	}()
 }

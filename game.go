@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	_ "net/http/pprof"
 	"runtime"
 
 	"github.com/fe3dback/galaxy/cfg"
@@ -36,6 +37,7 @@ func (g *Game) setup() *di.Container {
 
 func (g *Game) run() int {
 	if g.container.Flags().IsProfiling() {
+		log.Printf("!!! Profiling is ON, port=%d\n", g.container.Flags().ProfilingPort())
 		profile(g.container.Flags().ProfilingPort())
 	}
 

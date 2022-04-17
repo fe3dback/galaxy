@@ -1,6 +1,9 @@
 package render
 
 import (
+	"math"
+	"time"
+
 	"github.com/fe3dback/galaxy/galx"
 )
 
@@ -43,24 +46,32 @@ func (r *Render) EndEngineFrame() {
 func (r *Render) DrawTemporary() {
 	// r.renderer.DrawTmpTriangle()
 
-	const rSizeX = 24
-	const rSizeY = 32
-	const rOffset = 10
+	const rSizeX = 32
+	const rSizeY = 48
+	const rOffset = 8
 	const rStartX = rSizeX
 	const rEndX = 1280 - rSizeX - rOffset
 	const rStartY = rSizeY
 	const rEndY = 720 - rSizeY - rOffset
 
+	dOffsetX := math.Sin(float64(time.Now().UnixMilli())*0.01) * rOffset
+	dOffsetY := math.Cos(float64(time.Now().UnixMilli())*0.01) * rOffset
+
+	gridX := 0
+	gridY := 0
+
 	for x := rStartX; x < rEndX; x += rSizeX + rOffset {
+		gridX++
 		for y := rStartY; y < rEndY; y += rSizeY + rOffset {
+			gridY++
 			r.DrawSquare(galx.ColorCyan, galx.Rect{
 				TL: galx.Vec{
-					X: float64(x),
-					Y: float64(y),
+					X: float64(x) + ((dOffsetX * float64(gridX)) * 0.005),
+					Y: float64(y) + ((dOffsetY * float64(gridY)) * 0.005),
 				},
 				BR: galx.Vec{
-					X: float64(x + rSizeX),
-					Y: float64(y + rSizeY),
+					X: float64(x+rSizeX) + ((dOffsetX * float64(gridX)) * 0.005),
+					Y: float64(y+rSizeY) + ((dOffsetY * float64(gridY)) * 0.005),
 				},
 			})
 		}
