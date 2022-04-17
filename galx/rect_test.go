@@ -74,8 +74,8 @@ func TestRect_Edges(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
 			if got := r.Edges(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Edges() = %v, want %v", got, tt.want)
@@ -196,8 +196,8 @@ func TestRect_Height(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
 			if got := r.Height(); got != tt.want {
 				t.Errorf("height() = %v, want %v", got, tt.want)
@@ -251,10 +251,10 @@ func TestRect_Vertices(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
-			if got := r.Vertices(); !reflect.DeepEqual(got, tt.want) {
+			if got := r.VerticesClockWise(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Vertices() = %v, want %v", got, tt.want)
 			}
 		})
@@ -387,8 +387,8 @@ func TestRect_Width(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
 			if got := r.Width(); got != tt.want {
 				t.Errorf("width() = %v, want %v", got, tt.want)
@@ -513,8 +513,8 @@ func TestRect_Center(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
 			if got := r.Center(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Center() = %v, want %v", got, tt.want)
@@ -547,8 +547,8 @@ func TestRect_Scale(t *testing.T) {
 				s: 2,
 			},
 			want: Rect{
-				Min: Vec{X: 0, Y: 0},
-				Max: Vec{X: 0, Y: 0},
+				TL: Vec{X: 0, Y: 0},
+				BR: Vec{X: 0, Y: 0},
 			},
 		},
 		{
@@ -561,8 +561,8 @@ func TestRect_Scale(t *testing.T) {
 				s: 1,
 			},
 			want: Rect{
-				Min: Vec{X: -1, Y: -1},
-				Max: Vec{X: 1, Y: 1},
+				TL: Vec{X: -1, Y: -1},
+				BR: Vec{X: 1, Y: 1},
 			},
 		},
 		{
@@ -575,8 +575,8 @@ func TestRect_Scale(t *testing.T) {
 				s: 2.5,
 			},
 			want: Rect{
-				Min: Vec{X: -2.5, Y: -2.5},
-				Max: Vec{X: 2.5, Y: 2.5},
+				TL: Vec{X: -2.5, Y: -2.5},
+				BR: Vec{X: 2.5, Y: 2.5},
 			},
 		},
 		{
@@ -589,16 +589,16 @@ func TestRect_Scale(t *testing.T) {
 				s: 2.5,
 			},
 			want: Rect{
-				Min: Vec{X: -2.5, Y: -2.5},
-				Max: Vec{X: 2.5, Y: 2.5},
+				TL: Vec{X: -2.5, Y: -2.5},
+				BR: Vec{X: 2.5, Y: 2.5},
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := Rect{
-				Min: tt.fields.Min,
-				Max: tt.fields.Max,
+				TL: tt.fields.Min,
+				BR: tt.fields.Max,
 			}
 			if got := r.Scale(tt.args.s); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Scale() = %v, want %v", got, tt.want)

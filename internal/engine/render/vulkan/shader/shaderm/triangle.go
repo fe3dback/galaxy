@@ -46,12 +46,20 @@ func (x *Triangle) Size() uint64 {
 	return pTriangleSizeTotal
 }
 
+func (x *Triangle) VertexCount() uint32 {
+	return pTriangleVertexCount
+}
+
 func (x *Triangle) TriangleCount() uint32 {
 	return pTriangleTriangleCount
 }
 
-func (x *Triangle) VertexCount() uint32 {
-	return pTriangleVertexCount
+func (x *Triangle) Topology() vulkan.PrimitiveTopology {
+	return vulkan.PrimitiveTopologyTriangleList
+}
+
+func (x *Triangle) Indexes() []uint16 {
+	return []uint16{0, 1, 2}
 }
 
 func (x *Triangle) Data() []byte {

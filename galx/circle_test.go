@@ -25,11 +25,11 @@ func TestCircle_BoundingBox(t *testing.T) {
 				Radius: 2,
 			},
 			want: Rect{
-				Min: Vec{
+				TL: Vec{
 					X: -2,
 					Y: -2,
 				},
-				Max: Vec{
+				BR: Vec{
 					X: 2,
 					Y: 2,
 				},
@@ -45,11 +45,11 @@ func TestCircle_BoundingBox(t *testing.T) {
 				Radius: -2,
 			},
 			want: Rect{
-				Min: Vec{
+				TL: Vec{
 					X: -2,
 					Y: -2,
 				},
-				Max: Vec{
+				BR: Vec{
 					X: 2,
 					Y: 2,
 				},
@@ -65,11 +65,11 @@ func TestCircle_BoundingBox(t *testing.T) {
 				Radius: 1.5,
 			},
 			want: Rect{
-				Min: Vec{
+				TL: Vec{
 					X: -3.5,
 					Y: -4.5,
 				},
-				Max: Vec{
+				BR: Vec{
 					X: -0.5,
 					Y: -1.5,
 				},

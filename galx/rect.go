@@ -6,16 +6,16 @@ import (
 )
 
 type Rect struct {
-	Min Vec
-	Max Vec
+	TL Vec
+	BR Vec
 }
 
 func (r Rect) String() string {
-	return fmt.Sprintf("Rect{%.4f, %.4f, %.4f, %.4f}", r.Min.X, r.Min.Y, r.Max.X, r.Max.Y)
+	return fmt.Sprintf("Rect{%.4f, %.4f, %.4f, %.4f}", r.TL.X, r.TL.Y, r.BR.X, r.BR.Y)
 }
 
 func (r Rect) Valid() bool {
-	return r.Max.X >= r.Min.X && r.Max.Y >= r.Min.Y
+	return r.BR.X >= r.TL.X && r.BR.Y >= r.TL.Y
 }
 
 func (r Rect) Normalize() Rect {
@@ -23,29 +23,29 @@ func (r Rect) Normalize() Rect {
 		return r
 	}
 
-	if r.Max.X < r.Min.X {
-		r.Min.X, r.Max.X = r.Max.X, r.Min.X
+	if r.BR.X < r.TL.X {
+		r.TL.X, r.BR.X = r.BR.X, r.TL.X
 	}
 
-	if r.Max.Y < r.Min.Y {
-		r.Min.Y, r.Max.Y = r.Max.Y, r.Min.Y
+	if r.BR.Y < r.TL.Y {
+		r.TL.Y, r.BR.Y = r.BR.Y, r.TL.Y
 	}
 
 	return r
 }
 
 func (r Rect) Width() float64 {
-	return math.Abs(r.Max.X - r.Min.X)
+	return math.Abs(r.BR.X - r.TL.X)
 }
 
 func (r Rect) Height() float64 {
-	return math.Abs(r.Max.Y - r.Min.Y)
+	return math.Abs(r.BR.Y - r.TL.Y)
 }
 
 func (r Rect) Center() Vec {
 	return Vec{
-		X: r.Min.X + ((r.Max.X - r.Min.X) / 2),
-		Y: r.Min.Y + ((r.Max.Y - r.Min.Y) / 2),
+		X: r.TL.X + ((r.BR.X - r.TL.X) / 2),
+		Y: r.TL.Y + ((r.BR.Y - r.TL.Y) / 2),
 	}
 }
 
@@ -57,11 +57,11 @@ func (r Rect) Scale(s float64) Rect {
 	hh := (r.Height() * s) / 2
 
 	return Rect{
-		Min: Vec{
+		TL: Vec{
 			X: center.X - wh,
 			Y: center.Y - hh,
 		},
-		Max: Vec{
+		BR: Vec{
 			X: center.X + wh,
 			Y: center.Y + hh,
 		},
@@ -72,28 +72,28 @@ func (r Rect) Increase(size float64) Rect {
 	r = r.Normalize()
 
 	return Rect{
-		Min: Vec{
-			X: r.Min.X - size,
-			Y: r.Min.Y - size,
+		TL: Vec{
+			X: r.TL.X - size,
+			Y: r.TL.Y - size,
 		},
-		Max: Vec{
-			X: r.Max.X + size,
-			Y: r.Max.Y + size,
+		BR: Vec{
+			X: r.BR.X + size,
+			Y: r.BR.Y + size,
 		},
 	}
 }
 
 func (r Rect) Contains(v Vec) bool {
-	if v.X < r.Min.X {
+	if v.X < r.TL.X {
 		return false
 	}
-	if v.Y < r.Min.Y {
+	if v.Y < r.TL.Y {
 		return false
 	}
-	if v.X > r.Max.X {
+	if v.X > r.BR.X {
 		return false
 	}
-	if v.Y > r.Max.Y {
+	if v.Y > r.BR.Y {
 		return false
 	}
 
@@ -101,7 +101,7 @@ func (r Rect) Contains(v Vec) bool {
 }
 
 func (r Rect) Edges() [4]Line {
-	corners := r.Vertices()
+	corners := r.VerticesClockWise()
 
 	return [4]Line{
 		{A: corners[0], B: corners[1]},
@@ -111,17 +111,17 @@ func (r Rect) Edges() [4]Line {
 	}
 }
 
-func (r Rect) Vertices() [4]Vec {
+func (r Rect) VerticesClockWise() [4]Vec {
 	return [4]Vec{
-		r.Min,
+		r.TL,
 		{
-			X: r.Min.X,
-			Y: r.Max.Y,
+			X: r.BR.X,
+			Y: r.TL.Y,
 		},
-		r.Max,
+		r.BR,
 		{
-			X: r.Max.X,
-			Y: r.Min.Y,
+			X: r.TL.X,
+			Y: r.BR.Y,
 		},
 	}
 }
@@ -134,27 +134,27 @@ func SurroundRect(boxes ...Rect) Rect {
 
 	for _, box := range boxes {
 		box = box.Normalize()
-		
-		if box.Min.X < minX {
-			minX = box.Min.X
+
+		if box.TL.X < minX {
+			minX = box.TL.X
 		}
-		if box.Min.Y < minY {
-			minY = box.Min.Y
+		if box.TL.Y < minY {
+			minY = box.TL.Y
 		}
-		if box.Max.X > maxX {
-			maxX = box.Max.X
+		if box.BR.X > maxX {
+			maxX = box.BR.X
 		}
-		if box.Max.Y > maxY {
-			maxY = box.Max.Y
+		if box.BR.Y > maxY {
+			maxY = box.BR.Y
 		}
 	}
 
 	return Rect{
-		Min: Vec{
+		TL: Vec{
 			X: minX,
 			Y: minY,
 		},
-		Max: Vec{
+		BR: Vec{
 			X: maxX,
 			Y: maxY,
 		},

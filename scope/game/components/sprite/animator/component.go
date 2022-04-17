@@ -21,8 +21,8 @@ func (anim *Animator) OnDraw(r galx.Renderer) error {
 		Y: float64(entityPos.RoundY() + seq.offsetY - (frame.h / 2)),
 	}
 	imageRect := galx.Rect{
-		Min: imageRectMin,
-		Max: imageRectMin.Add(galx.Vec{
+		TL: imageRectMin,
+		BR: imageRectMin.Add(galx.Vec{
 			X: float64(frame.w),
 			Y: float64(frame.h),
 		}),

@@ -11,6 +11,8 @@ import (
 type (
 	dataInstance interface {
 		Data() []byte
+		Indexes() []uint16
+		VertexCount() uint32
 	}
 
 	bindStats struct {
@@ -18,22 +20,29 @@ type (
 		buffers       []vulkan.Buffer
 		offsets       []vulkan.DeviceSize
 	}
+
+	flush struct {
+		vertexChunks []bindStats
+		indexBuffer  vulkan.Buffer
+	}
 )
 
 func newDataBuffersManager(ld *vkLogicalDevice, pd *vkPhysicalDevice) *vkDataBuffersManager {
 	return &vkDataBuffersManager{
-		residentVertex: vkBufferTable{
+		vertex: vkBufferTable{
 			totalCapacity: 0,
 			buffers:       []vkBuffer{},
 		},
-		ld: ld,
-		pd: pd,
+		index: vkBufferUnion{},
+		ld:    ld,
+		pd:    pd,
 	}
 }
 
 func (vb *vkDataBuffersManager) free() {
 	buffers := make([]vkBuffer, 0)
-	buffers = append(buffers, vb.residentVertex.buffers...)
+	buffers = append(buffers, vb.vertex.buffers...)
+	buffers = append(buffers, vb.index.buffer)
 
 	for _, vkBuffer := range buffers {
 		vulkan.DestroyBuffer(vb.ld.ref, vkBuffer.handle, nil)
@@ -43,27 +52,53 @@ func (vb *vkDataBuffersManager) free() {
 	log.Printf("vk: freed: vertex buffers\n")
 }
 
-func (vb *vkDataBuffersManager) resetVertexBuffers() {
-	vb.residentVertex.framePageID = -1
-	vb.residentVertex.framePageCapacity = 0
-	vb.residentVertex.frameInstanceCounts = []uint32{}
-	vb.residentVertex.frameStagedData = [][]byte{}
+func (vb *vkDataBuffersManager) resetBuffers() {
+	vb.resetIndexBuffer()
+	vb.resetVertexBuffer()
+}
 
-	for range vb.residentVertex.buffers {
-		vb.residentVertex.frameStagedData = append(vb.residentVertex.frameStagedData, []byte{})
-		vb.residentVertex.frameInstanceCounts = append(vb.residentVertex.frameInstanceCounts, 0)
+func (vb *vkDataBuffersManager) resetIndexBuffer() {
+	vb.index.staging = []byte{}
+	vb.index.offset = 0
+}
+
+func (vb *vkDataBuffersManager) resetVertexBuffer() {
+	vb.vertex.framePageID = -1
+	vb.vertex.framePageCapacity = 0
+	vb.vertex.frameInstanceCounts = []uint32{}
+	vb.vertex.frameStagedData = [][]byte{}
+
+	for range vb.vertex.buffers {
+		vb.vertex.frameStagedData = append(vb.vertex.frameStagedData, []byte{})
+		vb.vertex.frameInstanceCounts = append(vb.vertex.frameInstanceCounts, 0)
 	}
 }
 
-func (vb *vkDataBuffersManager) flushVertexBuffers() []bindStats {
+func (vb *vkDataBuffersManager) flushBuffers() flush {
+	return flush{
+		vertexChunks: vb.flushVertexBuffer(),
+		indexBuffer:  vb.flushIndexBuffer(),
+	}
+}
+
+func (vb *vkDataBuffersManager) flushIndexBuffer() vulkan.Buffer {
+	if vb.index.buffer.handle == nil {
+		vb.allocateNewIndexBuffer()
+	}
+
+	vulkan.Memcopy(vb.index.buffer.dataPtr, vb.index.staging)
+	return vb.index.buffer.handle
+}
+
+func (vb *vkDataBuffersManager) flushVertexBuffer() []bindStats {
 	stats := make([]bindStats, 0)
 
-	for pageID, stagedData := range vb.residentVertex.frameStagedData {
-		buff := vb.residentVertex.buffers[pageID]
+	for pageID, stagedData := range vb.vertex.frameStagedData {
+		buff := vb.vertex.buffers[pageID]
 		vulkan.Memcopy(buff.dataPtr, stagedData)
 
 		stats = append(stats, bindStats{
-			instanceCount: vb.residentVertex.frameInstanceCounts[pageID],
+			instanceCount: vb.vertex.frameInstanceCounts[pageID],
 			buffers:       []vulkan.Buffer{buff.handle},
 			offsets:       []vulkan.DeviceSize{0},
 		})
@@ -72,42 +107,60 @@ func (vb *vkDataBuffersManager) flushVertexBuffers() []bindStats {
 	return stats
 }
 
-func (vb *vkDataBuffersManager) writeToVertexBuffers(instance dataInstance) {
+func (vb *vkDataBuffersManager) writeToBuffers(instance dataInstance) {
+	vb.writeToIndexBuffer(instance)
+	vb.writeToVertexBuffer(instance)
+}
+
+func (vb *vkDataBuffersManager) writeToIndexBuffer(instance dataInstance) {
+	for _, index := range instance.Indexes() {
+		index += vb.index.offset
+		vb.index.staging = append(vb.index.staging, uint8(index&0xff), uint8(index>>8))
+	}
+
+	vb.index.offset += uint16(instance.VertexCount())
+}
+
+func (vb *vkDataBuffersManager) writeToVertexBuffer(instance dataInstance) {
 	data := instance.Data()
 	size := uint64(len(data))
 
-	if vb.residentVertex.framePageCapacity < size {
-		vb.residentVertex.framePageID++
+	if vb.vertex.framePageCapacity < size {
+		vb.vertex.framePageID++
 
-		if int16(len(vb.residentVertex.buffers)-1) < vb.residentVertex.framePageID {
+		if int16(len(vb.vertex.buffers)-1) < vb.vertex.framePageID {
 			vb.allocateNewVertexBuffer()
 		}
 
-		buff := vb.residentVertex.buffers[vb.residentVertex.framePageID]
-		vb.residentVertex.framePageCapacity = uint64(buff.capacity)
+		buff := vb.vertex.buffers[vb.vertex.framePageID]
+		vb.vertex.framePageCapacity = uint64(buff.capacity)
 	}
 
 	// write to buffer
-	vb.residentVertex.frameInstanceCounts[vb.residentVertex.framePageID]++
-	stageData := &(vb.residentVertex.frameStagedData[vb.residentVertex.framePageID])
+	vb.vertex.frameInstanceCounts[vb.vertex.framePageID]++
+	stageData := &(vb.vertex.frameStagedData[vb.vertex.framePageID])
 	*stageData = append(*stageData, data...)
-	vb.residentVertex.framePageCapacity -= size
+	vb.vertex.framePageCapacity -= size
 }
 
 func (vb *vkDataBuffersManager) allocateNewVertexBuffer() {
-	buff := allocatePersistBuffer(vb.ld, vb.pd)
-	vb.residentVertex.buffers = append(vb.residentVertex.buffers, buff)
-	vb.residentVertex.frameStagedData = append(vb.residentVertex.frameStagedData, []byte{})
-	vb.residentVertex.frameInstanceCounts = append(vb.residentVertex.frameInstanceCounts, 0)
-	vb.residentVertex.totalCapacity += uint64(buff.capacity)
+	buff := allocatePersistBuffer(vb.ld, vb.pd, vertexBufferSize, vulkan.BufferUsageVertexBufferBit)
+	vb.vertex.buffers = append(vb.vertex.buffers, buff)
+	vb.vertex.frameStagedData = append(vb.vertex.frameStagedData, []byte{})
+	vb.vertex.frameInstanceCounts = append(vb.vertex.frameInstanceCounts, 0)
+	vb.vertex.totalCapacity += uint64(buff.capacity)
 }
 
-func allocatePersistBuffer(ld *vkLogicalDevice, pd *vkPhysicalDevice) vkBuffer {
+func (vb *vkDataBuffersManager) allocateNewIndexBuffer() {
+	vb.index.buffer = allocatePersistBuffer(vb.ld, vb.pd, indexBufferSize, vulkan.BufferUsageIndexBufferBit)
+}
+
+func allocatePersistBuffer(ld *vkLogicalDevice, pd *vkPhysicalDevice, size int, buffType vulkan.BufferUsageFlagBits) vkBuffer {
 	// create new buffer page
 	info := &vulkan.BufferCreateInfo{
 		SType:       vulkan.StructureTypeBufferCreateInfo,
-		Size:        vulkan.DeviceSize(vertexBufferSize),
-		Usage:       vulkan.BufferUsageFlags(vulkan.BufferUsageVertexBufferBit),
+		Size:        vulkan.DeviceSize(size),
+		Usage:       vulkan.BufferUsageFlags(buffType),
 		SharingMode: vulkan.SharingModeExclusive,
 	}
 
@@ -148,7 +201,7 @@ func allocatePersistBuffer(ld *vkLogicalDevice, pd *vkPhysicalDevice) vkBuffer {
 	var data unsafe.Pointer
 	vulkan.MapMemory(ld.ref, bufferMemory, 0, info.Size, 0, &data)
 
-	log.Printf("Buffer %dMB capacity - allocated", info.Size/1024)
+	log.Printf("Buffer %.3fMB capacity - allocated", float64(info.Size/1024))
 
 	return vkBuffer{
 		capacity: info.Size,

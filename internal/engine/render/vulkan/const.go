@@ -10,6 +10,7 @@ const maxPresetFails = 100
 
 // Capacity of each vertex buffer page
 const vertexBufferSize = 2048 // 2048 Bytes
+const indexBufferSize = 8192  // 8 MB
 
 const (
 	shaderEntryPoint = "main"

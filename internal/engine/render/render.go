@@ -43,16 +43,24 @@ func (r *Render) EndEngineFrame() {
 func (r *Render) DrawTemporary() {
 	// r.renderer.DrawTmpTriangle()
 
-	for x := 50; x < 1000; x += 50 {
-		for y := 50; y < 720; y += 50 {
+	const rSizeX = 24
+	const rSizeY = 32
+	const rOffset = 10
+	const rStartX = rSizeX
+	const rEndX = 1280 - rSizeX - rOffset
+	const rStartY = rSizeY
+	const rEndY = 720 - rSizeY - rOffset
+
+	for x := rStartX; x < rEndX; x += rSizeX + rOffset {
+		for y := rStartY; y < rEndY; y += rSizeY + rOffset {
 			r.DrawSquare(galx.ColorCyan, galx.Rect{
-				Min: galx.Vec{
+				TL: galx.Vec{
 					X: float64(x),
 					Y: float64(y),
 				},
-				Max: galx.Vec{
-					X: float64(x + 25),
-					Y: float64(y + 40),
+				BR: galx.Vec{
+					X: float64(x + rSizeX),
+					Y: float64(y + rSizeY),
 				},
 			})
 		}

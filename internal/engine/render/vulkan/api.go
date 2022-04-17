@@ -76,26 +76,29 @@ func (vk *Vk) Draw() {
 	// draw all shaders
 	for pipelineID, instances := range vk.renderQueue {
 		// bind pipeline for this group of shaders
-		triangleCount := instances[0].TriangleCount()
 		pipeline := vk.pipelineManager.pipeline(pipelineID)
 		vulkan.CmdBindPipeline(commandBuffer, vulkan.PipelineBindPointGraphics, pipeline)
 
-		vk.dataBuffersManager.resetVertexBuffers()
+		// clean buffers
+		vk.dataBuffersManager.resetBuffers()
 
-		// copy vertex data to buffers
+		// copy data to buffers
 		for _, instance := range instances {
-			vk.dataBuffersManager.writeToVertexBuffers(instance)
+			vk.dataBuffersManager.writeToBuffers(instance)
 			drawInstances++
 		}
 
-		// flush vertex buffers
-		batches := vk.dataBuffersManager.flushVertexBuffers()
-		for _, batch := range batches {
-			vulkan.CmdBindVertexBuffers(commandBuffer, 0, uint32(1), batch.buffers, batch.offsets)
-			totalTriangles := batch.instanceCount * triangleCount
-			totalVertexes := totalTriangles * 3
+		// flush buffers to GPU memory
+		result := vk.dataBuffersManager.flushBuffers()
 
-			vulkan.CmdDraw(commandBuffer, totalVertexes, totalTriangles, 0, 0)
+		// bind indexes
+		vulkan.CmdBindIndexBuffer(commandBuffer, result.indexBuffer, 0, vulkan.IndexTypeUint16)
+		indexesCount := uint32(len(instances[0].Indexes()))
+
+		// draw commands
+		for _, batch := range result.vertexChunks {
+			vulkan.CmdBindVertexBuffers(commandBuffer, 0, uint32(1), batch.buffers, batch.offsets)
+			vulkan.CmdDrawIndexed(commandBuffer, indexesCount*batch.instanceCount, 1, 0, 0, 0)
 			drawCalls++
 		}
 	}

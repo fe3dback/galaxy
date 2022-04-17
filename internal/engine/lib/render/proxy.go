@@ -18,10 +18,10 @@ func (r *Renderer) transRect(rect galx.Rect) sdl.Rect {
 		rect = rect.Normalize()
 	}
 
-	size := rect.Max.Sub(rect.Min)
+	size := rect.BR.Sub(rect.TL)
 	return Rect{
-		X: int32(r.screenX(rect.Min.X)),
-		Y: int32(r.screenY(rect.Min.Y)),
+		X: int32(r.screenX(rect.TL.X)),
+		Y: int32(r.screenY(rect.TL.Y)),
 		W: int32(size.X),
 		H: int32(size.Y),
 	}
@@ -106,23 +106,23 @@ func (r *Renderer) DrawSquareEx(color galx.Color, angle galx.Angle, rect galx.Re
 
 	vertices := [4]galx.Vec{
 		galx.Vec{
-			X: rect.Min.X,
-			Y: rect.Min.Y,
+			X: rect.TL.X,
+			Y: rect.TL.Y,
 		}.RotateAround(center, angle),
 
 		galx.Vec{
-			X: rect.Min.X + rect.Max.X,
-			Y: rect.Min.Y,
+			X: rect.TL.X + rect.BR.X,
+			Y: rect.TL.Y,
 		}.RotateAround(center, angle),
 
 		galx.Vec{
-			X: rect.Min.X + rect.Max.X,
-			Y: rect.Min.Y + rect.Max.Y,
+			X: rect.TL.X + rect.BR.X,
+			Y: rect.TL.Y + rect.BR.Y,
 		}.RotateAround(center, angle),
 
 		galx.Vec{
-			X: rect.Min.X,
-			Y: rect.Min.Y + rect.Max.Y,
+			X: rect.TL.X,
+			Y: rect.TL.Y + rect.BR.Y,
 		}.RotateAround(center, angle),
 	}
 

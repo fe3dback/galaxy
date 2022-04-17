@@ -5,7 +5,7 @@ import "github.com/fe3dback/galaxy/galx"
 func (r *Render) DrawSquare(color galx.Color, rect galx.Rect) {
 	var vertPos [4]galx.Vec2
 
-	for ind, vec := range rect.Vertices() {
+	for ind, vec := range rect.VerticesClockWise() {
 		transform := r.project(r.cam(vec))
 		vertPos[ind] = galx.Vec2{
 			X: float32(transform.X),

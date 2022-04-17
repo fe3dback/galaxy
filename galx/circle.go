@@ -11,11 +11,11 @@ func (c Circle) BoundingBox() Rect {
 	c.Radius = math.Abs(c.Radius)
 
 	return Rect{
-		Min: Vec{
+		TL: Vec{
 			X: c.Pos.X - c.Radius,
 			Y: c.Pos.Y - c.Radius,
 		},
-		Max: Vec{
+		BR: Vec{
 			X: c.Pos.X + c.Radius,
 			Y: c.Pos.Y + c.Radius,
 		},

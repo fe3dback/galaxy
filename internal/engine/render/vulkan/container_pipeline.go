@@ -25,7 +25,7 @@ func (c *container) createShaderPipelineUniversalTriangleList(sp shaderProgram) 
 		shaderModuleVert.stageInfo,
 	}
 
-	inputAssemble := c.createPipeLineAssembleStateTopologyTriangleList()
+	inputAssemble := c.createPipeLineAssembleState(sp)
 	vertexInputInfo := c.createVertexInputInfo(sp)
 	viewPortStage := c.createPipelineViewPortState()
 	rasterizer := c.createPipeLineRasterizerLine()
@@ -63,14 +63,10 @@ func (c *container) createShaderPipelineUniversalTriangleList(sp shaderProgram) 
 	return pipelines[0]
 }
 
-func (c *container) createPipeLineAssembleStateTopologyTriangleList() vulkan.PipelineInputAssemblyStateCreateInfo {
-	return c.createPipeLineAssembleState(vulkan.PrimitiveTopologyTriangleList)
-}
-
-func (c *container) createPipeLineAssembleState(topology vulkan.PrimitiveTopology) vulkan.PipelineInputAssemblyStateCreateInfo {
+func (c *container) createPipeLineAssembleState(sp shaderProgram) vulkan.PipelineInputAssemblyStateCreateInfo {
 	return vulkan.PipelineInputAssemblyStateCreateInfo{
 		SType:                  vulkan.StructureTypePipelineInputAssemblyStateCreateInfo,
-		Topology:               topology,
+		Topology:               sp.Topology(),
 		PrimitiveRestartEnable: vulkan.False,
 	}
 }
@@ -108,12 +104,20 @@ func (c *container) createPipeLineRasterizerLine() vulkan.PipelineRasterizationS
 }
 
 func (c *container) createPipeLineRasterizer(mode vulkan.PolygonMode) vulkan.PipelineRasterizationStateCreateInfo {
+	var cullMode vulkan.CullModeFlagBits
+
+	if c.cfg.debug {
+		cullMode = vulkan.CullModeNone
+	} else {
+		cullMode = vulkan.CullModeBackBit
+	}
+
 	return vulkan.PipelineRasterizationStateCreateInfo{
 		SType:                   vulkan.StructureTypePipelineRasterizationStateCreateInfo,
 		DepthClampEnable:        vulkan.False,
 		RasterizerDiscardEnable: vulkan.False,
 		PolygonMode:             mode,
-		CullMode:                vulkan.CullModeFlags(vulkan.CullModeBackBit),
+		CullMode:                vulkan.CullModeFlags(cullMode),
 		FrontFace:               vulkan.FrontFaceClockwise,
 		DepthBiasEnable:         vulkan.False,
 		DepthBiasConstantFactor: 0.0,

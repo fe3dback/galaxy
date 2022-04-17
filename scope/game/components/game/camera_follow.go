@@ -31,8 +31,8 @@ func (r *CameraFollower) OnDraw(d galx.Renderer) error {
 	}
 
 	d.DrawSquare(galx.ColorPink, galx.Rect{
-		Min: r.cam.Position(),
-		Max: galx.Vec{
+		TL: r.cam.Position(),
+		BR: galx.Vec{
 			X: float64(r.cam.Width() - 1),
 			Y: float64(r.cam.Height() - 1),
 		},

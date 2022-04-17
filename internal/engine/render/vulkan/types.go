@@ -141,10 +141,17 @@ type (
 	}
 
 	vkDataBuffersManager struct {
-		residentVertex vkBufferTable
+		vertex vkBufferTable
+		index  vkBufferUnion
 
 		ld *vkLogicalDevice
 		pd *vkPhysicalDevice
+	}
+
+	vkBufferUnion struct {
+		offset  uint16
+		buffer  vkBuffer
+		staging []byte
 	}
 
 	vkBufferTable struct {
@@ -199,6 +206,8 @@ type (
 		Size() uint64
 		TriangleCount() uint32
 		VertexCount() uint32
+		Topology() vulkan.PrimitiveTopology
+		Indexes() []uint16
 		Data() []byte
 		Bindings() []vulkan.VertexInputBindingDescription
 		Attributes() []vulkan.VertexInputAttributeDescription

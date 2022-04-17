@@ -5,19 +5,19 @@ import (
 )
 
 func Rect2Rect(a, b galx.Rect) bool {
-	if a.Max.X < b.Min.X {
+	if a.BR.X < b.TL.X {
 		return false
 	}
 
-	if a.Min.X > b.Max.X {
+	if a.TL.X > b.BR.X {
 		return false
 	}
 
-	if a.Max.Y < b.Min.Y {
+	if a.BR.Y < b.TL.Y {
 		return false
 	}
 
-	if a.Min.Y > b.Max.Y {
+	if a.TL.Y > b.BR.Y {
 		return false
 	}
 
@@ -25,19 +25,19 @@ func Rect2Rect(a, b galx.Rect) bool {
 }
 
 func Rect2Point(a galx.Rect, b galx.Vec) bool {
-	if a.Min.X > b.X {
+	if a.TL.X > b.X {
 		return false
 	}
 
-	if a.Max.X < b.X {
+	if a.BR.X < b.X {
 		return false
 	}
 
-	if a.Min.Y > b.Y {
+	if a.TL.Y > b.Y {
 		return false
 	}
 
-	if a.Max.Y < b.Y {
+	if a.BR.Y < b.Y {
 		return false
 	}
 
@@ -47,16 +47,16 @@ func Rect2Point(a galx.Rect, b galx.Vec) bool {
 func Rect2Circle(r galx.Rect, c galx.Circle) bool {
 	test := c.Pos
 
-	if c.Pos.X < r.Min.X {
-		test.X = r.Min.X
-	} else if c.Pos.X > r.Max.X {
-		test.X = r.Max.X
+	if c.Pos.X < r.TL.X {
+		test.X = r.TL.X
+	} else if c.Pos.X > r.BR.X {
+		test.X = r.BR.X
 	}
 
-	if c.Pos.Y < r.Min.Y {
-		test.Y = r.Min.Y
-	} else if c.Pos.Y > r.Max.Y {
-		test.Y = r.Max.Y
+	if c.Pos.Y < r.TL.Y {
+		test.Y = r.TL.Y
+	} else if c.Pos.Y > r.BR.Y {
+		test.Y = r.BR.Y
 	}
 
 	distance := c.Pos.Sub(test).Magnitude()

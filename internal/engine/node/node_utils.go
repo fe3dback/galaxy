@@ -14,27 +14,27 @@ func (n *Node) BoundingBox(padding float64) galx.Rect {
 	for _, child := range n.Child() {
 		chBBox := child.BoundingBox(padding)
 
-		if chBBox.Min.X < minX {
-			minX = chBBox.Min.X
+		if chBBox.TL.X < minX {
+			minX = chBBox.TL.X
 		}
-		if chBBox.Min.Y < minY {
-			minY = chBBox.Min.Y
+		if chBBox.TL.Y < minY {
+			minY = chBBox.TL.Y
 		}
 
-		if chBBox.Max.X > maxX {
-			maxX = chBBox.Max.X
+		if chBBox.BR.X > maxX {
+			maxX = chBBox.BR.X
 		}
-		if chBBox.Max.Y > maxY {
-			maxY = chBBox.Max.Y
+		if chBBox.BR.Y > maxY {
+			maxY = chBBox.BR.Y
 		}
 	}
 
 	return galx.Rect{
-		Min: galx.Vec{
+		TL: galx.Vec{
 			X: minX,
 			Y: minY,
 		},
-		Max: galx.Vec{
+		BR: galx.Vec{
 			X: maxX,
 			Y: maxY,
 		},

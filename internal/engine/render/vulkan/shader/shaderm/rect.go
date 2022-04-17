@@ -46,21 +46,27 @@ func (x *Rect) Size() uint64 {
 	return pRectSizeTotal
 }
 
-func (x *Rect) TriangleCount() uint32 {
-	return pRectTriangleCount
-}
-
 func (x *Rect) VertexCount() uint32 {
 	return pRectVertexCount
 }
 
+func (x *Rect) TriangleCount() uint32 {
+	return pRectTriangleCount
+}
+
+func (x *Rect) Topology() vulkan.PrimitiveTopology {
+	return vulkan.PrimitiveTopologyTriangleList
+}
+
+func (x *Rect) Indexes() []uint16 {
+	return []uint16{0, 1, 2, 2, 3, 0}
+}
+
 func (x *Rect) Data() []byte {
 	r := make([]byte, 0, x.Size())
-	list := []int{2, 1, 0, 2, 0, 3}
-
-	for _, vInd := range list {
-		r = append(r, x.Position[vInd].Data()...)
-		r = append(r, x.Color[vInd].Data()...)
+	for i := 0; i < pRectVertexCount; i++ {
+		r = append(r, x.Position[i].Data()...)
+		r = append(r, x.Color[i].Data()...)
 	}
 
 	return r
