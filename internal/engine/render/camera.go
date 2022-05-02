@@ -9,7 +9,7 @@ import (
 
 type (
 	Camera struct {
-		position galx.Vec
+		position galx.Vec2d
 		width    int
 		height   int
 		scale    float64
@@ -29,7 +29,7 @@ func NewCamera(dispatcher *event.Dispatcher, defaultWidth int, defaultHeight int
 	cam := &Camera{
 		dispatcher: dispatcher,
 
-		position: galx.Vec{},
+		position: galx.Vec2d{},
 		width:    defaultWidth,
 		height:   defaultHeight,
 		scale:    1,
@@ -46,15 +46,15 @@ func NewCamera(dispatcher *event.Dispatcher, defaultWidth int, defaultHeight int
 	return cam
 }
 
-func (c *Camera) Position() galx.Vec {
+func (c *Camera) Position() galx.Vec2d {
 	return c.position
 }
 
-func (c *Camera) Screen2World(screen galx.Vec) galx.Vec {
+func (c *Camera) Screen2World(screen galx.Vec2d) galx.Vec2d {
 	return screen.Decrease(c.scale).Add(c.position)
 }
 
-func (c *Camera) World2Screen(world galx.Vec) galx.Vec {
+func (c *Camera) World2Screen(world galx.Vec2d) galx.Vec2d {
 	return world.Scale(c.scale).Sub(c.position)
 }
 
@@ -70,12 +70,12 @@ func (c *Camera) Scale() float64 {
 	return c.scale
 }
 
-func (c *Camera) MoveTo(p galx.Vec) {
+func (c *Camera) MoveTo(p galx.Vec2d) {
 	c.position = p
 }
 
-func (c *Camera) CenterOn(p galx.Vec) {
-	c.MoveTo(galx.Vec{
+func (c *Camera) CenterOn(p galx.Vec2d) {
+	c.MoveTo(galx.Vec2d{
 		X: p.X - (float64(c.width)/c.scale)/2,
 		Y: p.Y - (float64(c.height)/c.scale)/2,
 	})
@@ -96,8 +96,8 @@ func (c *Camera) ZoomView(scale float64) {
 	)
 }
 
-func (c *Camera) center() galx.Vec {
-	return c.position.Add(galx.Vec{
+func (c *Camera) center() galx.Vec2d {
+	return c.position.Add(galx.Vec2d{
 		X: (float64(c.width) / c.scale) / 2,
 		Y: (float64(c.height) / c.scale) / 2,
 	})

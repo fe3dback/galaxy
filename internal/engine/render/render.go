@@ -65,11 +65,11 @@ func (r *Render) DrawTemporary() {
 		for y := rStartY; y < rEndY; y += rSizeY + rOffset {
 			gridY++
 			r.DrawSquare(galx.ColorCyan, galx.Rect{
-				TL: galx.Vec{
+				TL: galx.Vec2d{
 					X: float64(x) + ((dOffsetX * float64(gridX)) * 0.005),
 					Y: float64(y) + ((dOffsetY * float64(gridY)) * 0.005),
 				},
-				BR: galx.Vec{
+				BR: galx.Vec2d{
 					X: float64(x+rSizeX) + ((dOffsetX * float64(gridX)) * 0.005),
 					Y: float64(y+rSizeY) + ((dOffsetY * float64(gridY)) * 0.005),
 				},

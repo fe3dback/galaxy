@@ -174,10 +174,10 @@ func TestLine2Line(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l1A := galx.Vec{X: tt.a[0], Y: tt.a[1]}
-			l1B := galx.Vec{X: tt.a[2], Y: tt.a[3]}
-			l2A := galx.Vec{X: tt.b[0], Y: tt.b[1]}
-			l2B := galx.Vec{X: tt.b[2], Y: tt.b[3]}
+			l1A := galx.Vec2d{X: tt.a[0], Y: tt.a[1]}
+			l1B := galx.Vec2d{X: tt.a[2], Y: tt.a[3]}
+			l2A := galx.Vec2d{X: tt.b[0], Y: tt.b[1]}
+			l2B := galx.Vec2d{X: tt.b[2], Y: tt.b[3]}
 
 			var variants = make([][2]galx.Line, 0)
 
@@ -219,7 +219,7 @@ func TestLine2Circle(t *testing.T) {
 	}
 
 	center2R := galx.Circle{
-		Pos:    galx.Vec{},
+		Pos:    galx.Vec2d{},
 		Radius: 2,
 	}
 
@@ -367,8 +367,8 @@ func TestLine2Circle(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			lA := galx.Vec{X: tt.args.line[0], Y: tt.args.line[1]}
-			lB := galx.Vec{X: tt.args.line[2], Y: tt.args.line[3]}
+			lA := galx.Vec2d{X: tt.args.line[0], Y: tt.args.line[1]}
+			lB := galx.Vec2d{X: tt.args.line[2], Y: tt.args.line[3]}
 
 			variants := []galx.Line{
 				{A: lA, B: lB},

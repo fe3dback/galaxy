@@ -13,7 +13,7 @@ type (
 	Node struct {
 		id               UUID
 		name             string
-		relativePosition galx.Vec
+		relativePosition galx.Vec2d
 		relativeRotation galx.Angle
 		relativeScale    float64
 		components       components
@@ -32,7 +32,7 @@ func NewNode(id UUID) *Node {
 	return &Node{
 		id:               id,
 		name:             "",
-		relativePosition: galx.Vec{},
+		relativePosition: galx.Vec2d{},
 		relativeRotation: galx.Angle0,
 		relativeScale:    1,
 		components:       make(components, 0),

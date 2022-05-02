@@ -21,11 +21,11 @@ type (
 func (f *frame) TextureRect() galx.Rect {
 	if f.rect == nil {
 		r := galx.Rect{
-			TL: galx.Vec{
+			TL: galx.Vec2d{
 				X: float64(f.x),
 				Y: float64(f.y),
 			},
-			BR: galx.Vec{
+			BR: galx.Vec2d{
 				X: float64(f.x + f.w),
 				Y: float64(f.y + f.h),
 			},

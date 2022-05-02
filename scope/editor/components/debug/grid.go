@@ -56,7 +56,7 @@ func (c *Grid) OnBeforeDraw(r galx.Renderer) error {
 	}
 
 	startAt := c.camera.Position()
-	endAt := galx.Vec{
+	endAt := galx.Vec2d{
 		X: startAt.X + float64(c.camera.Width()),
 		Y: startAt.Y + float64(c.camera.Height()),
 	}
@@ -67,16 +67,16 @@ func (c *Grid) OnBeforeDraw(r galx.Renderer) error {
 			rY := math.Floor(y/c.sizeY) * c.sizeY
 
 			r.DrawLine(galx.ColorGray1, galx.Line{
-				A: galx.Vec{X: rX, Y: rY},
-				B: galx.Vec{X: rX + c.sizeX, Y: rY},
+				A: galx.Vec2d{X: rX, Y: rY},
+				B: galx.Vec2d{X: rX + c.sizeX, Y: rY},
 			})
 			r.DrawLine(galx.ColorGray1, galx.Line{
-				A: galx.Vec{X: rX, Y: rY},
-				B: galx.Vec{X: rX, Y: rY + c.sizeY},
+				A: galx.Vec2d{X: rX, Y: rY},
+				B: galx.Vec2d{X: rX, Y: rY + c.sizeY},
 			})
 
 			if c.sizeX >= 64 && c.sizeY >= 64 {
-				r.DrawText(consts.AssetDefaultFont, galx.ColorGray1, galx.Vec{X: rX, Y: rY}, fmt.Sprintf("%.0fx%.0f", rX, rY))
+				r.DrawText(consts.AssetDefaultFont, galx.ColorGray1, galx.Vec2d{X: rX, Y: rY}, fmt.Sprintf("%.0fx%.0f", rX, rY))
 			}
 		}
 	}

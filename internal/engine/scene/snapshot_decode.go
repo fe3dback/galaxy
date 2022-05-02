@@ -32,7 +32,7 @@ func (m *Manager) decodeGameObject(trackedIDs trackedIDs, snapshotGameObject Sna
 
 	// create
 	gameObject := node.NewNode(uniqueID)
-	gameObject.SetPosition(galx.Vec{
+	gameObject.SetPosition(galx.Vec2d{
 		X: snapshotGameObject.Transform.Position.X,
 		Y: snapshotGameObject.Transform.Position.Y,
 	})

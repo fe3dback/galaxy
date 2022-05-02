@@ -36,7 +36,7 @@ func (r *Renderer) transRectPtr(rect galx.Rect) *sdl.Rect {
 	return &rRect
 }
 
-func (r *Renderer) transPoint(point galx.Vec) sdl.Point {
+func (r *Renderer) transPoint(point galx.Vec2d) sdl.Point {
 	return Point{
 		X: int32(r.screenX(point.X)),
 		Y: int32(r.screenY(point.Y)),
@@ -99,28 +99,28 @@ func (r *Renderer) DrawSquareEx(color galx.Color, angle galx.Angle, rect galx.Re
 		return
 	}
 
-	center := galx.Vec{
+	center := galx.Vec2d{
 		X: float64(norm.X + norm.W/2),
 		Y: float64(norm.Y + norm.H/2),
 	}
 
-	vertices := [4]galx.Vec{
-		galx.Vec{
+	vertices := [4]galx.Vec2d{
+		galx.Vec2d{
 			X: rect.TL.X,
 			Y: rect.TL.Y,
 		}.RotateAround(center, angle),
 
-		galx.Vec{
+		galx.Vec2d{
 			X: rect.TL.X + rect.BR.X,
 			Y: rect.TL.Y,
 		}.RotateAround(center, angle),
 
-		galx.Vec{
+		galx.Vec2d{
 			X: rect.TL.X + rect.BR.X,
 			Y: rect.TL.Y + rect.BR.Y,
 		}.RotateAround(center, angle),
 
-		galx.Vec{
+		galx.Vec2d{
 			X: rect.TL.X,
 			Y: rect.TL.Y + rect.BR.Y,
 		}.RotateAround(center, angle),
@@ -144,7 +144,7 @@ func (r *Renderer) DrawLine(color galx.Color, line galx.Line) {
 	r.internalDrawLines(color, norm)
 }
 
-func (r *Renderer) DrawPoint(color galx.Color, vec galx.Vec) {
+func (r *Renderer) DrawPoint(color galx.Color, vec galx.Vec2d) {
 	p := r.transPoint(vec)
 	if !r.isPointInsideCamera(p) {
 		return
@@ -153,7 +153,7 @@ func (r *Renderer) DrawPoint(color galx.Color, vec galx.Vec) {
 	r.internalDrawPoint(color, p)
 }
 
-func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec, angle galx.Angle) {
+func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec2d, angle galx.Angle) {
 	target := vec.PolarOffset(dist, angle)
 	line := galx.Line{
 		A: vec,
@@ -181,7 +181,7 @@ func (r *Renderer) DrawVector(color galx.Color, dist float64, vec galx.Vec, angl
 	r.internalDrawLines(color, r.transLine(arrowRight))
 }
 
-func (r *Renderer) DrawCrossLines(color galx.Color, size int, vec galx.Vec) {
+func (r *Renderer) DrawCrossLines(color galx.Color, size int, vec galx.Vec2d) {
 	p := r.transPoint(vec)
 	if !r.isPointInsideCamera(p) {
 		return
@@ -194,7 +194,7 @@ func (r *Renderer) DrawCrossLines(color galx.Color, size int, vec galx.Vec) {
 // Sprite
 // ==================================================
 
-func (r *Renderer) DrawSprite(res consts.AssetsPath, vec galx.Vec) {
+func (r *Renderer) DrawSprite(res consts.AssetsPath, vec galx.Vec2d) {
 	r.drawTexture(
 		res,
 		Rect{},
@@ -203,7 +203,7 @@ func (r *Renderer) DrawSprite(res consts.AssetsPath, vec galx.Vec) {
 	)
 }
 
-func (r *Renderer) DrawSpriteAngle(res consts.AssetsPath, vec galx.Vec, angle galx.Angle) {
+func (r *Renderer) DrawSpriteAngle(res consts.AssetsPath, vec galx.Vec2d, angle galx.Angle) {
 	r.drawTexture(
 		res,
 		Rect{},
@@ -249,7 +249,7 @@ func (r *Renderer) drawTexture(res consts.AssetsPath, src, dest Rect, angle galx
 // Text
 // ==================================================
 
-func (r *Renderer) DrawText(fontId consts.AssetsPath, color galx.Color, vec galx.Vec, text string) {
+func (r *Renderer) DrawText(fontId consts.AssetsPath, color galx.Color, vec galx.Vec2d, text string) {
 	norm := Rect{
 		X: int32(vec.X),
 		Y: int32(vec.Y),

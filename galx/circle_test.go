@@ -7,7 +7,7 @@ import (
 
 func TestCircle_BoundingBox(t *testing.T) {
 	type fields struct {
-		Pos    Vec
+		Pos    Vec2d
 		Radius float64
 	}
 	tests := []struct {
@@ -18,18 +18,18 @@ func TestCircle_BoundingBox(t *testing.T) {
 		{
 			name: "s1",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: 0,
 					Y: 0,
 				},
 				Radius: 2,
 			},
 			want: Rect{
-				TL: Vec{
+				TL: Vec2d{
 					X: -2,
 					Y: -2,
 				},
-				BR: Vec{
+				BR: Vec2d{
 					X: 2,
 					Y: 2,
 				},
@@ -38,18 +38,18 @@ func TestCircle_BoundingBox(t *testing.T) {
 		{
 			name: "s1 neg",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: 0,
 					Y: 0,
 				},
 				Radius: -2,
 			},
 			want: Rect{
-				TL: Vec{
+				TL: Vec2d{
 					X: -2,
 					Y: -2,
 				},
-				BR: Vec{
+				BR: Vec2d{
 					X: 2,
 					Y: 2,
 				},
@@ -58,18 +58,18 @@ func TestCircle_BoundingBox(t *testing.T) {
 		{
 			name: "s2",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: -2,
 					Y: -3,
 				},
 				Radius: 1.5,
 			},
 			want: Rect{
-				TL: Vec{
+				TL: Vec2d{
 					X: -3.5,
 					Y: -4.5,
 				},
-				BR: Vec{
+				BR: Vec2d{
 					X: -0.5,
 					Y: -1.5,
 				},
@@ -91,7 +91,7 @@ func TestCircle_BoundingBox(t *testing.T) {
 
 func TestCircle_DistanceTo(t *testing.T) {
 	type fields struct {
-		Pos    Vec
+		Pos    Vec2d
 		Radius float64
 	}
 	type args struct {
@@ -106,7 +106,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 		{
 			name: "s1",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: 0,
 					Y: 0,
 				},
@@ -114,7 +114,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 			},
 			args: args{
 				Circle{
-					Pos: Vec{
+					Pos: Vec2d{
 						X: 3,
 						Y: 0,
 					},
@@ -126,7 +126,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 		{
 			name: "s2",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: 0,
 					Y: 0,
 				},
@@ -134,7 +134,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 			},
 			args: args{
 				Circle{
-					Pos: Vec{
+					Pos: Vec2d{
 						X: -3,
 						Y: 0,
 					},
@@ -146,7 +146,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 		{
 			name: "s3",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: 2,
 					Y: 2,
 				},
@@ -154,7 +154,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 			},
 			args: args{
 				Circle{
-					Pos: Vec{
+					Pos: Vec2d{
 						X: -5,
 						Y: 2,
 					},
@@ -166,7 +166,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 		{
 			name: "s4",
 			fields: fields{
-				Pos: Vec{
+				Pos: Vec2d{
 					X: -2,
 					Y: -2,
 				},
@@ -174,7 +174,7 @@ func TestCircle_DistanceTo(t *testing.T) {
 			},
 			args: args{
 				Circle{
-					Pos: Vec{
+					Pos: Vec2d{
 						X: 2,
 						Y: 2,
 					},

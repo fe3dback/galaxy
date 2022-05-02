@@ -30,11 +30,11 @@ func (n *Node) BoundingBox(padding float64) galx.Rect {
 	}
 
 	return galx.Rect{
-		TL: galx.Vec{
+		TL: galx.Vec2d{
 			X: minX,
 			Y: minY,
 		},
-		BR: galx.Vec{
+		BR: galx.Vec2d{
 			X: maxX,
 			Y: maxY,
 		},

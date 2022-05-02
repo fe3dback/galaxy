@@ -121,8 +121,8 @@ func (m *Mouse) subscribeToFrameStart(dispatcher *event.Dispatcher) {
 	})
 }
 
-func (m *Mouse) MouseCoords() galx.Vec {
-	return galx.Vec{
+func (m *Mouse) MouseCoords() galx.Vec2d {
+	return galx.Vec2d{
 		X: float64(m.lastX),
 		Y: float64(m.lastY),
 	}

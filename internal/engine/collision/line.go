@@ -31,7 +31,7 @@ func Line2Line(l1, l2 galx.Line) bool {
 	return false
 }
 
-func Line2Point(line galx.Line, p galx.Vec) bool {
+func Line2Point(line galx.Line, p galx.Vec2d) bool {
 	d1 := line.A.DistanceTo(p)
 	d2 := line.B.DistanceTo(p)
 	lineLen := line.A.Sub(line.B).Magnitude()
@@ -52,7 +52,7 @@ func Line2Circle(line galx.Line, circle galx.Circle) bool {
 	dot := (((circle.Pos.X - line.A.X) * (line.B.X - line.A.X)) +
 		((circle.Pos.Y - line.A.Y) * (line.B.Y - line.A.Y))) / math.Pow(dist.Magnitude(), 2)
 
-	closest := galx.Vec{
+	closest := galx.Vec2d{
 		X: line.A.X + (dot * (line.B.X - line.A.X)),
 		Y: line.A.Y + (dot * (line.B.Y - line.A.Y)),
 	}

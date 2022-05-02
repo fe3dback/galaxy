@@ -194,12 +194,12 @@ func TestAngle_Unit(t *testing.T) {
 	tests := []struct {
 		name string
 		a    Angle
-		want Vec
+		want Vec2d
 	}{
 		{
 			name: "right",
 			a:    Angle0,
-			want: Vec{
+			want: Vec2d{
 				X: 1,
 				Y: 0,
 			},
@@ -207,7 +207,7 @@ func TestAngle_Unit(t *testing.T) {
 		{
 			name: "top",
 			a:    Angle90,
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: -1,
 			},
@@ -215,7 +215,7 @@ func TestAngle_Unit(t *testing.T) {
 		{
 			name: "right",
 			a:    Angle180,
-			want: Vec{
+			want: Vec2d{
 				X: -1,
 				Y: 0,
 			},
@@ -223,7 +223,7 @@ func TestAngle_Unit(t *testing.T) {
 		{
 			name: "bottom",
 			a:    Angle270,
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: 1,
 			},
@@ -231,7 +231,7 @@ func TestAngle_Unit(t *testing.T) {
 		{
 			name: "45",
 			a:    Angle45,
-			want: Vec{
+			want: Vec2d{
 				X: 0.7071,
 				Y: -0.7071,
 			},

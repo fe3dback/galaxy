@@ -34,15 +34,15 @@ type Transform struct {
 	// state
 	activeX              bool
 	activeY              bool
-	startMousePosition   galx.Vec
-	startObjectsPosition []galx.Vec
+	startMousePosition   galx.Vec2d
+	startObjectsPosition []galx.Vec2d
 	keyXDown             bool
 	keyYDown             bool
 	keyCtrlDown          bool
 
 	// visual
 	camera            galx.Camera
-	attachAnchor      galx.Vec
+	attachAnchor      galx.Vec2d
 	surroundingSelect galx.Rect
 }
 
@@ -104,7 +104,7 @@ func (c *Transform) OnUpdate(state galx.State) error {
 	return nil
 }
 
-func (c *Transform) saveState(worldMouse galx.Vec) {
+func (c *Transform) saveState(worldMouse galx.Vec2d) {
 	if c.axisXY.Contains(worldMouse) {
 		c.activeX = true
 		c.activeY = true
@@ -115,7 +115,7 @@ func (c *Transform) saveState(worldMouse galx.Vec) {
 
 	if c.activeX || c.activeY {
 		c.startMousePosition = worldMouse
-		c.startObjectsPosition = make([]galx.Vec, len(c.selectedObjects))
+		c.startObjectsPosition = make([]galx.Vec2d, len(c.selectedObjects))
 		for idx, object := range c.selectedObjects {
 			c.startObjectsPosition[idx] = object.AbsPosition()
 		}
@@ -125,11 +125,11 @@ func (c *Transform) saveState(worldMouse galx.Vec) {
 func (c *Transform) resetState() {
 	c.activeX = false
 	c.activeY = false
-	c.startMousePosition = galx.Vec{}
+	c.startMousePosition = galx.Vec2d{}
 	c.startObjectsPosition = nil
 }
 
-func (c *Transform) move(worldMouse galx.Vec) {
+func (c *Transform) move(worldMouse galx.Vec2d) {
 	lockedX := !c.activeX
 	lockedY := !c.activeY
 
@@ -160,7 +160,7 @@ func (c *Transform) move(worldMouse galx.Vec) {
 	}
 }
 
-func (c *Transform) snapPosition(pos galx.Vec) galx.Vec {
+func (c *Transform) snapPosition(pos galx.Vec2d) galx.Vec2d {
 	if !c.snapOn && !c.snapForceOn {
 		// both off
 		return pos
@@ -171,13 +171,13 @@ func (c *Transform) snapPosition(pos galx.Vec) galx.Vec {
 		return pos
 	}
 
-	return galx.Vec{
+	return galx.Vec2d{
 		X: math.Floor(pos.X/float64(c.snapSize)) * float64(c.snapSize),
 		Y: math.Floor(pos.Y/float64(c.snapSize)) * float64(c.snapSize),
 	}
 }
 
-func (c *Transform) calculateAnchor(worldMouse galx.Vec) {
+func (c *Transform) calculateAnchor(worldMouse galx.Vec2d) {
 	bbox := make([]galx.Rect, 0, len(c.selectedObjects))
 	closest := float64(math.MaxInt16)
 
@@ -258,11 +258,11 @@ func (c *Transform) drawLocks(r galx.Renderer) {
 
 	if lockedY {
 		r.DrawLine(axisColorX, galx.Line{
-			A: galx.Vec{
+			A: galx.Vec2d{
 				X: c.camera.Position().X,
 				Y: c.attachAnchor.Y,
 			},
-			B: galx.Vec{
+			B: galx.Vec2d{
 				X: c.camera.Position().X + float64(c.camera.Width()),
 				Y: c.attachAnchor.Y,
 			},
@@ -271,11 +271,11 @@ func (c *Transform) drawLocks(r galx.Renderer) {
 
 	if lockedX {
 		r.DrawLine(axisColorY, galx.Line{
-			A: galx.Vec{
+			A: galx.Vec2d{
 				X: c.attachAnchor.X,
 				Y: c.camera.Position().Y,
 			},
-			B: galx.Vec{
+			B: galx.Vec2d{
 				X: c.attachAnchor.X,
 				Y: c.camera.Position().Y + float64(c.camera.Height()),
 			},

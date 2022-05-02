@@ -52,7 +52,7 @@ func (c *Select) OnUpdate(state galx.State) error {
 	return nil
 }
 
-func (c *Select) objectAt(state galx.State, clickPosition galx.Vec) galx.GameObject {
+func (c *Select) objectAt(state galx.State, clickPosition galx.Vec2d) galx.GameObject {
 	const selectPrecision = 4
 
 	var current galx.GameObject

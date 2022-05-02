@@ -6,8 +6,8 @@ import (
 )
 
 type Rect struct {
-	TL Vec
-	BR Vec
+	TL Vec2d
+	BR Vec2d
 }
 
 func (r Rect) String() string {
@@ -42,8 +42,8 @@ func (r Rect) Height() float64 {
 	return math.Abs(r.BR.Y - r.TL.Y)
 }
 
-func (r Rect) Center() Vec {
-	return Vec{
+func (r Rect) Center() Vec2d {
+	return Vec2d{
 		X: r.TL.X + ((r.BR.X - r.TL.X) / 2),
 		Y: r.TL.Y + ((r.BR.Y - r.TL.Y) / 2),
 	}
@@ -57,11 +57,11 @@ func (r Rect) Scale(s float64) Rect {
 	hh := (r.Height() * s) / 2
 
 	return Rect{
-		TL: Vec{
+		TL: Vec2d{
 			X: center.X - wh,
 			Y: center.Y - hh,
 		},
-		BR: Vec{
+		BR: Vec2d{
 			X: center.X + wh,
 			Y: center.Y + hh,
 		},
@@ -72,18 +72,18 @@ func (r Rect) Increase(size float64) Rect {
 	r = r.Normalize()
 
 	return Rect{
-		TL: Vec{
+		TL: Vec2d{
 			X: r.TL.X - size,
 			Y: r.TL.Y - size,
 		},
-		BR: Vec{
+		BR: Vec2d{
 			X: r.BR.X + size,
 			Y: r.BR.Y + size,
 		},
 	}
 }
 
-func (r Rect) Contains(v Vec) bool {
+func (r Rect) Contains(v Vec2d) bool {
 	if v.X < r.TL.X {
 		return false
 	}
@@ -111,8 +111,8 @@ func (r Rect) Edges() [4]Line {
 	}
 }
 
-func (r Rect) VerticesClockWise() [4]Vec {
-	return [4]Vec{
+func (r Rect) VerticesClockWise() [4]Vec2d {
+	return [4]Vec2d{
 		r.TL,
 		{
 			X: r.BR.X,
@@ -150,11 +150,11 @@ func SurroundRect(boxes ...Rect) Rect {
 	}
 
 	return Rect{
-		TL: Vec{
+		TL: Vec2d{
 			X: minX,
 			Y: minY,
 		},
-		BR: Vec{
+		BR: Vec2d{
 			X: maxX,
 			Y: maxY,
 		},

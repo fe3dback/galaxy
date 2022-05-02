@@ -41,8 +41,8 @@ func (a Angle) Radians() float64 {
 	return float64(a)
 }
 
-func (a Angle) Unit() Vec {
-	return Vec{
+func (a Angle) Unit() Vec2d {
+	return Vec2d{
 		X: math.Cos(a.Radians()),
 		Y: -math.Sin(a.Radians()),
 	}

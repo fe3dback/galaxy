@@ -14,7 +14,7 @@ type (
 		FrameEnd()
 		Draw()
 		DrawTmpTriangle() // todo: tmp
-		DrawRect(vertexPos [4]galx.Vec2, vertexColor [4]galx.Vec3)
+		DrawRect(vertexPos [4]galx.Vec2d, vertexColor [4]galx.Vec3d)
 		GPUWait()
 	}
 )

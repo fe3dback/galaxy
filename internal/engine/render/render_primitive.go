@@ -3,19 +3,19 @@ package render
 import "github.com/fe3dback/galaxy/galx"
 
 func (r *Render) DrawSquare(color galx.Color, rect galx.Rect) {
-	var vertPos [4]galx.Vec2
+	var vertPos [4]galx.Vec2d
 
 	for ind, vec := range rect.VerticesClockWise() {
 		transform := r.project(r.cam(vec))
-		vertPos[ind] = galx.Vec2{
-			X: float32(transform.X),
-			Y: float32(transform.Y),
+		vertPos[ind] = galx.Vec2d{
+			X: transform.X,
+			Y: transform.Y,
 		}
 	}
 
 	r.renderer.DrawRect(
 		vertPos,
-		[4]galx.Vec3{
+		[4]galx.Vec3d{
 			{1, 0, 0},
 			{0, 1, 0},
 			{0, 0, 1},
@@ -44,17 +44,17 @@ func (r *Render) DrawLine(color galx.Color, line galx.Line) {
 	panic("implement me")
 }
 
-func (r *Render) DrawVector(color galx.Color, dist float64, vec galx.Vec, angle galx.Angle) {
+func (r *Render) DrawVector(color galx.Color, dist float64, vec galx.Vec2d, angle galx.Angle) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (r *Render) DrawCrossLines(color galx.Color, size int, vec galx.Vec) {
+func (r *Render) DrawCrossLines(color galx.Color, size int, vec galx.Vec2d) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (r *Render) DrawPoint(color galx.Color, vec galx.Vec) {
+func (r *Render) DrawPoint(color galx.Color, vec galx.Vec2d) {
 	// TODO implement me
 	panic("implement me")
 }

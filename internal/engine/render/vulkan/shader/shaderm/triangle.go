@@ -17,8 +17,8 @@ const pTriangleSizeTotal = pTriangleSizeVertex * pTriangleVertexCount
 
 type (
 	Triangle struct {
-		Position [pTriangleVertexCount]galx.Vec2
-		Color    [pTriangleVertexCount]galx.Vec3
+		Position [pTriangleVertexCount]galx.Vec2d
+		Color    [pTriangleVertexCount]galx.Vec3d
 	}
 )
 

@@ -29,7 +29,7 @@ func (s2d *Sprite2D) OnDraw(r galx.Renderer) error {
 	// draw sprite
 	r.DrawSpriteAngle(
 		s2d.resource,
-		s2d.entity.AbsPosition().Sub(galx.Vec{
+		s2d.entity.AbsPosition().Sub(galx.Vec2d{
 			X: float64(s2d.textureInfo.Width / 2),
 			Y: float64(s2d.textureInfo.Height / 2),
 		}),

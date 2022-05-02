@@ -13,7 +13,7 @@ func TestCircle2Circle(t *testing.T) {
 	}
 
 	center2R := galx.Circle{
-		Pos:    galx.Vec{X: 0, Y: 0},
+		Pos:    galx.Vec2d{X: 0, Y: 0},
 		Radius: 2,
 	}
 
@@ -24,45 +24,45 @@ func TestCircle2Circle(t *testing.T) {
 	}{
 		{name: "inside collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 0, Y: 0}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: 0, Y: 0}, Radius: 1},
 		}, want: true},
 		{name: "outside collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 0, Y: 0}, Radius: 3},
+			b: galx.Circle{Pos: galx.Vec2d{X: 0, Y: 0}, Radius: 3},
 		}, want: true},
 
 		// sides collide
 		{name: "top side collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 0, Y: -3}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: 0, Y: -3}, Radius: 1},
 		}, want: true},
 		{name: "bottom side collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 0, Y: 3}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: 0, Y: 3}, Radius: 1},
 		}, want: true},
 		{name: "left side collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: -3, Y: 0}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: -3, Y: 0}, Radius: 1},
 		}, want: true},
 		{name: "right side collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 3, Y: 0}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: 3, Y: 0}, Radius: 1},
 		}, want: true},
 
 		// sides offset not collide
 		{name: "top side collide", args: args{
 			a: center2R,
-			b: galx.Circle{Pos: galx.Vec{X: 0, Y: -3.0001}, Radius: 1},
+			b: galx.Circle{Pos: galx.Vec2d{X: 0, Y: -3.0001}, Radius: 1},
 		}, want: false},
 
 		// special
 		{name: "eq collide", args: args{
-			a: galx.Circle{Pos: galx.Vec{X: 5, Y: 1}, Radius: 0.5},
-			b: galx.Circle{Pos: galx.Vec{X: 6, Y: 1}, Radius: 0.5},
+			a: galx.Circle{Pos: galx.Vec2d{X: 5, Y: 1}, Radius: 0.5},
+			b: galx.Circle{Pos: galx.Vec2d{X: 6, Y: 1}, Radius: 0.5},
 		}, want: true},
 		{name: "small offset no collide", args: args{
-			a: galx.Circle{Pos: galx.Vec{X: 5, Y: 1}, Radius: 0.49999},
-			b: galx.Circle{Pos: galx.Vec{X: 6, Y: 1}, Radius: 0.5},
+			a: galx.Circle{Pos: galx.Vec2d{X: 5, Y: 1}, Radius: 0.49999},
+			b: galx.Circle{Pos: galx.Vec2d{X: 6, Y: 1}, Radius: 0.5},
 		}, want: false},
 	}
 	for _, tt := range tests {
@@ -77,11 +77,11 @@ func TestCircle2Circle(t *testing.T) {
 func TestCircle2Point(t *testing.T) {
 	type args struct {
 		c galx.Circle
-		p galx.Vec
+		p galx.Vec2d
 	}
 
 	center2R := galx.Circle{
-		Pos: galx.Vec{
+		Pos: galx.Vec2d{
 			X: 0,
 			Y: 0,
 		},
@@ -97,7 +97,7 @@ func TestCircle2Point(t *testing.T) {
 			name: "s1",
 			args: args{
 				c: center2R,
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: 0,
 				},
@@ -108,7 +108,7 @@ func TestCircle2Point(t *testing.T) {
 			name: "left",
 			args: args{
 				c: center2R,
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: -2,
 					Y: 0,
 				},
@@ -119,7 +119,7 @@ func TestCircle2Point(t *testing.T) {
 			name: "top",
 			args: args{
 				c: center2R,
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: -2,
 				},
@@ -130,7 +130,7 @@ func TestCircle2Point(t *testing.T) {
 			name: "left no collide",
 			args: args{
 				c: center2R,
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: -2.0001,
 				},
@@ -141,13 +141,13 @@ func TestCircle2Point(t *testing.T) {
 			name: "bottom offset collide",
 			args: args{
 				c: galx.Circle{
-					Pos: galx.Vec{
+					Pos: galx.Vec2d{
 						X: 0,
 						Y: 10,
 					},
 					Radius: 3,
 				},
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: 13,
 				},
@@ -158,13 +158,13 @@ func TestCircle2Point(t *testing.T) {
 			name: "bottom offset+ collide",
 			args: args{
 				c: galx.Circle{
-					Pos: galx.Vec{
+					Pos: galx.Vec2d{
 						X: 0,
 						Y: 10,
 					},
 					Radius: 3,
 				},
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: 12.99999,
 				},
@@ -175,13 +175,13 @@ func TestCircle2Point(t *testing.T) {
 			name: "bottom offset- no collide",
 			args: args{
 				c: galx.Circle{
-					Pos: galx.Vec{
+					Pos: galx.Vec2d{
 						X: 0,
 						Y: 10,
 					},
 					Radius: 3,
 				},
-				p: galx.Vec{
+				p: galx.Vec2d{
 					X: 0,
 					Y: 13.00001,
 				},

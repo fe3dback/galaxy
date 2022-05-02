@@ -7,27 +7,27 @@ import (
 
 func TestLine_Center(t *testing.T) {
 	type fields struct {
-		A Vec
-		B Vec
+		A Vec2d
+		B Vec2d
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		want   Vec
+		want   Vec2d
 	}{
 		{
 			name: "x",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: 0,
 					Y: 0,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 10,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 5,
 				Y: 0,
 			},
@@ -35,16 +35,16 @@ func TestLine_Center(t *testing.T) {
 		{
 			name: "x 2",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: 5,
 					Y: 0,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 15,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 10,
 				Y: 0,
 			},
@@ -52,16 +52,16 @@ func TestLine_Center(t *testing.T) {
 		{
 			name: "x 3",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: -5,
 					Y: 0,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 5,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: 0,
 			},
@@ -69,16 +69,16 @@ func TestLine_Center(t *testing.T) {
 		{
 			name: "y",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: -1,
 					Y: -1,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 1,
 					Y: 1,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: 0,
 			},
@@ -86,16 +86,16 @@ func TestLine_Center(t *testing.T) {
 		{
 			name: "y 2",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: -2,
 					Y: 2,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 2,
 					Y: -2,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: 0,
 			},
@@ -116,8 +116,8 @@ func TestLine_Center(t *testing.T) {
 
 func TestLine_Length(t *testing.T) {
 	type fields struct {
-		A Vec
-		B Vec
+		A Vec2d
+		B Vec2d
 	}
 	tests := []struct {
 		name   string
@@ -127,11 +127,11 @@ func TestLine_Length(t *testing.T) {
 		{
 			name: "simple",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: 0,
 					Y: 0,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 1,
 					Y: 0,
 				},
@@ -141,11 +141,11 @@ func TestLine_Length(t *testing.T) {
 		{
 			name: "x 2",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: -2,
 					Y: 0,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 2,
 					Y: 0,
 				},
@@ -155,11 +155,11 @@ func TestLine_Length(t *testing.T) {
 		{
 			name: "x 3",
 			fields: fields{
-				A: Vec{
+				A: Vec2d{
 					X: -1,
 					Y: -1,
 				},
-				B: Vec{
+				B: Vec2d{
 					X: 1,
 					Y: 1,
 				},

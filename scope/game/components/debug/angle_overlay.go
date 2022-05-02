@@ -30,7 +30,7 @@ func (td *AngleOverlay) OnCreated(entity galx.GameObject) {
 func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	// center
 	r.DrawCrossLines(galx.ColorOrange, 10, td.entity.AbsPosition())
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec2d{
 		X: 0,
 		Y: -20,
 	}), td.entity.AbsPosition().String())
@@ -44,13 +44,13 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 
 	// test vectors
 	// rotate around
-	rotateAround := td.entity.AbsPosition().Add(galx.Vec{
+	rotateAround := td.entity.AbsPosition().Add(galx.Vec2d{
 		X: 100,
 		Y: 0,
 	}).RotateAround(td.entity.AbsPosition(), td.entity.Rotation())
 	r.DrawCrossLines(galx.ColorGreen, 10, rotateAround)
 	rotateAroundText := fmt.Sprintf("ra (%s)", rotateAround)
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec2d{
 		X: 0,
 		Y: 20,
 	}), rotateAroundText)
@@ -60,14 +60,14 @@ func (td *AngleOverlay) OnDraw(r galx.Renderer) error {
 	r.DrawCrossLines(galx.ColorGreen, 5, polarOffset)
 
 	// rotate 90deg
-	vec := galx.Vec{
+	vec := galx.Vec2d{
 		X: 1,
 		Y: 0,
 	}
 	vec = vec.Rotate(td.entity.Rotation().Add(galx.NewAngle(90)))
 	r.DrawVector(galx.ColorOrange, 50, td.entity.AbsPosition(), vec.Direction())
 	rotateDir := fmt.Sprintf("S+90 (%.2f)", vec.Direction())
-	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec{
+	r.DrawText(consts.AssetDefaultFont, galx.ColorOrange, td.entity.AbsPosition().Add(galx.Vec2d{
 		X: -20,
 		Y: 40,
 	}), rotateDir)

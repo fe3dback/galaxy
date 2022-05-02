@@ -7,8 +7,8 @@ import (
 
 func TestRect_Edges(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	tests := []struct {
 		name   string
@@ -18,52 +18,52 @@ func TestRect_Edges(t *testing.T) {
 		{
 			name: "simple",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -2,
 					Y: -2,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 2,
 					Y: 2,
 				},
 			},
 			want: [4]Line{
 				{
-					A: Vec{
+					A: Vec2d{
 						X: -2,
 						Y: -2,
 					},
-					B: Vec{
+					B: Vec2d{
 						X: -2,
 						Y: 2,
 					},
 				},
 				{
-					A: Vec{
+					A: Vec2d{
 						X: -2,
 						Y: 2,
 					},
-					B: Vec{
+					B: Vec2d{
 						X: 2,
 						Y: 2,
 					},
 				},
 				{
-					A: Vec{
+					A: Vec2d{
 						X: 2,
 						Y: 2,
 					},
-					B: Vec{
+					B: Vec2d{
 						X: 2,
 						Y: -2,
 					},
 				},
 				{
-					A: Vec{
+					A: Vec2d{
 						X: 2,
 						Y: -2,
 					},
-					B: Vec{
+					B: Vec2d{
 						X: -2,
 						Y: -2,
 					},
@@ -86,8 +86,8 @@ func TestRect_Edges(t *testing.T) {
 
 func TestRect_Height(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	tests := []struct {
 		name   string
@@ -97,11 +97,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "t1",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: -4,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: 4,
 				},
@@ -111,11 +111,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "t2",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 3,
 					Y: -4,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -3,
 					Y: 4,
 				},
@@ -125,11 +125,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "t3",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 3,
 					Y: 20,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -3,
 					Y: -2,
 				},
@@ -139,11 +139,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "around 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: -100,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: 200,
 				},
@@ -153,11 +153,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "less t 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: -100,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: -150,
 				},
@@ -167,11 +167,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "less t 0 reversed",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: -150,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: -100,
 				},
@@ -181,11 +181,11 @@ func TestRect_Height(t *testing.T) {
 		{
 			name: "simple g 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: 500,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: 250,
 				},
@@ -208,27 +208,27 @@ func TestRect_Height(t *testing.T) {
 
 func TestRect_Vertices(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		want   [4]Vec
+		want   [4]Vec2d
 	}{
 		{
 			name: "simple",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -2,
 					Y: -2,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 2,
 					Y: 2,
 				},
 			},
-			want: [4]Vec{
+			want: [4]Vec2d{
 				{
 					X: -2,
 					Y: -2,
@@ -263,8 +263,8 @@ func TestRect_Vertices(t *testing.T) {
 
 func TestRect_Width(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	tests := []struct {
 		name   string
@@ -274,11 +274,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "s1",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -2,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 2,
 					Y: 0,
 				},
@@ -288,11 +288,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "s2",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -3,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 1,
 					Y: 0,
 				},
@@ -302,11 +302,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "s3",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -5,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -3,
 					Y: 0,
 				},
@@ -316,11 +316,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "s4",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -5,
 					Y: 16,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -3,
 					Y: 12,
 				},
@@ -330,11 +330,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "around 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -100,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 200,
 					Y: 0,
 				},
@@ -344,11 +344,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "less t 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -100,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -150,
 					Y: 0,
 				},
@@ -358,11 +358,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "less t 0 reversed",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -150,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -100,
 					Y: 0,
 				},
@@ -372,11 +372,11 @@ func TestRect_Width(t *testing.T) {
 		{
 			name: "simple g 0",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 500,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 250,
 					Y: 0,
 				},
@@ -399,27 +399,27 @@ func TestRect_Width(t *testing.T) {
 
 func TestRect_Center(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		want   Vec
+		want   Vec2d
 	}{
 		{
 			name: "zero",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 0,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 0,
 				Y: 0,
 			},
@@ -427,16 +427,16 @@ func TestRect_Center(t *testing.T) {
 		{
 			name: "x simple",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 0,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 10,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 5,
 				Y: 0,
 			},
@@ -444,16 +444,16 @@ func TestRect_Center(t *testing.T) {
 		{
 			name: "x simple 2",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 5,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 10,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 7.5,
 				Y: 0,
 			},
@@ -461,16 +461,16 @@ func TestRect_Center(t *testing.T) {
 		{
 			name: "x less zero 1",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -5,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 15,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 5,
 				Y: 0,
 			},
@@ -478,16 +478,16 @@ func TestRect_Center(t *testing.T) {
 		{
 			name: "x reversed",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: 15,
 					Y: 0,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: -5,
 					Y: 0,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: 5,
 				Y: 0,
 			},
@@ -495,16 +495,16 @@ func TestRect_Center(t *testing.T) {
 		{
 			name: "xy",
 			fields: fields{
-				Min: Vec{
+				Min: Vec2d{
 					X: -15,
 					Y: 5,
 				},
-				Max: Vec{
+				Max: Vec2d{
 					X: 5,
 					Y: -15,
 				},
 			},
-			want: Vec{
+			want: Vec2d{
 				X: -5,
 				Y: -5,
 			},
@@ -525,8 +525,8 @@ func TestRect_Center(t *testing.T) {
 
 func TestRect_Scale(t *testing.T) {
 	type fields struct {
-		Min Vec
-		Max Vec
+		Min Vec2d
+		Max Vec2d
 	}
 	type args struct {
 		s float64
@@ -540,57 +540,57 @@ func TestRect_Scale(t *testing.T) {
 		{
 			name: "zero",
 			fields: fields{
-				Min: Vec{X: 0, Y: 0},
-				Max: Vec{X: 0, Y: 0},
+				Min: Vec2d{X: 0, Y: 0},
+				Max: Vec2d{X: 0, Y: 0},
 			},
 			args: args{
 				s: 2,
 			},
 			want: Rect{
-				TL: Vec{X: 0, Y: 0},
-				BR: Vec{X: 0, Y: 0},
+				TL: Vec2d{X: 0, Y: 0},
+				BR: Vec2d{X: 0, Y: 0},
 			},
 		},
 		{
 			name: "one2one",
 			fields: fields{
-				Min: Vec{X: -1, Y: -1},
-				Max: Vec{X: 1, Y: 1},
+				Min: Vec2d{X: -1, Y: -1},
+				Max: Vec2d{X: 1, Y: 1},
 			},
 			args: args{
 				s: 1,
 			},
 			want: Rect{
-				TL: Vec{X: -1, Y: -1},
-				BR: Vec{X: 1, Y: 1},
+				TL: Vec2d{X: -1, Y: -1},
+				BR: Vec2d{X: 1, Y: 1},
 			},
 		},
 		{
 			name: "one x2.5",
 			fields: fields{
-				Min: Vec{X: -1, Y: -1},
-				Max: Vec{X: 1, Y: 1},
+				Min: Vec2d{X: -1, Y: -1},
+				Max: Vec2d{X: 1, Y: 1},
 			},
 			args: args{
 				s: 2.5,
 			},
 			want: Rect{
-				TL: Vec{X: -2.5, Y: -2.5},
-				BR: Vec{X: 2.5, Y: 2.5},
+				TL: Vec2d{X: -2.5, Y: -2.5},
+				BR: Vec2d{X: 2.5, Y: 2.5},
 			},
 		},
 		{
 			name: "reversed one x2.5 (nornalized inside)",
 			fields: fields{
-				Min: Vec{X: 1, Y: 1},
-				Max: Vec{X: -1, Y: -1},
+				Min: Vec2d{X: 1, Y: 1},
+				Max: Vec2d{X: -1, Y: -1},
 			},
 			args: args{
 				s: 2.5,
 			},
 			want: Rect{
-				TL: Vec{X: -2.5, Y: -2.5},
-				BR: Vec{X: 2.5, Y: 2.5},
+				TL: Vec2d{X: -2.5, Y: -2.5},
+				BR: Vec2d{X: 2.5, Y: 2.5},
 			},
 		},
 	}

@@ -2,11 +2,11 @@ package node
 
 import "github.com/fe3dback/galaxy/galx"
 
-func (n *Node) RelativePosition() galx.Vec {
+func (n *Node) RelativePosition() galx.Vec2d {
 	return n.relativePosition
 }
 
-func (n *Node) AbsPosition() galx.Vec {
+func (n *Node) AbsPosition() galx.Vec2d {
 	if !n.IsRoot() {
 		return n.parent.AbsPosition().Add(n.RelativePosition())
 	}
@@ -15,11 +15,11 @@ func (n *Node) AbsPosition() galx.Vec {
 	return n.RelativePosition()
 }
 
-func (n *Node) SetPosition(relativePosition galx.Vec) {
+func (n *Node) SetPosition(relativePosition galx.Vec2d) {
 	n.relativePosition = relativePosition
 }
 
-func (n *Node) AddPosition(v galx.Vec) {
+func (n *Node) AddPosition(v galx.Vec2d) {
 	n.SetPosition(n.AbsPosition().Add(v))
 }
 

@@ -6,7 +6,7 @@ import (
 )
 
 type Movement struct {
-	vector galx.Vec
+	vector galx.Vec2d
 
 	pressedTop    bool
 	pressedBottom bool
@@ -18,7 +18,7 @@ type Movement struct {
 
 func NewMovement(dispatcher *event2.Dispatcher) *Movement {
 	m := &Movement{
-		vector:        galx.Vec{},
+		vector:        galx.Vec2d{},
 		pressedTop:    false,
 		pressedBottom: false,
 		pressedLeft:   false,
@@ -31,7 +31,7 @@ func NewMovement(dispatcher *event2.Dispatcher) *Movement {
 	return m
 }
 
-func (m *Movement) Vector() galx.Vec {
+func (m *Movement) Vector() galx.Vec2d {
 	return m.vector
 }
 

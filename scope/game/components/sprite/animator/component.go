@@ -16,13 +16,13 @@ func (anim *Animator) OnDraw(r galx.Renderer) error {
 	frame := seq.frames[seq.currentFrame]
 	entityPos := anim.entity.AbsPosition()
 
-	imageRectMin := galx.Vec{
+	imageRectMin := galx.Vec2d{
 		X: float64(entityPos.RoundX() + seq.offsetX - (frame.w / 2)),
 		Y: float64(entityPos.RoundY() + seq.offsetY - (frame.h / 2)),
 	}
 	imageRect := galx.Rect{
 		TL: imageRectMin,
-		BR: imageRectMin.Add(galx.Vec{
+		BR: imageRectMin.Add(galx.Vec2d{
 			X: float64(frame.w),
 			Y: float64(frame.h),
 		}),

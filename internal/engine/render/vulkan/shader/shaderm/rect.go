@@ -17,8 +17,8 @@ const pRectSizeTotal = pRectSizeVertex * (pRectTriangleCount * 3)
 
 type (
 	Rect struct {
-		Position [pRectVertexCount]galx.Vec2
-		Color    [pRectVertexCount]galx.Vec3
+		Position [pRectVertexCount]galx.Vec2d
+		Color    [pRectVertexCount]galx.Vec3d
 	}
 )
 

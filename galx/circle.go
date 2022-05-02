@@ -3,7 +3,7 @@ package galx
 import "math"
 
 type Circle struct {
-	Pos    Vec
+	Pos    Vec2d
 	Radius float64
 }
 
@@ -11,18 +11,18 @@ func (c Circle) BoundingBox() Rect {
 	c.Radius = math.Abs(c.Radius)
 
 	return Rect{
-		TL: Vec{
+		TL: Vec2d{
 			X: c.Pos.X - c.Radius,
 			Y: c.Pos.Y - c.Radius,
 		},
-		BR: Vec{
+		BR: Vec2d{
 			X: c.Pos.X + c.Radius,
 			Y: c.Pos.Y + c.Radius,
 		},
 	}
 }
 
-func (c Circle) Contains(p Vec) bool {
+func (c Circle) Contains(p Vec2d) bool {
 	return c.Radius >= c.Pos.DistanceTo(p)
 }
 

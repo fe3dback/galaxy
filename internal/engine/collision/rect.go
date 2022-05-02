@@ -24,7 +24,7 @@ func Rect2Rect(a, b galx.Rect) bool {
 	return true
 }
 
-func Rect2Point(a galx.Rect, b galx.Vec) bool {
+func Rect2Point(a galx.Rect, b galx.Vec2d) bool {
 	if a.TL.X > b.X {
 		return false
 	}

@@ -40,7 +40,7 @@ type (
 
 	LayerFPS struct {
 		moment            galx.Moment
-		mousePos          galx.Vec
+		mousePos          galx.Vec2d
 		graphs            map[graphId]*graph
 		previousDeltaTime float64
 	}
@@ -146,8 +146,8 @@ func (l *LayerFPS) drawGraph(r galx.Renderer, g *graph) {
 	r.DrawLine(
 		galx.ColorSelection,
 		galx.Line{
-			A: galx.Vec{X: float64(xl), Y: float64(g.y + g.height + 2)},
-			B: galx.Vec{X: float64(xr), Y: float64(g.y + g.height + 2)},
+			A: galx.Vec2d{X: float64(xl), Y: float64(g.y + g.height + 2)},
+			B: galx.Vec2d{X: float64(xr), Y: float64(g.y + g.height + 2)},
 		},
 	)
 
@@ -175,8 +175,8 @@ func (l *LayerFPS) drawGraph(r galx.Renderer, g *graph) {
 		r.DrawLine(
 			graphColor,
 			galx.Line{
-				A: galx.Vec{X: float64(xl + xOffset), Y: float64(yb)},
-				B: galx.Vec{X: float64(xl + xOffset), Y: float64(yb - int(ratePercent*float32(g.height)))},
+				A: galx.Vec2d{X: float64(xl + xOffset), Y: float64(yb)},
+				B: galx.Vec2d{X: float64(xl + xOffset), Y: float64(yb - int(ratePercent*float32(g.height)))},
 			},
 		)
 

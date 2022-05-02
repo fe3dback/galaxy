@@ -10,12 +10,12 @@ func (r *Render) TextureQuery(res consts.AssetsPath) galx.TextureInfo {
 	panic("implement me")
 }
 
-func (r *Render) DrawSprite(res consts.AssetsPath, vec galx.Vec) {
+func (r *Render) DrawSprite(res consts.AssetsPath, vec galx.Vec2d) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (r *Render) DrawSpriteAngle(res consts.AssetsPath, vec galx.Vec, angle galx.Angle) {
+func (r *Render) DrawSpriteAngle(res consts.AssetsPath, vec galx.Vec2d, angle galx.Angle) {
 	// TODO implement me
 	panic("implement me")
 }

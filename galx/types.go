@@ -60,10 +60,10 @@ type (
 		Unselect()
 		IsSelected() bool
 
-		AbsPosition() Vec
-		RelativePosition() Vec
-		SetPosition(pos Vec)
-		AddPosition(pos Vec)
+		AbsPosition() Vec2d
+		RelativePosition() Vec2d
+		SetPosition(pos Vec2d)
+		AddPosition(pos Vec2d)
 		Rotation() Angle
 		Scale() float64
 		SetScale(scale float64)
@@ -147,14 +147,14 @@ type (
 	}
 
 	Camera interface {
-		Screen2World(screen Vec) Vec
-		World2Screen(world Vec) Vec
-		Position() Vec
+		Screen2World(screen Vec2d) Vec2d
+		World2Screen(world Vec2d) Vec2d
+		Position() Vec2d
 		Width() int
 		Height() int
 		Scale() float64
-		MoveTo(p Vec)
-		CenterOn(p Vec)
+		MoveTo(p Vec2d)
+		CenterOn(p Vec2d)
 		Resize(width, height int)
 		ZoomView(scale float64)
 	}
@@ -196,7 +196,7 @@ type (
 	MousePropagationPriority = int
 
 	Mouse interface {
-		MouseCoords() Vec
+		MouseCoords() Vec2d
 		ScrollPosition() float64
 		ScrollLastOffset() float64
 
@@ -217,7 +217,7 @@ type (
 	}
 
 	Movement interface {
-		Vector() Vec
+		Vector() Vec2d
 		Shift() bool
 		Space() bool
 	}
@@ -249,20 +249,20 @@ type (
 		DrawCircle(color Color, circle Circle)
 		DrawSquareEx(color Color, angle Angle, rect Rect)
 		DrawLine(color Color, line Line)
-		DrawVector(color Color, dist float64, vec Vec, angle Angle)
-		DrawCrossLines(color Color, size int, vec Vec)
-		DrawPoint(color Color, vec Vec)
+		DrawVector(color Color, dist float64, vec Vec2d, angle Angle)
+		DrawCrossLines(color Color, size int, vec Vec2d)
+		DrawPoint(color Color, vec Vec2d)
 
 		// sprite
 
 		TextureQuery(res consts.AssetsPath) TextureInfo
-		DrawSprite(res consts.AssetsPath, vec Vec)
-		DrawSpriteAngle(res consts.AssetsPath, vec Vec, angle Angle)
+		DrawSprite(res consts.AssetsPath, vec Vec2d)
+		DrawSpriteAngle(res consts.AssetsPath, vec Vec2d, angle Angle)
 		DrawSpriteEx(res consts.AssetsPath, src, dest Rect, angle Angle)
 
 		// text
 
-		DrawText(fontId consts.AssetsPath, color Color, vec Vec, text string)
+		DrawText(fontId consts.AssetsPath, color Color, vec Vec2d, text string)
 
 		// system
 

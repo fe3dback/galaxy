@@ -11,11 +11,11 @@ func testNormalizeRect(rect galx.Rect) galx.Rect {
 	aHalfWidth := rect.BR.X / 2
 	aHalfHeight := rect.BR.Y / 2
 	return galx.Rect{
-		TL: galx.Vec{
+		TL: galx.Vec2d{
 			X: rect.TL.X - aHalfWidth,
 			Y: rect.TL.Y - aHalfHeight,
 		},
-		BR: galx.Vec{
+		BR: galx.Vec2d{
 			X: rect.TL.X + aHalfWidth,
 			Y: rect.TL.Y + aHalfHeight,
 		},
@@ -29,8 +29,8 @@ func TestCollideBoxToBox(t *testing.T) {
 	}
 
 	centeredBoxS1 := galx.Rect{
-		TL: galx.Vec{X: 0, Y: 0}, // x, y
-		BR: galx.Vec{X: 2, Y: 2}, // w, h
+		TL: galx.Vec2d{X: 0, Y: 0}, // x, y
+		BR: galx.Vec2d{X: 2, Y: 2}, // w, h
 	}
 
 	tests := []struct {
@@ -43,7 +43,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top left corner not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -3, Y: -3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -3, Y: -3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -51,7 +51,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top right corner not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 3, Y: -3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 3, Y: -3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -59,7 +59,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom left corner not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -3, Y: 3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -3, Y: 3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -67,7 +67,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom right corner not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 3, Y: 3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 3, Y: 3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -76,7 +76,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: -3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: -3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -84,7 +84,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: 3}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: 3}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -92,7 +92,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "left not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -3, Y: 0}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -3, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -100,7 +100,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "right not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 3, Y: 0}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 3, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -110,7 +110,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: -2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: -2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -118,7 +118,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: 2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: 2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -126,7 +126,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "left collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2, Y: 2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2, Y: 2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -134,7 +134,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "right collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2, Y: 0}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -144,7 +144,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top float not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: -2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: -2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -152,7 +152,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom float not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: 2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: 2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -160,7 +160,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "left float not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2.00001, Y: 0}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2.00001, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -168,7 +168,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "right float not collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2.00001, Y: 0}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2.00001, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -178,7 +178,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top left corner collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2, Y: -2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2, Y: -2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -186,7 +186,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top right corner collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2, Y: -2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2, Y: -2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -194,7 +194,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom left corner collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2, Y: 2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2, Y: 2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -202,7 +202,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom right corner collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2, Y: 2}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2, Y: 2}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -212,7 +212,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top left small overlap collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -1.5, Y: -1.5}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -1.5, Y: -1.5}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -220,7 +220,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top right small overlap collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 1.5, Y: -1.5}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 1.5, Y: -1.5}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -228,7 +228,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom left small overlap collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -1.5, Y: 1.5}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -1.5, Y: 1.5}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -236,7 +236,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom right small overlap collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 1.5, Y: 1.5}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 1.5, Y: 1.5}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: true,
 		},
@@ -246,7 +246,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top left close float, no collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2.00001, Y: -2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2.00001, Y: -2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -254,7 +254,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "top right close float, no collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2.00001, Y: -2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2.00001, Y: -2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -262,7 +262,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom left close float, no collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -2.00001, Y: 2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: -2.00001, Y: 2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -270,7 +270,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "bottom right close float, no collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 2.00001, Y: 2.00001}, BR: galx.Vec{X: 2, Y: 2}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2.00001, Y: 2.00001}, BR: galx.Vec2d{X: 2, Y: 2}},
 			},
 			want: false,
 		},
@@ -280,7 +280,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "overlap collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: 0}, BR: galx.Vec{X: 1, Y: 1}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: 0}, BR: galx.Vec2d{X: 1, Y: 1}},
 			},
 			want: true,
 		},
@@ -288,7 +288,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "overlap small size collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 0, Y: 0}, BR: galx.Vec{X: 0.0001, Y: 0.0001}},
+				b: galx.Rect{TL: galx.Vec2d{X: 0, Y: 0}, BR: galx.Vec2d{X: 0.0001, Y: 0.0001}},
 			},
 			want: true,
 		},
@@ -296,7 +296,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "overlap small size offset TL collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: -1, Y: -1}, BR: galx.Vec{X: 0.0001, Y: 0.0001}},
+				b: galx.Rect{TL: galx.Vec2d{X: -1, Y: -1}, BR: galx.Vec2d{X: 0.0001, Y: 0.0001}},
 			},
 			want: true,
 		},
@@ -304,7 +304,7 @@ func TestCollideBoxToBox(t *testing.T) {
 			name: "overlap small size offset BR collide",
 			args: args{
 				a: centeredBoxS1,
-				b: galx.Rect{TL: galx.Vec{X: 1, Y: 1}, BR: galx.Vec{X: 0.0001, Y: 0.0001}},
+				b: galx.Rect{TL: galx.Vec2d{X: 1, Y: 1}, BR: galx.Vec2d{X: 0.0001, Y: 0.0001}},
 			},
 			want: true,
 		},
@@ -313,16 +313,16 @@ func TestCollideBoxToBox(t *testing.T) {
 		{
 			name: "offset corner collide",
 			args: args{
-				a: galx.Rect{TL: galx.Vec{X: 3, Y: 3}, BR: galx.Vec{X: 1, Y: 1}},
-				b: galx.Rect{TL: galx.Vec{X: 2, Y: 2}, BR: galx.Vec{X: 1, Y: 1}},
+				a: galx.Rect{TL: galx.Vec2d{X: 3, Y: 3}, BR: galx.Vec2d{X: 1, Y: 1}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2, Y: 2}, BR: galx.Vec2d{X: 1, Y: 1}},
 			},
 			want: true,
 		},
 		{
 			name: "offset corner pixel no collide",
 			args: args{
-				a: galx.Rect{TL: galx.Vec{X: 3, Y: 3}, BR: galx.Vec{X: 1, Y: 1}},
-				b: galx.Rect{TL: galx.Vec{X: 2, Y: 2}, BR: galx.Vec{X: 0.9999, Y: 0.9999}},
+				a: galx.Rect{TL: galx.Vec2d{X: 3, Y: 3}, BR: galx.Vec2d{X: 1, Y: 1}},
+				b: galx.Rect{TL: galx.Vec2d{X: 2, Y: 2}, BR: galx.Vec2d{X: 0.9999, Y: 0.9999}},
 			},
 			want: false,
 		},
@@ -357,10 +357,10 @@ func TestCollideBoxToBox(t *testing.T) {
 func TestRect2Point(t *testing.T) {
 	type args struct {
 		a galx.Rect
-		b galx.Vec
+		b galx.Vec2d
 	}
 
-	centered2x2 := galx.Rect{TL: galx.Vec{X: 0, Y: 0}, BR: galx.Vec{X: 2, Y: 2}}
+	centered2x2 := galx.Rect{TL: galx.Vec2d{X: 0, Y: 0}, BR: galx.Vec2d{X: 2, Y: 2}}
 
 	tests := []struct {
 		name string
@@ -372,7 +372,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top left corner collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1, Y: -1},
+				b: galx.Vec2d{X: -1, Y: -1},
 			},
 			want: true,
 		},
@@ -380,7 +380,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top right corner collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1, Y: -1},
+				b: galx.Vec2d{X: 1, Y: -1},
 			},
 			want: true,
 		},
@@ -388,7 +388,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom left corner collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1, Y: 1},
+				b: galx.Vec2d{X: -1, Y: 1},
 			},
 			want: true,
 		},
@@ -396,7 +396,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom right corner collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1, Y: 1},
+				b: galx.Vec2d{X: 1, Y: 1},
 			},
 			want: true,
 		},
@@ -406,7 +406,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top side collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0, Y: -1},
+				b: galx.Vec2d{X: 0, Y: -1},
 			},
 			want: true,
 		},
@@ -414,7 +414,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom side collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0, Y: 1},
+				b: galx.Vec2d{X: 0, Y: 1},
 			},
 			want: true,
 		},
@@ -422,7 +422,7 @@ func TestRect2Point(t *testing.T) {
 			name: "left side collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1, Y: 0},
+				b: galx.Vec2d{X: -1, Y: 0},
 			},
 			want: true,
 		},
@@ -430,7 +430,7 @@ func TestRect2Point(t *testing.T) {
 			name: "right side collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1, Y: 0},
+				b: galx.Vec2d{X: 1, Y: 0},
 			},
 			want: true,
 		},
@@ -440,7 +440,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top left corner offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1.00001, Y: -1},
+				b: galx.Vec2d{X: -1.00001, Y: -1},
 			},
 			want: false,
 		},
@@ -448,7 +448,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top right corner offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1, Y: -1.00001},
+				b: galx.Vec2d{X: 1, Y: -1.00001},
 			},
 			want: false,
 		},
@@ -456,7 +456,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom left corner offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1, Y: 1.00001},
+				b: galx.Vec2d{X: -1, Y: 1.00001},
 			},
 			want: false,
 		},
@@ -464,7 +464,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom right corner offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1.00001, Y: 1},
+				b: galx.Vec2d{X: 1.00001, Y: 1},
 			},
 			want: false,
 		},
@@ -474,7 +474,7 @@ func TestRect2Point(t *testing.T) {
 			name: "top side offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0, Y: -1.00001},
+				b: galx.Vec2d{X: 0, Y: -1.00001},
 			},
 			want: false,
 		},
@@ -482,7 +482,7 @@ func TestRect2Point(t *testing.T) {
 			name: "bottom side offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0, Y: 1.00001},
+				b: galx.Vec2d{X: 0, Y: 1.00001},
 			},
 			want: false,
 		},
@@ -490,7 +490,7 @@ func TestRect2Point(t *testing.T) {
 			name: "left side offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -1.00001, Y: 0},
+				b: galx.Vec2d{X: -1.00001, Y: 0},
 			},
 			want: false,
 		},
@@ -498,7 +498,7 @@ func TestRect2Point(t *testing.T) {
 			name: "right side offset not collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 1.00001, Y: 0},
+				b: galx.Vec2d{X: 1.00001, Y: 0},
 			},
 			want: false,
 		},
@@ -508,7 +508,7 @@ func TestRect2Point(t *testing.T) {
 			name: "inside collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0, Y: 0},
+				b: galx.Vec2d{X: 0, Y: 0},
 			},
 			want: true,
 		},
@@ -516,7 +516,7 @@ func TestRect2Point(t *testing.T) {
 			name: "inside tl collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: -0.9999, Y: -0.9999},
+				b: galx.Vec2d{X: -0.9999, Y: -0.9999},
 			},
 			want: true,
 		},
@@ -524,7 +524,7 @@ func TestRect2Point(t *testing.T) {
 			name: "inside br collide",
 			args: args{
 				a: centered2x2,
-				b: galx.Vec{X: 0.9999, Y: 0.9999},
+				b: galx.Vec2d{X: 0.9999, Y: 0.9999},
 			},
 			want: true,
 		},
@@ -534,10 +534,10 @@ func TestRect2Point(t *testing.T) {
 			name: "inside not centered tl collide",
 			args: args{
 				a: galx.Rect{
-					TL: galx.Vec{X: -1, Y: -1}, // x,y
-					BR: galx.Vec{X: 2, Y: 2},   // w,h
+					TL: galx.Vec2d{X: -1, Y: -1}, // x,y
+					BR: galx.Vec2d{X: 2, Y: 2},   // w,h
 				},
-				b: galx.Vec{X: -2, Y: -2},
+				b: galx.Vec2d{X: -2, Y: -2},
 			},
 			want: true,
 		},
@@ -545,10 +545,10 @@ func TestRect2Point(t *testing.T) {
 			name: "inside not centered tl not collide",
 			args: args{
 				a: galx.Rect{
-					TL: galx.Vec{X: 0, Y: 0},             // x,y
-					BR: galx.Vec{X: 1.99999, Y: 1.99999}, // w,h
+					TL: galx.Vec2d{X: 0, Y: 0},             // x,y
+					BR: galx.Vec2d{X: 1.99999, Y: 1.99999}, // w,h
 				},
-				b: galx.Vec{X: -2, Y: -2},
+				b: galx.Vec2d{X: -2, Y: -2},
 			},
 			want: false,
 		},
@@ -576,10 +576,10 @@ func TestRect2Circle(t *testing.T) {
 		c galx.Circle
 	}
 
-	centeredCircle2R := galx.Circle{Pos: galx.Vec{}, Radius: 2}
+	centeredCircle2R := galx.Circle{Pos: galx.Vec2d{}, Radius: 2}
 	centeredBox2R := galx.Rect{
-		TL: galx.Vec{},           // x,y
-		BR: galx.Vec{X: 2, Y: 2}, // w,h
+		TL: galx.Vec2d{},           // x,y
+		BR: galx.Vec2d{X: 2, Y: 2}, // w,h
 	}
 
 	tests := []struct {
@@ -599,7 +599,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s2",
 			args: args{
 				r: centeredBox2R,
-				c: galx.Circle{Pos: galx.Vec{X: 2, Y: 0}, Radius: 2},
+				c: galx.Circle{Pos: galx.Vec2d{X: 2, Y: 0}, Radius: 2},
 			},
 			want: true,
 		},
@@ -607,7 +607,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3",
 			args: args{
 				r: centeredBox2R,
-				c: galx.Circle{Pos: galx.Vec{X: 3, Y: 0}, Radius: 2},
+				c: galx.Circle{Pos: galx.Vec2d{X: 3, Y: 0}, Radius: 2},
 			},
 			want: true,
 		},
@@ -615,7 +615,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3+",
 			args: args{
 				r: centeredBox2R,
-				c: galx.Circle{Pos: galx.Vec{X: 3.0001, Y: 0}, Radius: 2},
+				c: galx.Circle{Pos: galx.Vec2d{X: 3.0001, Y: 0}, Radius: 2},
 			},
 			want: false,
 		},
@@ -623,7 +623,7 @@ func TestRect2Circle(t *testing.T) {
 			name: "s3-",
 			args: args{
 				r: centeredBox2R,
-				c: galx.Circle{Pos: galx.Vec{X: 2.9999, Y: 0}, Radius: 2},
+				c: galx.Circle{Pos: galx.Vec2d{X: 2.9999, Y: 0}, Radius: 2},
 			},
 			want: true,
 		},

@@ -8,9 +8,9 @@ import (
 type Velocity struct {
 	entity galx.GameObject
 
-	Acceleration galx.Vec
-	Velocity     galx.Vec
-	MaxVelocity  galx.Vec
+	Acceleration galx.Vec2d
+	Velocity     galx.Vec2d
+	MaxVelocity  galx.Vec2d
 }
 
 func (v Velocity) Id() string {
