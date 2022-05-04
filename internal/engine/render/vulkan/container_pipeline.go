@@ -162,11 +162,11 @@ func (c *container) createPipelineColorBlendDefault() vulkan.PipelineColorBlendS
 }
 
 // PipelineLayout used for input not vertex data into shaders (like textures, uniform buffers, etc...)
-func newPipeLineLayout(ld *vkLogicalDevice) vulkan.PipelineLayout {
+func newPipeLineLayout(ld *vkLogicalDevice, ubo vulkan.DescriptorSetLayout) vulkan.PipelineLayout {
 	info := &vulkan.PipelineLayoutCreateInfo{
 		SType:                  vulkan.StructureTypePipelineLayoutCreateInfo,
-		SetLayoutCount:         0,
-		PSetLayouts:            nil,
+		SetLayoutCount:         1,
+		PSetLayouts:            []vulkan.DescriptorSetLayout{ubo},
 		PushConstantRangeCount: 0,
 		PPushConstantRanges:    nil,
 	}
@@ -178,4 +178,29 @@ func newPipeLineLayout(ld *vkLogicalDevice) vulkan.PipelineLayout {
 	)
 
 	return pipelineLayout
+}
+
+func newPipeLineLayoutUBODescriptorSet(ld *vkLogicalDevice) vulkan.DescriptorSetLayout {
+	bindings := []vulkan.DescriptorSetLayoutBinding{
+		{
+			Binding:         0,
+			DescriptorType:  vulkan.DescriptorTypeUniformBuffer,
+			DescriptorCount: 1,
+			StageFlags:      vulkan.ShaderStageFlags(vulkan.ShaderStageVertexBit),
+		},
+	}
+
+	createInfo := vulkan.DescriptorSetLayoutCreateInfo{
+		SType:        vulkan.StructureTypeDescriptorSetLayoutCreateInfo,
+		BindingCount: uint32(len(bindings)),
+		PBindings:    bindings,
+	}
+
+	var layout vulkan.DescriptorSetLayout
+	vkAssert(
+		vulkan.CreateDescriptorSetLayout(ld.ref, &createInfo, nil, &layout),
+		fmt.Errorf("failed create descriptor set layout for uniform buffer"),
+	)
+
+	return layout
 }

@@ -141,8 +141,9 @@ type (
 	}
 
 	vkDataBuffersManager struct {
-		vertex vkBufferTable
-		index  vkBufferUnion
+		vertex  vkBufferTable
+		index   vkBufferUnion
+		uniform []vkBufferUnion
 
 		ld *vkLogicalDevice
 		pd *vkPhysicalDevice

@@ -24,19 +24,20 @@ type (
 		vkPipelineHandlesLazyCache   map[shaderModuleID]vulkan.Pipeline
 
 		// vk handle wrappers
-		vk                *Vk
-		vkInstance        *vkInstance
-		vkSurface         *vkSurface
-		vkPhysicalDevice  *vkPhysicalDevice
-		vkLogicalDevice   *vkLogicalDevice
-		vkCommandPool     *vkCommandPool
-		vkFrameManager    *vkFrameManager
-		vkSwapChain       *vkSwapChain
-		vkFrameBuffers    *vkFrameBuffers
-		vkVertexBuffers   *vkDataBuffersManager
-		vkShaderManager   *vkShaderManager
-		vkPipelineManager *vkPipelineManager
-		vkPipelineLayout  vulkan.PipelineLayout
+		vk                               *Vk
+		vkInstance                       *vkInstance
+		vkSurface                        *vkSurface
+		vkPhysicalDevice                 *vkPhysicalDevice
+		vkLogicalDevice                  *vkLogicalDevice
+		vkCommandPool                    *vkCommandPool
+		vkFrameManager                   *vkFrameManager
+		vkSwapChain                      *vkSwapChain
+		vkFrameBuffers                   *vkFrameBuffers
+		vkVertexBuffers                  *vkDataBuffersManager
+		vkShaderManager                  *vkShaderManager
+		vkPipelineManager                *vkPipelineManager
+		vkPipelineLayout                 vulkan.PipelineLayout
+		vkPipelineLayoutUBODescriptorSet vulkan.DescriptorSetLayout
 	}
 )
 
@@ -243,6 +244,18 @@ func (c *container) providePipelineLayout() vulkan.PipelineLayout {
 
 	c.vkPipelineLayout = newPipeLineLayout(
 		c.provideVkLogicalDevice(),
+		c.providePipelineLayoutUBODescriptorSet(),
 	)
 	return c.vkPipelineLayout
+}
+
+func (c *container) providePipelineLayoutUBODescriptorSet() vulkan.DescriptorSetLayout {
+	if c.vkPipelineLayoutUBODescriptorSet != nil {
+		return c.vkPipelineLayoutUBODescriptorSet
+	}
+
+	c.vkPipelineLayoutUBODescriptorSet = newPipeLineLayoutUBODescriptorSet(
+		c.provideVkLogicalDevice(),
+	)
+	return c.vkPipelineLayoutUBODescriptorSet
 }

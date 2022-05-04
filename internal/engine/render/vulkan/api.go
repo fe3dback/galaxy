@@ -1,6 +1,8 @@
 package vulkan
 
 import (
+	"math"
+
 	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/galx"
@@ -58,6 +60,18 @@ func (vk *Vk) FrameEnd() {
 	vk.frameManager.frameEnd(vk.swapChain, commandBuffer)
 }
 
+// todo: remove this temp stuff
+func mat4Perspective(fovy, aspect, near, far float32) galx.Mat4 {
+	nmf, f := 1/(near-far), 1./math.Tan(float64(fovy)/2.0)
+
+	return galx.Mat4{
+		A: galx.Vec4d{f / float64(aspect), 0, 0, 0},
+		B: galx.Vec4d{0, f, 0, 0},
+		C: galx.Vec4d{0, 0, float64((near + far) * nmf), -1},
+		D: galx.Vec4d{0, 0, float64((2. * far * near) * nmf), 0},
+	}
+}
+
 func (vk *Vk) Draw() {
 	if !vk.currentFrameAvailableForRender {
 		return
@@ -70,6 +84,19 @@ func (vk *Vk) Draw() {
 	drawCalls := 0
 	drawInstances := 0
 	commandBuffer := vk.commandPool.commandBuffer(int(vk.currentFrameImageID))
+
+	// write to global buffers
+	// uboProjection := mat4Perspective(
+	// 	float32(galx.NewAngle(45).Radians()),
+	// 	vk.swapChain.viewport().Width/vk.swapChain.viewport().Height,
+	// 	0.1,
+	// 	10,
+	// )
+	uboProjection := galx.Mat4Identity()
+	uboView := galx.Mat4Identity()
+	uboModel := galx.Mat4Identity()
+
+	vk.dataBuffersManager.updateGlobalUniformBuffer(vk.currentFrameImageID, uboProjection, uboView, uboModel)
 
 	// draw all shaders
 	for pipelineID, instances := range vk.renderQueue {

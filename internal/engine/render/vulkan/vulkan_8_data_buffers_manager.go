@@ -6,6 +6,8 @@ import (
 	"unsafe"
 
 	"github.com/vulkan-go/vulkan"
+
+	"github.com/fe3dback/galaxy/galx"
 )
 
 type (
@@ -43,6 +45,9 @@ func (vb *vkDataBuffersManager) free() {
 	buffers := make([]vkBuffer, 0)
 	buffers = append(buffers, vb.vertex.buffers...)
 	buffers = append(buffers, vb.index.buffer)
+	for _, union := range vb.uniform {
+		buffers = append(buffers, union.buffer)
+	}
 
 	for _, vkBuffer := range buffers {
 		vulkan.DestroyBuffer(vb.ld.ref, vkBuffer.handle, nil)
@@ -143,6 +148,21 @@ func (vb *vkDataBuffersManager) writeToVertexBuffer(instance dataInstance) {
 	vb.vertex.framePageCapacity -= size
 }
 
+func (vb *vkDataBuffersManager) updateGlobalUniformBuffer(frameID uint32, projection, view, model galx.Mat4) {
+	if int(frameID) > len(vb.uniform)-1 {
+		vb.allocateNewUniformBuffer()
+	}
+
+	buf := make([]byte, 0, uniformBufferSize)
+
+	// max memory supported here is 4*mat4
+	buf = append(buf, projection.Data()...)
+	buf = append(buf, view.Data()...)
+	buf = append(buf, model.Data()...)
+
+	vulkan.Memcopy(vb.uniform[frameID].buffer.dataPtr, buf)
+}
+
 func (vb *vkDataBuffersManager) allocateNewVertexBuffer() {
 	buff := allocatePersistBuffer(vb.ld, vb.pd, vertexBufferSize, vulkan.BufferUsageVertexBufferBit)
 	vb.vertex.buffers = append(vb.vertex.buffers, buff)
@@ -153,6 +173,14 @@ func (vb *vkDataBuffersManager) allocateNewVertexBuffer() {
 
 func (vb *vkDataBuffersManager) allocateNewIndexBuffer() {
 	vb.index.buffer = allocatePersistBuffer(vb.ld, vb.pd, indexBufferSize, vulkan.BufferUsageIndexBufferBit)
+}
+
+func (vb *vkDataBuffersManager) allocateNewUniformBuffer() {
+	vb.uniform = append(vb.uniform, vkBufferUnion{
+		offset:  0,
+		buffer:  allocatePersistBuffer(vb.ld, vb.pd, uniformBufferSize, vulkan.BufferUsageUniformBufferBit),
+		staging: []byte{},
+	})
 }
 
 func allocatePersistBuffer(ld *vkLogicalDevice, pd *vkPhysicalDevice, size int, buffType vulkan.BufferUsageFlagBits) vkBuffer {

@@ -22,8 +22,11 @@ Build on top of:
 
 ## Deps
 
-SDL lib:
+### SDL
 
+(deprecated, will be removed after vulkan implementation is ready)
+
+install c libs (need for compile):
 ```bash
 apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev
 ```
@@ -32,6 +35,21 @@ apt install libsdl2{,-image,-mixer,-ttf,-gfx}-dev
 
 For working with vulkan (compiling shaders, etc..), need install vulkan SDK:
 https://vulkan.lunarg.com/
+
+Dev libs:
+```bash
+sudo apt install vulkan-tools
+sudo apt install libvulkan-dev
+sudo apt install vulkan-validationlayers-dev spirv-tools
+```
+
+SPIR-V compiler (for shader compiling):
+```bash
+https://github.com/google/shaderc
+
+# download linux binary from prebuild package
+# copy glslc to your /usr/local/bin
+```
 
 (optional) Vulkan validation layers (for debug render pipeline):
 
