@@ -1,6 +1,7 @@
 package di
 
 import (
+	"github.com/fe3dback/govgl"
 	"go.uber.org/zap"
 
 	"github.com/fe3dback/galaxy/cfg"
@@ -15,7 +16,6 @@ import (
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/node"
 	"github.com/fe3dback/galaxy/internal/engine/render"
-	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/engine/windows"
 	"github.com/fe3dback/galaxy/internal/frames"
@@ -40,7 +40,7 @@ type Container struct {
 		render struct {
 			windowManager *windows.Manager
 			inst          *render.Render
-			libVulkan     *vulkan.Vk
+			vglRender     *govgl.Render
 			camera        *render.Camera
 		}
 		engine struct {

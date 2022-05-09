@@ -15,7 +15,7 @@ func WithScreen(fullscreen bool, width int, height int) Modifier {
 }
 
 // WithGraphicsVulkanDebug will print vulkan validation errors
-// on stdout. It require installed Vulkan SDK to work
+// on stdout. It requires to be installed Vulkan SDK to work
 //  default = false
 func WithGraphicsVulkanDebug(enabled bool) Modifier {
 	return func(flags *InitFlags) {

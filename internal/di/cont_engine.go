@@ -3,6 +3,10 @@ package di
 import (
 	"fmt"
 
+	"github.com/fe3dback/govgl"
+	"github.com/fe3dback/govgl/arch"
+	vglConfig "github.com/fe3dback/govgl/config"
+
 	"github.com/fe3dback/galaxy/consts"
 	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/assets"
@@ -12,7 +16,7 @@ import (
 	oldRender "github.com/fe3dback/galaxy/internal/engine/lib/render"
 	"github.com/fe3dback/galaxy/internal/engine/lib/sound"
 	"github.com/fe3dback/galaxy/internal/engine/render"
-	"github.com/fe3dback/galaxy/internal/engine/render/vulkan"
+
 	"github.com/fe3dback/galaxy/internal/engine/scene"
 	"github.com/fe3dback/galaxy/internal/engine/windows"
 )
@@ -170,7 +174,7 @@ func (c *Container) ProvideEngineRenderer() *render.Render {
 	}
 
 	renderer := render.NewRender(
-		c.ProvideEngineRendererVulkan(),
+		c.ProvideEngineRendererVGL(),
 		c.provideRenderCamera(),
 	)
 
@@ -178,25 +182,28 @@ func (c *Container) ProvideEngineRenderer() *render.Render {
 	return c.memstate.render.inst
 }
 
-func (c *Container) ProvideEngineRendererVulkan() *vulkan.Vk {
-	if c.memstate.render.libVulkan != nil {
-		return c.memstate.render.libVulkan
+func (c *Container) ProvideEngineRendererVGL() *govgl.Render {
+	if c.memstate.render.vglRender != nil {
+		return c.memstate.render.vglRender
 	}
 
 	opts := c.flags.VulkanOpts()
-	cfg := vulkan.NewConfig(
-		vulkan.WithDebug(opts.Debug),
-		vulkan.WithVSync(opts.VSync),
+	cfg := vglConfig.NewConfig(
+		vglConfig.WithDebug(opts.Debug),
+		vglConfig.WithVSync(opts.VSync),
 	)
 
-	vk := vulkan.NewVulkanApi(
+	wm := arch.NewCustomGLFW(
+		"Galaxy",
+		"Galaxy",
 		c.provideWindowsManager().Window(),
-		c.ProvideEventDispatcher(),
-		cfg,
-		c.Closer(),
 	)
-	c.memstate.render.libVulkan = vk
-	return c.memstate.render.libVulkan
+
+	vglRender := govgl.NewRender(wm, cfg)
+	c.Closer().EnqueueClose(vglRender.Close)
+
+	c.memstate.render.vglRender = vglRender
+	return c.memstate.render.vglRender
 }
 
 func (c *Container) ProvideEngineRendererOLD() *oldRender.Renderer {

@@ -4,17 +4,19 @@ import (
 	"math"
 	"time"
 
+	"github.com/fe3dback/govgl"
+
 	"github.com/fe3dback/galaxy/galx"
 )
 
 type Render struct {
-	renderer renderer
+	renderer *govgl.Render
 
 	renderMode galx.RenderMode
 	camera     *Camera
 }
 
-func NewRender(renderer renderer, camera *Camera) *Render {
+func NewRender(renderer *govgl.Render, camera *Camera) *Render {
 	return &Render{
 		renderer: renderer,
 		camera:   camera,
@@ -31,14 +33,12 @@ func (r *Render) SetRenderTarget(id galx.RenderTarget) {
 	panic("implement me")
 }
 
-func (r *Render) StartEngineFrame(color galx.Color) {
+func (r *Render) StartEngineFrame() {
 	r.renderMode = galx.RenderModeWorld
-	r.renderer.Clear(color)
 	r.renderer.FrameStart()
 }
 
 func (r *Render) EndEngineFrame() {
-	r.renderer.Draw()
 	r.renderer.FrameEnd()
 }
 
@@ -91,5 +91,5 @@ func (r *Render) EndGUIFrame() {
 }
 
 func (r *Render) WaitGPUOperationsBeforeQuit() {
-	r.renderer.GPUWait()
+	r.renderer.WaitGPU()
 }

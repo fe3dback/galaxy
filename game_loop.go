@@ -35,7 +35,7 @@ func gameLoop(game *Game) bool {
 	editorManager := c.ProvideEditorManager()
 
 	// clear first time screen (fix copy texture from underlying memory)
-	renderer.StartEngineFrame(defaultColor)
+	renderer.StartEngineFrame()
 	renderer.EndEngineFrame()
 
 	for frames.Ready() {
@@ -82,7 +82,7 @@ func gameLoop(game *Game) bool {
 		// -----------------------------------
 		// draw
 		// -----------------------------------
-		renderer.StartEngineFrame(defaultColor)
+		renderer.StartEngineFrame()
 		//
 		// renderer.SetRenderMode(galx.RenderModeWorld)
 		// if engineState.InEditorMode() {

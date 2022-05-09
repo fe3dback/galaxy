@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-gl/glfw/v3.3/glfw"
-	"github.com/vulkan-go/vulkan"
 
 	"github.com/fe3dback/galaxy/internal/engine"
 	"github.com/fe3dback/galaxy/internal/engine/event"
@@ -52,13 +51,6 @@ func newVulkanWindow(
 	fullscreen bool,
 	debug bool,
 ) *glfw.Window {
-	// set vulkan address
-	procAddr := glfw.GetVulkanGetInstanceProcAddress()
-	if procAddr == nil {
-		panic(fmt.Errorf("failed get vulkan proc address"))
-	}
-	vulkan.SetGetInstanceProcAddr(procAddr)
-
 	// init
 	err := glfw.Init()
 	if err != nil {
